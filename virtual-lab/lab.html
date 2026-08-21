@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduSim Virtual Lab — 2D Canvas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="lab.css"/>
+</head>
+<body>
+  <!-- Top Toolbar -->
+  <header class="lab-header">
+    <div class="lab-brand">
+      <button class="back-btn" id="backBtn" title="Back to Dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="lab-logo">EduSim</span>
+      <span class="lab-divider">|</span>
+      <span class="lab-project-name" id="labProjectName">Untitled Lab</span>
+    </div>
+
+    <div class="lab-toolbar-center">
+      <button class="lab-btn" id="undoBtn" title="Undo (Ctrl+Z)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button class="lab-btn" id="redoBtn" title="Redo (Ctrl+Y)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+      </button>
+      <div class="lab-sep"></div>
+      <button class="lab-btn" id="zoomOutBtn" title="Zoom Out">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <span class="zoom-label" id="zoomLabel">100%</span>
+      <button class="lab-btn" id="zoomInBtn" title="Zoom In">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <button class="lab-btn" id="fitBtn" title="Fit to Screen">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </button>
+      <div class="lab-sep"></div>
+      <button class="lab-btn wire-btn" id="wireBtn" title="Wire Mode (W)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Wire
+      </button>
+      <button class="lab-btn" id="deleteBtn" title="Delete Selected (Del)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>
+
+    <div class="lab-toolbar-right">
+      <div class="sim-status" id="simStatus">
+        <span class="sim-dot" id="simDot"></span>
+        <span id="simStatusText">Ready</span>
+      </div>
+      <div class="lab-sep"></div>
+      <button class="lab-btn" id="toggleCodeBtn" title="Toggle Code Editor">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Code
+      </button>
+      <button class="lab-btn run-btn" id="runBtn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Run
+      </button>
+      <button class="lab-btn stop-btn" id="stopBtn" disabled>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+        Stop
+      </button>
+      <div class="lab-sep"></div>
+      <button class="lab-btn" id="themeBtn" title="Toggle Light/Dark Theme">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <div class="lab-sep"></div>
+      <button class="lab-btn" id="saveLabBtn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Lab Workspace -->
+  <div class="lab-workspace">
+
+    <!-- Left: Component Palette -->
+    <aside class="comp-palette">
+      <div class="palette-search">
+        <input type="text" id="compSearch" placeholder="Search components…"/>
+      </div>
+      <div class="palette-body" id="paletteBody">
+        <!-- Injected by lab.js from component registry -->
+      </div>
+    </aside>
+
+
+    <!-- Center: Canvas -->
+    <main class="canvas-container" id="canvasContainer">
+      <svg class="lab-canvas" id="labSvg"
+           xmlns="http://www.w3.org/2000/svg"
+           xmlns:xlink="http://www.w3.org/1999/xlink">
+        <!-- Wires layer -->
+        <g id="wiresLayer">
+          <!-- Active wire being drawn -->
+          <line id="activeWire" x1="0" y1="0" x2="0" y2="0" stroke="#00d4ff" stroke-width="2" display="none"/>
+        </g>
+        <!-- Components layer -->
+        <g id="componentsLayer"></g>
+      </svg>
+    </main>
+
+    <!-- Floating Code Panel -->
+    <aside class="code-panel" id="codePanel" style="display:none;">
+      <div class="code-panel-header">
+        <h3>Source Code</h3>
+        <button class="close-code-btn" id="closeCodeBtn"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="code-editor-wrap">
+        <div id="monacoLabEditor"></div>
+      </div>
+      <div class="code-panel-footer">
+        <select class="code-device-select" id="codeDeviceSelect">
+          <option value="">Select target device...</option>
+        </select>
+        <button class="lab-btn run-btn" id="uploadCodeBtn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right: Properties Inspector -->
+    <aside class="props-panel" id="propsPanel">
+      <div class="props-header">
+        <h3>Properties</h3>
+      </div>
+      <div class="props-body" id="propsBody">
+        <div class="props-empty">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>Select a component to inspect its properties</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Bottom: Serial / Simulation Console -->
+  <footer class="lab-console" id="labConsole">
+    <div class="console-tabs">
+      <button class="console-tab active" data-ctab="console">Console</button>
+      <button class="console-tab" data-ctab="serial">Serial</button>
+      <div style="flex:1"></div>
+      <button class="lab-btn" id="toggleConsoleBtn" title="Toggle Console Height">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+    
+    <div class="console-body active" id="consoleBody">
+      <div class="clog sys">[ EduSim Virtual Lab Ready ]</div>
+    </div>
+    <div class="console-body" id="serialBody" style="display:none;"></div>
+    
+    <div class="console-input-row">
+      <input type="text" class="console-input" id="consoleInput" placeholder="Send to serial…" disabled/>
+      <button class="console-send" id="consoleSend" disabled>SEND</button>
+    </div>
+  </footer>
+
+  <script src="../config.js"></script>
+  <script>
+    // Monaco from CDN — configure worker before loading
+    window.MonacoEnvironment = {
+      getWorkerUrl: function(_, label) {
+        const base = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs';
+        const url  = label === 'json'        ? `${base}/language/json/jsonWorker.js`
+                   : label === 'css'         ? `${base}/language/css/cssWorker.js`
+                   : label === 'html'        ? `${base}/language/html/htmlWorker.js`
+                   : label === 'typescript'  ? `${base}/language/typescript/tsWorker.js`
+                   :                          `${base}/editor/editorWorker.js`;
+        return `data:text/javascript;charset=utf-8,${encodeURIComponent(
+          `self.MonacoEnvironment={baseUrl:'${base}/'};importScripts('${url}');`
+        )}`;
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+  <script src="components/registry.js"></script>
+  <script src="simulator.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>
