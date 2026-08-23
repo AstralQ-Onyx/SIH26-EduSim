@@ -18,7 +18,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
   if (document.referrer && document.referrer !== location.href) {
     history.back();
   } else {
-    location.href = '../dashboard.html';
+    location.href = '../platform/dashboard.html';
   }
 });
 

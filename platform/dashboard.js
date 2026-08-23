@@ -1032,7 +1032,7 @@ function loadVirtualLabs() {
     const card = document.createElement('div');
     card.className = 'vlab-card';
     card.onclick = () => {
-      window.location.href = `virtual-lab/lab.html?id=${lab.id}&name=${encodeURIComponent(lab.name)}&controller=${encodeURIComponent(lab.controller)}`;
+      window.location.href = `../virtual-lab/lab.html?id=${lab.id}&name=${encodeURIComponent(lab.name)}&controller=${encodeURIComponent(lab.controller)}`;
     };
     card.innerHTML = `
       <div class="vlab-card-header">
