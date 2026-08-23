@@ -13,7 +13,14 @@ const PROJECT = {
   mode:       params.get('mode')      || '2d',
 };
 document.getElementById('labProjectName').textContent = PROJECT.name;
-document.getElementById('backBtn').addEventListener('click', () => history.back());
+document.getElementById('backBtn').addEventListener('click', () => {
+  // Navigate back to dashboard; fall back to root if no history
+  if (document.referrer && document.referrer !== location.href) {
+    history.back();
+  } else {
+    location.href = '../dashboard.html';
+  }
+});
 
 // ── SVG canvas state ──────────────────────────────────────
 const svg            = document.getElementById('labSvg');
@@ -41,8 +48,10 @@ const SNAP = 10;
 // ── Undo / Redo ──────────────────────────────────────────────
 const undoStack = [];
 const redoStack = [];
+let _suppressHistory = false;  // prevents restoreState from triggering new history entries
 
 function pushHistory() {
+  if (_suppressHistory) return;
   const state = {
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
     wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color })),
@@ -53,6 +62,7 @@ function pushHistory() {
 }
 
 function restoreState(data) {
+  _suppressHistory = true;   // <<< stop child calls from polluting stacks
   document.getElementById('componentsLayer').innerHTML = '';
   document.getElementById('wiresLayer').innerHTML = '';
   components.length = 0;
@@ -61,10 +71,8 @@ function restoreState(data) {
 
   data.components.forEach(c => {
     const comp = addComponent(c.defId, c.x, c.y);
-    // Patch the id from the saved state (addComponent auto-generated a new one)
     comp.id = c.id;
     comp.element.dataset.id = c.id;
-    // Sync all pin-circle compIds to the restored id
     comp.element.querySelectorAll('.pin-circle').forEach(circle => {
       circle.dataset.compId = c.id;
     });
@@ -74,6 +82,7 @@ function restoreState(data) {
     comp.element.setAttribute('transform', `translate(${comp.x},${comp.y}) rotate(${comp.rotation} ${comp.def.w/2} ${comp.def.h/2})`);
   });
   data.wires.forEach(w => drawWire(w.from, w.to, w.color));
+  _suppressHistory = false;  // <<< re-enable
   populateDeviceSelect();
 }
 
