@@ -402,6 +402,113 @@
           New Lab Project
         </button>
       </div>
+      <div class="vlab-feature-panels">
+        <section class="vlab-panel">
+          <div class="vlab-panel-header">
+            <div>
+              <span class="panel-kicker">Simulation Engine Status</span>
+              <h3>Runtime readiness</h3>
+            </div>
+          </div>
+          <div class="status-grid">
+            <div class="status-tile">
+              <span class="eyebrow">Engine</span>
+              <strong>Arduino + Pseudo-Sim</strong>
+              <small>Compile route and virtual runtime are already integrated.</small>
+            </div>
+            <div class="status-tile">
+              <span class="eyebrow">Arduino runtime</span>
+              <strong>Local agent supported</strong>
+              <small>Board compilation depends on the local arduino-cli bridge.</small>
+            </div>
+            <div class="status-tile">
+              <span class="eyebrow">Component library</span>
+              <strong id="labComponentCountValue">0 items</strong>
+              <small>Registry-backed board and device definitions loaded from the app.</small>
+            </div>
+            <div class="status-tile">
+              <span class="eyebrow">Projects stored</span>
+              <strong id="labProjectCountValue">0 projects</strong>
+              <small>Saved in browser storage for the current workspace.</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="vlab-panel">
+          <div class="vlab-panel-header">
+            <div>
+              <span class="panel-kicker">Quick Start Experiments</span>
+              <h3>Beginner-friendly lab starters</h3>
+            </div>
+          </div>
+          <div class="quick-start-list">
+            <article class="quick-start-item">
+              <div class="item-copy">
+                <span class="mini-badge">ESP32</span>
+                <h4>LED Blink Starter</h4>
+                <p>Basic output loop for GPIO toggling and timing control.</p>
+              </div>
+              <button class="mini-action" data-launch-controller="esp32" data-lab-name="ESP32 Blink Starter" data-mode="2d">Open Starter</button>
+            </article>
+            <article class="quick-start-item">
+              <div class="item-copy">
+                <span class="mini-badge">Arduino</span>
+                <h4>Signal + Indicator Test</h4>
+                <p>Run a basic digital output pattern to validate the board and wiring flow.</p>
+              </div>
+              <button class="mini-action" data-launch-controller="arduino_uno" data-lab-name="Arduino Signal Test" data-mode="2d">Open Starter</button>
+            </article>
+            <article class="quick-start-item">
+              <div class="item-copy">
+                <span class="mini-badge">2D / 3D</span>
+                <h4>Board Preview Lab</h4>
+                <p>Open a clean workspace to assemble a circuit in the supported schematic or 3D view.</p>
+              </div>
+              <button class="mini-action" data-launch-controller="esp8266" data-lab-name="Board Preview Lab" data-mode="3d">Open 3D Lab</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="vlab-panel">
+          <div class="vlab-panel-header">
+            <div>
+              <span class="panel-kicker">Component Library</span>
+              <h3>Available supported devices</h3>
+            </div>
+          </div>
+          <div class="component-list">
+            <article class="component-item">
+              <div class="item-copy">
+                <h4>ESP32 Dev Module</h4>
+                <p>Controller / WiFi + Bluetooth board</p>
+              </div>
+              <button class="mini-action" data-launch-controller="esp32" data-lab-name="ESP32 Lab" data-mode="2d">Launch</button>
+            </article>
+            <article class="component-item">
+              <div class="item-copy">
+                <h4>ESP8266 NodeMCU</h4>
+                <p>Controller / WiFi board</p>
+              </div>
+              <button class="mini-action" data-launch-controller="esp8266" data-lab-name="ESP8266 Lab" data-mode="2d">Launch</button>
+            </article>
+            <article class="component-item">
+              <div class="item-copy">
+                <h4>2D Schematic</h4>
+                <p>Supported editor mode</p>
+              </div>
+              <button class="mini-action" data-launch-controller="none" data-lab-name="Circuit Sandbox" data-mode="2d">Open</button>
+            </article>
+            <article class="component-item">
+              <div class="item-copy">
+                <h4>3D Breadboard</h4>
+                <p>Supported workspace view</p>
+              </div>
+              <button class="mini-action" data-launch-controller="none" data-lab-name="3D Circuit Sandbox" data-mode="3d">Open</button>
+            </article>
+          </div>
+        </section>
+      </div>
+
       <div class="vlab-grid" id="vlabGrid">
         <div class="empty-state">
           <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.2">
@@ -603,6 +710,38 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <!-- Config -->
 <script src="../config/config.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const componentCountEl = document.getElementById('labComponentCountValue');
+    const projectCountEl = document.getElementById('labProjectCountValue');
+
+    if (componentCountEl) {
+      const componentCount = window.LAB_COMPONENTS ? Object.keys(window.LAB_COMPONENTS).length : 0;
+      componentCountEl.textContent = `${componentCount} items`;
+    }
+
+    if (projectCountEl) {
+      let projectCount = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('edusim_vlab_')) {
+          projectCount += 1;
+        }
+      }
+      projectCountEl.textContent = `${projectCount} project${projectCount === 1 ? '' : 's'}`;
+    }
+
+    document.querySelectorAll('[data-launch-controller]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const controller = button.dataset.launchController || 'none';
+        const name = encodeURIComponent(button.dataset.labName || 'Virtual Lab');
+        const mode = button.dataset.mode || '2d';
+        window.location.href = `../virtual-lab/lab.html?controller=${encodeURIComponent(controller)}&name=${name}&mode=${mode}`;
+      });
+    });
+  });
+</script>
+<script src="../components/registry.js"></script>
 <!-- Dashboard Logic -->
 <script src="dashboard.js"></script>
 </body>
