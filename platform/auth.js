@@ -417,28 +417,26 @@ async function handleGoogleSignIn() {
   }
 }
 
-// Prevents onAuthStateChanged from redirecting while we are processing the
-// Google redirect result (e.g. writing a new user profile to Firestore).
-let _googleRedirectHandled = false;
+// ── Google OAuth Sign-In (Popup — called synchronously from click) ──────────
+// KEY: signInWithPopup() is called FIRST — before any await/async delay —
+// so the browser recognizes it as a direct response to the user's click gesture
+// and allows the popup window to open.
+async function handleGoogleSignIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
 
-// ── Handle Google Redirect Result (called on page load) ──────────────────
-async function handleGoogleRedirectResult() {
+  // ↓ SYNCHRONOUS — must be the first call, no await before this
+  const popupPromise = auth.signInWithPopup(provider);
+
+  // Only set loading UI AFTER the popup has been opened
+  setLoading(true);
+  setStatus('AUTHENTICATING WITH GOOGLE…');
+
   try {
-    const result = await auth.getRedirectResult();
-    if (!result || !result.user) {
-      // Normal page load — not returning from Google redirect
-      _googleRedirectHandled = true;
-      return;
-    }
-
-    // We ARE returning from a Google redirect — block onAuthStateChanged redirect
-    // until we've finished writing the user profile.
-    _googleRedirectHandled = false;
-
-    const user = result.user;
-    const isNew = result.additionalUserInfo?.isNewUser ?? false;
-    setLoading(true);
-    setStatus('VERIFYING IDENTITY…');
+    const result = await popupPromise;
+    const user   = result.user;
+    const isNew  = result.additionalUserInfo?.isNewUser ?? false;
 
     if (isNew) {
       const userData = {
@@ -447,33 +445,28 @@ async function handleGoogleRedirectResult() {
         email: user.email,
         photoURL: user.photoURL || '',
         authMethod: 'google',
-        role: '',
-        username: '',
-        org: '',
-        dept: '',
-        year: '',
-        contactMail: '',
+        role: '', username: '', org: '', dept: '', year: '', contactMail: '',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
       await db.collection('users').doc(user.uid).set(userData);
       setLoading(false);
       showToast('Google account linked! Please complete your profile.', 'success');
-      _googleRedirectHandled = true;
       setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
     } else {
       setLoading(false);
       showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
-      _googleRedirectHandled = true;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
     }
   } catch (err) {
-    _googleRedirectHandled = true; // unblock in case of error
     setLoading(false);
     setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
     const msgs = {
+      'auth/popup-blocked':                'Please allow popups for this site in your browser settings, then try again.',
+      'auth/popup-closed-by-user':         'Sign-in was cancelled.',
+      'auth/cancelled-popup-request':      'Only one sign-in window at a time.',
       'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method.',
-      'auth/network-request-failed': 'Network error. Check your connection.',
+      'auth/network-request-failed':       'Network error. Check your connection.',
     };
     showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
   }
@@ -695,10 +688,8 @@ async function showForgotPassword(e) {
 }
 
 // ── Auth State Observer ─────────────────────────────────────
-// Note: This deliberately does NOT redirect until the Google redirect result
-// has been processed (to avoid a race condition for new users).
+// Redirects any already-logged-in user to the dashboard automatically.
 auth.onAuthStateChanged(user => {
-  if (!_googleRedirectHandled) return; // wait for redirect result to finish
   if (user) {
     const params = new URLSearchParams(window.location.search);
     if (!params.has('setup')) {
@@ -706,8 +697,3 @@ auth.onAuthStateChanged(user => {
     }
   }
 });
-
-// ── Handle Google Redirect on Page Load ─────────────────────
-// Run first — sets _googleRedirectHandled = true when done,
-// which unblocks onAuthStateChanged.
-handleGoogleRedirectResult();
