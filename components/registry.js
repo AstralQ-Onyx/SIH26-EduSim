@@ -4064,6 +4064,331 @@ ledGreen5mm: {
     };
   }
 },
+ledRgb5mm: {
+  id: 'ledRgb5mm',
+  label: 'RGB LED',
+  category: 'Outputs',
+  desc: '5mm RGB LED with independently controllable red, green and blue channels and a common cathode terminal',
+  w: 76,
+  h: 130,
+
+  svg: `
+    <defs>
+      <!-- Clear RGB LED body -->
+      <linearGradient id="rgbLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".32" stop-color="#edf5fa" stop-opacity=".62"/>
+        <stop offset=".70" stop-color="#c9d3da" stop-opacity=".42"/>
+        <stop offset="1" stop-color="#8e9aa2" stop-opacity=".58"/>
+      </linearGradient>
+
+      <linearGradient id="rgbLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".50" stop-color="#ffffff" stop-opacity=".28"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <linearGradient id="rgbLedMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".30" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- RGB glow gradients -->
+      <radialGradient id="rgbRedGlow">
+        <stop offset="0" stop-color="#ff4b4b" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#ff1515" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
+      </radialGradient>
+
+      <radialGradient id="rgbGreenGlow">
+        <stop offset="0" stop-color="#6dff8d" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#18e94b" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#00c83d" stop-opacity="0"/>
+      </radialGradient>
+
+      <radialGradient id="rgbBlueGlow">
+        <stop offset="0" stop-color="#63bdff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#168cff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#005eff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= RGB GLOW ================= -->
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbRedGlow)"
+            opacity="0"
+            data-led-red-glow="true"/>
+
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbGreenGlow)"
+            opacity="0"
+            data-led-green-glow="true"/>
+
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbBlueGlow)"
+            opacity="0"
+            data-led-blue-glow="true"/>
+
+    <!-- ================= FOUR METAL LEGS ================= -->
+
+    <!-- RED -->
+    <path d="M24 54 L18 119"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- COMMON CATHODE - longest -->
+    <path d="M33 54 L31 128"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.8"
+          stroke-linecap="round"/>
+
+    <!-- GREEN -->
+    <path d="M43 54 L46 116"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- BLUE -->
+    <path d="M52 54 L59 111"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- ================= INTERNAL ELECTRODES ================= -->
+    <path d="M24 52 L26 36"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <path d="M33 52 L34 32"
+          stroke="#b7b7b7" stroke-width="2.2" opacity=".85"/>
+
+    <path d="M43 52 L42 36"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <path d="M52 52 L49 37"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <!-- common reflector -->
+    <path d="M29 37 L34 31 L39 37 L37 44 L31 44 Z"
+          fill="#d8d8d8"
+          stroke="#888"
+          stroke-width=".45"
+          opacity=".82"/>
+
+    <!-- red die -->
+    <rect x="25" y="33" width="4.5" height="4"
+          rx=".4" fill="#ff4141"
+          stroke="#a31b1b" stroke-width=".3"/>
+
+    <!-- green die -->
+    <rect x="39" y="33" width="4.5" height="4"
+          rx=".4" fill="#39e963"
+          stroke="#168837" stroke-width=".3"/>
+
+    <!-- blue die -->
+    <rect x="47" y="35" width="4.5" height="4"
+          rx=".4" fill="#3ba7ff"
+          stroke="#176aa4" stroke-width=".3"/>
+
+    <!-- bond wires -->
+    <path d="M34 33 Q30 27 27 34"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <path d="M34 33 Q38 27 41 34"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <path d="M34 34 Q43 28 49 36"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <!-- ================= CLEAR 5MM LED BODY ================= -->
+    <path
+      d="M19 49
+         L19 25
+         C19 11 26 4 38 4
+         C50 4 57 11 57 25
+         L57 49
+         Q57 56 50 57
+         H26
+         Q19 56 19 49 Z"
+      fill="url(#rgbLedBody)"
+      stroke="#8d9ba4"
+      stroke-width="1"
+      opacity=".84"
+    />
+
+    <!-- flat cathode identification side -->
+    <path d="M20 38 L20 50"
+          stroke="#77848d"
+          stroke-width="1.5"
+          opacity=".8"/>
+
+    <!-- ================= BODY HIGHLIGHTS ================= -->
+    <path
+      d="M24 18
+         C26 10 31 7 36 7
+         C31 15 30 27 31 42
+         C26 36 23 27 24 18 Z"
+      fill="url(#rgbLedHighlight)"
+      opacity=".82"
+    />
+
+    <ellipse cx="45" cy="12"
+             rx="3.5" ry="5.5"
+             fill="#ffffff"
+             opacity=".62"
+             transform="rotate(-25 45 12)"/>
+
+    <ellipse cx="38" cy="25"
+             rx="11" ry="15"
+             fill="#ffffff"
+             opacity=".10"/>
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M17 48
+         Q17 55 24 58
+         H52
+         Q59 55 59 48"
+      fill="none"
+      stroke="#9aa6ad"
+      stroke-width="2"
+      opacity=".9"
+    />
+
+    <!-- ================= PIN LABELS ================= -->
+    <g fill="#d9d9d9" font-size="4.5" font-family="monospace">
+      <text x="14" y="113" text-anchor="end">R</text>
+      <text x="28" y="123" text-anchor="end">COM</text>
+      <text x="49" y="111">G</text>
+      <text x="62" y="106">B</text>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="18" cy="122" r="2"
+            fill="#cfcfcf" data-pin="R"/>
+
+    <circle cx="31" cy="130" r="2"
+            fill="#cfcfcf" data-pin="COM"/>
+
+    <circle cx="46" cy="119" r="2"
+            fill="#cfcfcf" data-pin="G"/>
+
+    <circle cx="59" cy="114" r="2"
+            fill="#cfcfcf" data-pin="B"/>
+  `,
+
+  pins: [
+    {
+      id: 'R',
+      x: 18,
+      y: 122,
+      type: 'digital',
+      label: 'Red Anode (+)'
+    },
+    {
+      id: 'COM',
+      x: 31,
+      y: 130,
+      type: 'gnd',
+      label: 'Common Cathode (-)'
+    },
+    {
+      id: 'G',
+      x: 46,
+      y: 119,
+      type: 'digital',
+      label: 'Green Anode (+)'
+    },
+    {
+      id: 'B',
+      x: 59,
+      y: 114,
+      type: 'digital',
+      label: 'Blue Anode (+)'
+    }
+  ],
+
+  defaults: {
+    label: 'RGB LED',
+    red: false,
+    green: false,
+    blue: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'red',
+      label: 'Red',
+      type: 'checkbox'
+    },
+    {
+      key: 'green',
+      label: 'Green',
+      type: 'checkbox'
+    },
+    {
+      key: 'blue',
+      label: 'Blue',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Common-cathode RGB LED:
+      COM should normally be connected to GND.
+
+      R HIGH -> Red
+      G HIGH -> Green
+      B HIGH -> Blue
+
+      Multiple channels can be enabled together:
+      R + G       = Yellow
+      R + B       = Magenta
+      G + B       = Cyan
+      R + G + B   = White
+    */
+
+    const common = Number(inputs?.COM ?? 0);
+
+    const red =
+      Number(inputs?.R ?? 0) > common;
+
+    const green =
+      Number(inputs?.G ?? 0) > common;
+
+    const blue =
+      Number(inputs?.B ?? 0) > common;
+
+    return {
+      red,
+      green,
+      blue,
+      on: red || green || blue,
+
+      // Convenient RGB value for a renderer if required.
+      rgb: {
+        r: red ? 255 : 0,
+        g: green ? 255 : 0,
+        b: blue ? 255 : 0
+      }
+    };
+  }
+},
 
   /* ════════════════════════════
      INPUTS
