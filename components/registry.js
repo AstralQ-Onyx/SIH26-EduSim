@@ -2695,7 +2695,325 @@ const EDUSIM_COMPONENTS = {
     return {};
   }
   },
-  
+  raspberryPiPico2W: {
+  id: 'raspberryPiPico2W',
+  label: 'Raspberry Pi Pico 2 W',
+  category: 'Controllers',
+  desc: 'Raspberry Pi Pico 2 W microcontroller board with RP2350, Wi-Fi/Bluetooth, 26 GPIO, ADC, SPI, I2C, UART and USB',
+  w: 100,
+  h: 220,
+
+  svg: `
+    <defs>
+      <linearGradient id="pico2wPcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#167a55"/>
+        <stop offset="0.55" stop-color="#0f6748"/>
+        <stop offset="1" stop-color="#0a4f39"/>
+      </linearGradient>
+
+      <linearGradient id="pico2wMetal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#eeeeee"/>
+        <stop offset="1" stop-color="#929292"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="17" y="4"
+      width="66" height="212"
+      rx="7"
+      fill="url(#pico2wPcb)"
+      stroke="#0a4b36"
+      stroke-width="1.2"
+    />
+
+    <!-- castellated side edges -->
+    <g fill="#c7b27a" stroke="#705f35" stroke-width=".3">
+      <!-- left -->
+      <rect x="14" y="20" width="5" height="6" rx="1"/>
+      <rect x="14" y="30" width="5" height="6" rx="1"/>
+      <rect x="14" y="40" width="5" height="6" rx="1"/>
+      <rect x="14" y="50" width="5" height="6" rx="1"/>
+      <rect x="14" y="60" width="5" height="6" rx="1"/>
+      <rect x="14" y="70" width="5" height="6" rx="1"/>
+      <rect x="14" y="80" width="5" height="6" rx="1"/>
+      <rect x="14" y="90" width="5" height="6" rx="1"/>
+      <rect x="14" y="100" width="5" height="6" rx="1"/>
+      <rect x="14" y="110" width="5" height="6" rx="1"/>
+      <rect x="14" y="120" width="5" height="6" rx="1"/>
+      <rect x="14" y="130" width="5" height="6" rx="1"/>
+      <rect x="14" y="140" width="5" height="6" rx="1"/>
+      <rect x="14" y="150" width="5" height="6" rx="1"/>
+      <rect x="14" y="160" width="5" height="6" rx="1"/>
+      <rect x="14" y="170" width="5" height="6" rx="1"/>
+      <rect x="14" y="180" width="5" height="6" rx="1"/>
+      <rect x="14" y="190" width="5" height="6" rx="1"/>
+      <rect x="14" y="200" width="5" height="6" rx="1"/>
+
+      <!-- right -->
+      <rect x="81" y="20" width="5" height="6" rx="1"/>
+      <rect x="81" y="30" width="5" height="6" rx="1"/>
+      <rect x="81" y="40" width="5" height="6" rx="1"/>
+      <rect x="81" y="50" width="5" height="6" rx="1"/>
+      <rect x="81" y="60" width="5" height="6" rx="1"/>
+      <rect x="81" y="70" width="5" height="6" rx="1"/>
+      <rect x="81" y="80" width="5" height="6" rx="1"/>
+      <rect x="81" y="90" width="5" height="6" rx="1"/>
+      <rect x="81" y="100" width="5" height="6" rx="1"/>
+      <rect x="81" y="110" width="5" height="6" rx="1"/>
+      <rect x="81" y="120" width="5" height="6" rx="1"/>
+      <rect x="81" y="130" width="5" height="6" rx="1"/>
+      <rect x="81" y="140" width="5" height="6" rx="1"/>
+      <rect x="81" y="150" width="5" height="6" rx="1"/>
+      <rect x="81" y="160" width="5" height="6" rx="1"/>
+      <rect x="81" y="170" width="5" height="6" rx="1"/>
+      <rect x="81" y="180" width="5" height="6" rx="1"/>
+      <rect x="81" y="190" width="5" height="6" rx="1"/>
+      <rect x="81" y="200" width="5" height="6" rx="1"/>
+    </g>
+
+    <!-- ================= USB CONNECTOR ================= -->
+    <path
+      d="M35 4 H65
+         L69 9
+         V25
+         L65 30
+         H35
+         L31 25
+         V9 Z"
+      fill="url(#pico2wMetal)"
+      stroke="#666"
+      stroke-width=".8"
+    />
+
+    <rect x="38" y="8" width="24" height="15" rx="1.5" fill="#4a4a4a"/>
+    <rect x="42" y="11" width="16" height="9" rx="1" fill="#171717"/>
+
+    <!-- ================= BOOTSEL BUTTON ================= -->
+    <rect x="42" y="36" width="16" height="13" rx="2"
+          fill="#efefef" stroke="#888" stroke-width=".6"/>
+    <circle cx="50" cy="42.5" r="3.5" fill="#d9d9d9"/>
+    <text x="50" y="55" text-anchor="middle" fill="#e8e8e8"
+          font-size="3" font-family="monospace">BOOTSEL</text>
+
+    <!-- ================= RP2350 ================= -->
+    <rect x="35" y="80" width="30" height="30" rx="1.5"
+          fill="#242424" stroke="#555" stroke-width=".6"/>
+    <text x="50" y="93" text-anchor="middle" fill="#777"
+          font-size="3.2" font-family="monospace">RP2350</text>
+    <text x="50" y="99" text-anchor="middle" fill="#666"
+          font-size="2.5" font-family="monospace">MCU</text>
+
+    <!-- ================= WIFI / BT MODULE ================= -->
+    <rect x="34" y="124" width="32" height="36" rx="2"
+          fill="#d8d8d2" stroke="#888" stroke-width=".6"/>
+    <rect x="37" y="127" width="26" height="30" rx="1"
+          fill="#eeeeea" stroke="#aaa" stroke-width=".35"/>
+    <text x="50" y="139" text-anchor="middle" fill="#666"
+          font-size="2.7" font-family="monospace">CYW43439</text>
+    <text x="50" y="145" text-anchor="middle" fill="#777"
+          font-size="2.4" font-family="monospace">WiFi / BT</text>
+
+    <!-- antenna trace -->
+    <path d="M38 153 h7 v-3 h6 v3 h6 v-3 h6"
+          fill="none" stroke="#9e7e38" stroke-width="1.1"/>
+
+    <!-- ================= LED ================= -->
+    <circle cx="28" cy="32" r="2.5"
+            fill="#e7e32e" stroke="#8f8b14" stroke-width=".5"/>
+    <text x="28" y="27" text-anchor="middle" fill="#fff"
+          font-size="2.5" font-family="monospace">LED</text>
+
+    <!-- ================= DEBUG HEADER ================= -->
+    <g>
+      <rect x="38" y="178" width="24" height="10" rx="1"
+            fill="#222" stroke="#555" stroke-width=".5"/>
+      <circle cx="43" cy="183" r="1.3" fill="#c7a85f"/>
+      <circle cx="50" cy="183" r="1.3" fill="#c7a85f"/>
+      <circle cx="57" cy="183" r="1.3" fill="#c7a85f"/>
+    </g>
+    <text x="50" y="194" text-anchor="middle" fill="#fff"
+          font-size="2.6" font-family="monospace">DEBUG</text>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text x="50" y="169" text-anchor="middle"
+          fill="#e9fff4" font-size="3.3"
+          font-family="Arial, sans-serif" font-weight="bold">
+      Raspberry Pi Pico 2 W
+    </text>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d7d2a2" stroke="#666" stroke-width=".22">
+      <rect x="26" y="62" width="8" height="3" rx=".4"/>
+      <rect x="36" y="62" width="8" height="3" rx=".4"/>
+      <rect x="56" y="62" width="8" height="3" rx=".4"/>
+      <rect x="66" y="62" width="8" height="3" rx=".4"/>
+      <rect x="26" y="69" width="8" height="3" rx=".4"/>
+      <rect x="66" y="69" width="8" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= PIN LABELS ================= -->
+    <g fill="#fff" font-size="2.5" font-family="monospace">
+      <!-- LEFT -->
+      <text x="21" y="24">GP0</text>
+      <text x="21" y="34">GP1</text>
+      <text x="21" y="44">GND</text>
+      <text x="21" y="54">GP2</text>
+      <text x="21" y="64">GP3</text>
+      <text x="21" y="74">GP4</text>
+      <text x="21" y="84">GP5</text>
+      <text x="21" y="94">GND</text>
+      <text x="21" y="104">GP6</text>
+      <text x="21" y="114">GP7</text>
+      <text x="21" y="124">GP8</text>
+      <text x="21" y="134">GP9</text>
+      <text x="21" y="144">GND</text>
+      <text x="21" y="154">GP10</text>
+      <text x="21" y="164">GP11</text>
+      <text x="21" y="174">GP12</text>
+      <text x="21" y="184">GP13</text>
+      <text x="21" y="194">GND</text>
+      <text x="21" y="204">GP14</text>
+      <text x="21" y="214">GP15</text>
+
+      <!-- RIGHT -->
+      <text x="79" y="24" text-anchor="end">VBUS</text>
+      <text x="79" y="34" text-anchor="end">VSYS</text>
+      <text x="79" y="44" text-anchor="end">GND</text>
+      <text x="79" y="54" text-anchor="end">3V3_EN</text>
+      <text x="79" y="64" text-anchor="end">3V3</text>
+      <text x="79" y="74" text-anchor="end">ADC_VREF</text>
+      <text x="79" y="84" text-anchor="end">GP28</text>
+      <text x="79" y="94" text-anchor="end">GND</text>
+      <text x="79" y="104" text-anchor="end">GP27</text>
+      <text x="79" y="114" text-anchor="end">GP26</text>
+      <text x="79" y="124" text-anchor="end">RUN</text>
+      <text x="79" y="134" text-anchor="end">GP22</text>
+      <text x="79" y="144" text-anchor="end">GND</text>
+      <text x="79" y="154" text-anchor="end">GP21</text>
+      <text x="79" y="164" text-anchor="end">GP20</text>
+      <text x="79" y="174" text-anchor="end">GP19</text>
+      <text x="79" y="184" text-anchor="end">GP18</text>
+      <text x="79" y="194" text-anchor="end">GND</text>
+      <text x="79" y="204" text-anchor="end">GP17</text>
+      <text x="79" y="214" text-anchor="end">GP16</text>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <g fill="#cfcfcf" opacity=".95">
+      <!-- LEFT -->
+      <circle cx="0" cy="20" r="1.5"/>
+      <circle cx="0" cy="30" r="1.5"/>
+      <circle cx="0" cy="40" r="1.5"/>
+      <circle cx="0" cy="50" r="1.5"/>
+      <circle cx="0" cy="60" r="1.5"/>
+      <circle cx="0" cy="70" r="1.5"/>
+      <circle cx="0" cy="80" r="1.5"/>
+      <circle cx="0" cy="90" r="1.5"/>
+      <circle cx="0" cy="100" r="1.5"/>
+      <circle cx="0" cy="110" r="1.5"/>
+      <circle cx="0" cy="120" r="1.5"/>
+      <circle cx="0" cy="130" r="1.5"/>
+      <circle cx="0" cy="140" r="1.5"/>
+      <circle cx="0" cy="150" r="1.5"/>
+      <circle cx="0" cy="160" r="1.5"/>
+      <circle cx="0" cy="170" r="1.5"/>
+      <circle cx="0" cy="180" r="1.5"/>
+      <circle cx="0" cy="190" r="1.5"/>
+      <circle cx="0" cy="200" r="1.5"/>
+      <circle cx="0" cy="210" r="1.5"/>
+
+      <!-- RIGHT -->
+      <circle cx="100" cy="20" r="1.5"/>
+      <circle cx="100" cy="30" r="1.5"/>
+      <circle cx="100" cy="40" r="1.5"/>
+      <circle cx="100" cy="50" r="1.5"/>
+      <circle cx="100" cy="60" r="1.5"/>
+      <circle cx="100" cy="70" r="1.5"/>
+      <circle cx="100" cy="80" r="1.5"/>
+      <circle cx="100" cy="90" r="1.5"/>
+      <circle cx="100" cy="100" r="1.5"/>
+      <circle cx="100" cy="110" r="1.5"/>
+      <circle cx="100" cy="120" r="1.5"/>
+      <circle cx="100" cy="130" r="1.5"/>
+      <circle cx="100" cy="140" r="1.5"/>
+      <circle cx="100" cy="150" r="1.5"/>
+      <circle cx="100" cy="160" r="1.5"/>
+      <circle cx="100" cy="170" r="1.5"/>
+      <circle cx="100" cy="180" r="1.5"/>
+      <circle cx="100" cy="190" r="1.5"/>
+      <circle cx="100" cy="200" r="1.5"/>
+      <circle cx="100" cy="210" r="1.5"/>
+    </g>
+  `,
+
+  pins: [
+    // LEFT SIDE — physical pins 1–20
+    { id:'GP0',  x:0, y:20,  type:'digital', label:'Pin 1 - GP0 / UART0 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP1',  x:0, y:30,  type:'digital', label:'Pin 2 - GP1 / UART0 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND1', x:0, y:40,  type:'gnd',     label:'Pin 3 - GND' },
+    { id:'GP2',  x:0, y:50,  type:'digital', label:'Pin 4 - GP2 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP3',  x:0, y:60,  type:'digital', label:'Pin 5 - GP3 / I2C1 SCL / SPI0 TX' },
+    { id:'GP4',  x:0, y:70,  type:'digital', label:'Pin 6 - GP4 / UART1 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP5',  x:0, y:80,  type:'digital', label:'Pin 7 - GP5 / UART1 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND2', x:0, y:90,  type:'gnd',     label:'Pin 8 - GND' },
+    { id:'GP6',  x:0, y:100, type:'digital', label:'Pin 9 - GP6 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP7',  x:0, y:110, type:'digital', label:'Pin 10 - GP7 / I2C1 SCL / SPI0 TX' },
+    { id:'GP8',  x:0, y:120, type:'digital', label:'Pin 11 - GP8 / UART1 TX / I2C0 SDA / SPI1 RX' },
+    { id:'GP9',  x:0, y:130, type:'digital', label:'Pin 12 - GP9 / UART1 RX / I2C0 SCL / SPI1 CSn' },
+    { id:'GND3', x:0, y:140, type:'gnd',     label:'Pin 13 - GND' },
+    { id:'GP10', x:0, y:150, type:'digital', label:'Pin 14 - GP10 / I2C1 SDA / SPI1 SCK' },
+    { id:'GP11', x:0, y:160, type:'digital', label:'Pin 15 - GP11 / I2C1 SCL / SPI1 TX' },
+    { id:'GP12', x:0, y:170, type:'digital', label:'Pin 16 - GP12 / UART0 TX / I2C0 SDA / SPI1 RX' },
+    { id:'GP13', x:0, y:180, type:'digital', label:'Pin 17 - GP13 / UART0 RX / I2C0 SCL / SPI1 CSn' },
+    { id:'GND4', x:0, y:190, type:'gnd',     label:'Pin 18 - GND' },
+    { id:'GP14', x:0, y:200, type:'digital', label:'Pin 19 - GP14 / I2C1 SDA / SPI1 SCK' },
+    { id:'GP15', x:0, y:210, type:'digital', label:'Pin 20 - GP15 / I2C1 SCL / SPI1 TX' },
+
+    // RIGHT SIDE — physical pins 21–40, bottom to top on the real board
+    { id:'GP16',     x:100, y:210, type:'digital', label:'Pin 21 - GP16 / UART0 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP17',     x:100, y:200, type:'digital', label:'Pin 22 - GP17 / UART0 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND5',     x:100, y:190, type:'gnd',     label:'Pin 23 - GND' },
+    { id:'GP18',     x:100, y:180, type:'digital', label:'Pin 24 - GP18 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP19',     x:100, y:170, type:'digital', label:'Pin 25 - GP19 / I2C1 SCL / SPI0 TX' },
+    { id:'GP20',     x:100, y:160, type:'digital', label:'Pin 26 - GP20 / UART1 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP21',     x:100, y:150, type:'digital', label:'Pin 27 - GP21 / UART1 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND6',     x:100, y:140, type:'gnd',     label:'Pin 28 - GND' },
+    { id:'GP22',     x:100, y:130, type:'digital', label:'Pin 29 - GP22' },
+    { id:'RUN',      x:100, y:120, type:'digital', label:'Pin 30 - RUN' },
+    { id:'GP26',     x:100, y:110, type:'analog',  label:'Pin 31 - GP26 / ADC0' },
+    { id:'GP27',     x:100, y:100, type:'analog',  label:'Pin 32 - GP27 / ADC1' },
+    { id:'GND7',     x:100, y:90,  type:'gnd',     label:'Pin 33 - AGND' },
+    { id:'GP28',     x:100, y:80,  type:'analog',  label:'Pin 34 - GP28 / ADC2' },
+    { id:'ADC_VREF', x:100, y:70,  type:'power',   label:'Pin 35 - ADC_VREF' },
+    { id:'3V3_OUT',  x:100, y:60,  type:'power',   label:'Pin 36 - 3.3V OUT' },
+    { id:'3V3_EN',   x:100, y:50,  type:'power',   label:'Pin 37 - 3V3_EN' },
+    { id:'GND8',     x:100, y:40,  type:'gnd',     label:'Pin 38 - GND' },
+    { id:'VSYS',     x:100, y:30,  type:'power',   label:'Pin 39 - VSYS' },
+    { id:'VBUS',     x:100, y:20,  type:'power',   label:'Pin 40 - VBUS' },
+
+    // Debug pads
+    { id:'SWCLK', x:42, y:220, type:'digital', label:'SWCLK' },
+    { id:'DBG_GND', x:50, y:220, type:'gnd', label:'Debug GND' },
+    { id:'SWDIO', x:58, y:220, type:'digital', label:'SWDIO' }
+  ],
+
+  defaults: {
+    label: 'Raspberry Pi Pico 2 W'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+  },
 
   /* ════════════════════════════
      OUTPUTS
