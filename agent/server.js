@@ -34,7 +34,11 @@ const HTTP_PORT     = 3746;   // REST API for virtual lab compile-hex
 const AGENT_VERSION = '1.1.0';
 
 // ── Paths ─────────────────────────────────────────────────
-const BIN_DIR = path.join(__dirname, 'bin');
+// When packaged with pkg, __dirname points to a read-only snapshot.
+// Use process.execPath to store the bin folder next to the .exe
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : __dirname;
+const BIN_DIR = path.join(baseDir, 'bin');
 const CLI_EXE = process.platform === 'win32' ? 'arduino-cli.exe' : 'arduino-cli';
 let ARDUINO_CLI = path.join(BIN_DIR, CLI_EXE);
 
