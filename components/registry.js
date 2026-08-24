@@ -3534,7 +3534,273 @@ ledWhite5mm: {
     };
   }
 },
+ledBlue5mm: {
+  id: 'ledBlue5mm',
+  label: 'Blue LED',
+  category: 'Outputs',
+  desc: '5mm blue light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
 
+  svg: `
+    <defs>
+      <!-- Blue transparent LED body -->
+      <linearGradient id="blueLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6db7ff" stop-opacity=".95"/>
+        <stop offset=".30" stop-color="#1685ff" stop-opacity=".92"/>
+        <stop offset=".68" stop-color="#005bea" stop-opacity=".90"/>
+        <stop offset="1" stop-color="#00359b" stop-opacity=".95"/>
+      </linearGradient>
+
+      <!-- Plastic highlight -->
+      <linearGradient id="blueLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset=".45" stop-color="#9fd2ff" stop-opacity=".3"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- Metal leads -->
+      <linearGradient id="blueLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".32" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Blue glow -->
+      <radialGradient id="blueLedGlow">
+        <stop offset="0" stop-color="#58b7ff" stop-opacity=".95"/>
+        <stop offset=".38" stop-color="#168cff" stop-opacity=".65"/>
+        <stop offset=".72" stop-color="#006cff" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#0055ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="27"
+      fill="url(#blueLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE (+): longer lead -->
+    <path
+      d="M24 53 L22 117"
+      fill="none"
+      stroke="url(#blueLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE (-): shorter lead -->
+    <path
+      d="M36 53 L38 104"
+      fill="none"
+      stroke="url(#blueLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL POSTS ================= -->
+    <path d="M24 51 L24 35"
+          stroke="#bfc8d0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <path d="M36 51 L36 34"
+          stroke="#bfc8d0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <!-- reflector -->
+    <path
+      d="M32 36
+         L35 31
+         L39 36
+         L37 42
+         L33 42 Z"
+      fill="#9fc7e8"
+      stroke="#48779e"
+      stroke-width=".45"
+      opacity=".8"
+    />
+
+    <!-- LED die -->
+    <rect
+      x="33.5"
+      y="32"
+      width="4.5"
+      height="4"
+      rx=".4"
+      fill="#45b4ff"
+      stroke="#176aa4"
+      stroke-width=".35"
+    />
+
+    <!-- bond wire -->
+    <path
+      d="M24 35 Q29 27 35 33"
+      fill="none"
+      stroke="#d9e8f5"
+      stroke-width=".8"
+      opacity=".9"
+    />
+
+    <!-- ================= BLUE LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#blueLedBody)"
+      stroke="#003fbb"
+      stroke-width="1"
+      opacity=".92"
+    />
+
+    <!-- Cathode flat edge -->
+    <path
+      d="M42 37 L42 50"
+      stroke="#002f8c"
+      stroke-width="1.5"
+      opacity=".9"
+    />
+
+    <!-- ================= HIGHLIGHTS ================= -->
+    <path
+      d="M21 19
+         C22 11 26 8 30 8
+         C27 15 26 25 27 39
+         C23 34 20 27 21 19 Z"
+      fill="url(#blueLedHighlight)"
+      opacity=".8"
+    />
+
+    <ellipse
+      cx="35"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".55"
+      transform="rotate(-25 35 12)"
+    />
+
+    <ellipse
+      cx="29"
+      cy="24"
+      rx="7"
+      ry="13"
+      fill="#77c5ff"
+      opacity=".12"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#0048ca"
+      stroke-width="2"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Blue LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
 
   /* ════════════════════════════
      INPUTS
