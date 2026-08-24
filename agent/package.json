@@ -1,0 +1,15 @@
+{
+  "name": "edusim-agent",
+  "version": "1.0.0",
+  "description": "EduSim Local Hardware Agent — bridges browser IDE to arduino-cli and serial ports",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "serialport": "^12.0.0"
+  },
+  "engines": { "node": ">=16" }
+}

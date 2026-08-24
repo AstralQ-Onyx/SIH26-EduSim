@@ -3015,10 +3015,261 @@ const EDUSIM_COMPONENTS = {
   }
   },
 
+
   /* ════════════════════════════
      OUTPUTS
   ════════════════════════════ */
+ledRed5mm: {
+  id: 'ledRed5mm',
+  label: 'Red LED',
+  category: 'Outputs',
+  desc: '5mm red light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
 
+  svg: `
+    <defs>
+      <!-- LED red plastic body -->
+      <linearGradient id="redLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff6666"/>
+        <stop offset="0.35" stop-color="#ed1c24"/>
+        <stop offset="0.75" stop-color="#b50812"/>
+        <stop offset="1" stop-color="#76040a"/>
+      </linearGradient>
+
+      <!-- Transparent highlight -->
+      <linearGradient id="redLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".8"/>
+        <stop offset=".5" stop-color="#ffaaaa" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- Metal legs -->
+      <linearGradient id="ledLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a7a7a7"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Glow when LED is ON -->
+      <radialGradient id="redLedGlow">
+        <stop offset="0" stop-color="#ff3030" stop-opacity=".9"/>
+        <stop offset=".5" stop-color="#ff2020" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="26"
+      fill="url(#redLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE: longer lead -->
+    <path
+      d="M24 53
+         L22 117"
+      fill="none"
+      stroke="url(#ledLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE: shorter lead -->
+    <path
+      d="M36 53
+         L38 104"
+      fill="none"
+      stroke="url(#ledLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL LED POSTS ================= -->
+    <path d="M24 50 L24 36"
+          stroke="#bdbdbd"
+          stroke-width="2"
+          opacity=".75"/>
+
+    <path d="M36 50 L36 35"
+          stroke="#bdbdbd"
+          stroke-width="2"
+          opacity=".75"/>
+
+    <!-- bond wire -->
+    <path d="M24 36 Q29 29 34 35"
+          fill="none"
+          stroke="#d7d7d7"
+          stroke-width=".8"
+          opacity=".75"/>
+
+    <!-- internal die -->
+    <rect
+      x="32"
+      y="32"
+      width="6"
+      height="5"
+      rx=".5"
+      fill="#8c0c12"
+      opacity=".85"
+    />
+
+    <!-- ================= LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#redLedBody)"
+      stroke="#8e0710"
+      stroke-width="1"
+      opacity=".92"
+    />
+
+    <!-- flat cathode edge -->
+    <path
+      d="M42 38 L42 50"
+      stroke="#6e050b"
+      stroke-width="1.5"
+      opacity=".9"
+    />
+
+    <!-- ================= BODY HIGHLIGHT ================= -->
+    <path
+      d="M22 18
+         C23 11 27 8 31 8
+         C27 15 26 25 27 39
+         C23 34 21 26 22 18 Z"
+      fill="url(#redLedHighlight)"
+      opacity=".7"
+    />
+
+    <ellipse
+      cx="34"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".35"
+      transform="rotate(-25 34 12)"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#a20a12"
+      stroke-width="2"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Red LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic LED simulation:
+      A = anode input
+      K = cathode.
+
+      The LED is considered ON when the anode is HIGH
+      and the cathode is LOW/GND.
+    */
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
 
 
   /* ════════════════════════════
