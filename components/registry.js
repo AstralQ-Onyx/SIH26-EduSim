@@ -4677,7 +4677,290 @@ oled096I2c: {
     };
   }
 },
+buzzerPassive: {
+  id: 'buzzerPassive',
+  label: 'Piezo Buzzer',
+  category: 'Outputs',
+  desc: 'Two-pin piezo buzzer for tone and alert generation using a digital or PWM signal',
+  w: 70,
+  h: 100,
 
+  svg: `
+    <defs>
+      <!-- Buzzer body -->
+      <linearGradient id="buzzerBodyGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3a3a3a"/>
+        <stop offset=".45" stop-color="#151515"/>
+        <stop offset="1" stop-color="#050505"/>
+      </linearGradient>
+
+      <!-- Top surface -->
+      <radialGradient id="buzzerTopGrad" cx="45%" cy="35%" r="70%">
+        <stop offset="0" stop-color="#4a4a4a"/>
+        <stop offset=".55" stop-color="#202020"/>
+        <stop offset="1" stop-color="#080808"/>
+      </radialGradient>
+
+      <!-- Metal pins -->
+      <linearGradient id="buzzerPinMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Sound wave glow -->
+      <radialGradient id="buzzerSoundGlow">
+        <stop offset="0" stop-color="#ffd54a" stop-opacity=".5"/>
+        <stop offset=".6" stop-color="#ffd54a" stop-opacity=".18"/>
+        <stop offset="1" stop-color="#ffd54a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= SOUND GLOW ================= -->
+    <circle
+      cx="35"
+      cy="34"
+      r="31"
+      fill="url(#buzzerSoundGlow)"
+      opacity="0"
+      data-buzzer-glow="true"
+    />
+
+    <!-- ================= METAL PINS ================= -->
+
+    <!-- Positive pin -->
+    <path
+      d="M27 67 L26 98"
+      fill="none"
+      stroke="url(#buzzerPinMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- Negative pin -->
+    <path
+      d="M43 67 L44 92"
+      fill="none"
+      stroke="url(#buzzerPinMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= LOWER BODY ================= -->
+    <rect
+      x="15"
+      y="37"
+      width="40"
+      height="30"
+      rx="6"
+      fill="url(#buzzerBodyGrad)"
+      stroke="#050505"
+      stroke-width="1.2"
+    />
+
+    <!-- lower rim -->
+    <path
+      d="M15 55
+         Q15 65 25 67
+         H45
+         Q55 65 55 55"
+      fill="#111"
+      stroke="#050505"
+      stroke-width="1"
+    />
+
+    <!-- ================= TOP CYLINDER ================= -->
+    <ellipse
+      cx="35"
+      cy="26"
+      rx="22"
+      ry="10"
+      fill="url(#buzzerTopGrad)"
+      stroke="#111"
+      stroke-width="1"
+    />
+
+    <rect
+      x="13"
+      y="26"
+      width="44"
+      height="23"
+      fill="#151515"
+    />
+
+    <ellipse
+      cx="35"
+      cy="49"
+      rx="22"
+      ry="10"
+      fill="#111"
+      stroke="#090909"
+      stroke-width="1"
+    />
+
+    <ellipse
+      cx="35"
+      cy="26"
+      rx="22"
+      ry="10"
+      fill="url(#buzzerTopGrad)"
+      stroke="#111"
+      stroke-width="1"
+    />
+
+    <!-- ================= SOUND HOLE ================= -->
+    <ellipse
+      cx="35"
+      cy="25"
+      rx="6"
+      ry="3.2"
+      fill="#020202"
+    />
+
+    <!-- subtle top highlight -->
+    <ellipse
+      cx="29"
+      cy="21"
+      rx="10"
+      ry="4"
+      fill="#ffffff"
+      opacity=".05"
+    />
+
+    <!-- ================= POLARITY MARK ================= -->
+    <text
+      x="24"
+      y="58"
+      text-anchor="middle"
+      fill="#d9d9d9"
+      font-size="6"
+      font-family="monospace"
+      font-weight="bold"
+    >
+      +
+    </text>
+
+    <text
+      x="46"
+      y="58"
+      text-anchor="middle"
+      fill="#9c9c9c"
+      font-size="6"
+      font-family="monospace"
+    >
+      -
+    </text>
+
+    <!-- ================= PIN LABELS ================= -->
+    <text
+      x="22"
+      y="93"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      +
+    </text>
+
+    <text
+      x="48"
+      y="87"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      -
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="26"
+      cy="100"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="POS"
+    />
+
+    <circle
+      cx="44"
+      cy="94"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="NEG"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'POS',
+      x: 26,
+      y: 100,
+      type: 'digital',
+      label: 'Positive (+)'
+    },
+    {
+      id: 'NEG',
+      x: 44,
+      y: 94,
+      type: 'gnd',
+      label: 'Negative (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Buzzer',
+    enabled: false,
+    frequency: 1000
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'enabled',
+      label: 'Sound',
+      type: 'checkbox'
+    },
+    {
+      key: 'frequency',
+      label: 'Frequency (Hz)',
+      type: 'number',
+      min: 20,
+      max: 20000,
+      step: 10
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic buzzer simulation.
+
+      POS HIGH and NEG LOW -> buzzer active.
+
+      For tone()/PWM simulation, the engine can later pass
+      a frequency value into inputs.frequency.
+    */
+
+    const positive = Number(inputs?.POS ?? 0);
+    const negative = Number(inputs?.NEG ?? 0);
+
+    const enabled = positive > negative;
+
+    const frequency =
+      Number(inputs?.frequency ?? state?.frequency ?? 1000);
+
+    return {
+      enabled,
+      on: enabled,
+      frequency
+    };
+  }
+},
 
   /* ════════════════════════════
      INPUTS
