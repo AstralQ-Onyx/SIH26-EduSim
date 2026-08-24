@@ -5234,7 +5234,289 @@ irObstacleSensor: {
     };
   }
 },
+ultrasonicHCSR04: {
+  id: 'ultrasonicHCSR04',
+  label: 'HC-SR04 Ultrasonic Sensor',
+  category: 'Inputs',
+  desc: 'HC-SR04 ultrasonic distance sensor with VCC, TRIG, ECHO and GND pins',
+  w: 140,
+  h: 80,
 
+  svg: `
+    <defs>
+      <linearGradient id="hcsr04Pcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1464b8"/>
+        <stop offset=".55" stop-color="#0e4e95"/>
+        <stop offset="1" stop-color="#073b73"/>
+      </linearGradient>
+
+      <radialGradient id="hcsr04Transducer" cx="50%" cy="50%" r="65%">
+        <stop offset="0" stop-color="#454545"/>
+        <stop offset=".35" stop-color="#1f1f1f"/>
+        <stop offset=".72" stop-color="#0b0b0b"/>
+        <stop offset="1" stop-color="#020202"/>
+      </radialGradient>
+
+      <linearGradient id="hcsr04Metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0f0f0"/>
+        <stop offset=".45" stop-color="#c5c5c5"/>
+        <stop offset="1" stop-color="#777"/>
+      </linearGradient>
+
+      <linearGradient id="hcsr04PinMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="hcsr04Wave">
+        <stop offset="0" stop-color="#58d7ff" stop-opacity=".28"/>
+        <stop offset="1" stop-color="#58d7ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="5"
+      y="5"
+      width="130"
+      height="58"
+      rx="3"
+      fill="url(#hcsr04Pcb)"
+      stroke="#062f5e"
+      stroke-width="1"
+    />
+
+    <!-- mounting holes -->
+    <g fill="#f0f0f0" stroke="#7e7e7e" stroke-width=".6">
+      <circle cx="11" cy="11" r="3.5"/>
+      <circle cx="129" cy="11" r="3.5"/>
+      <circle cx="11" cy="57" r="3.5"/>
+      <circle cx="129" cy="57" r="3.5"/>
+    </g>
+
+    <!-- ================= LEFT TRANSDUCER ================= -->
+    <circle cx="39" cy="32" r="20"
+            fill="url(#hcsr04Metal)"
+            stroke="#8a8a8a"
+            stroke-width="1.2"/>
+
+    <circle cx="39" cy="32" r="16.2"
+            fill="url(#hcsr04Transducer)"
+            stroke="#111"
+            stroke-width=".8"/>
+
+    <circle cx="39" cy="32" r="12.5"
+            fill="none"
+            stroke="#4a4a4a"
+            stroke-width=".6"
+            stroke-dasharray="1.2 1.2"/>
+
+    <circle cx="39" cy="32" r="8.5"
+            fill="none"
+            stroke="#646464"
+            stroke-width=".5"
+            stroke-dasharray="1 1"/>
+
+    <!-- ================= RIGHT TRANSDUCER ================= -->
+    <circle cx="101" cy="32" r="20"
+            fill="url(#hcsr04Metal)"
+            stroke="#8a8a8a"
+            stroke-width="1.2"/>
+
+    <circle cx="101" cy="32" r="16.2"
+            fill="url(#hcsr04Transducer)"
+            stroke="#111"
+            stroke-width=".8"/>
+
+    <circle cx="101" cy="32" r="12.5"
+            fill="none"
+            stroke="#4a4a4a"
+            stroke-width=".6"
+            stroke-dasharray="1.2 1.2"/>
+
+    <circle cx="101" cy="32" r="8.5"
+            fill="none"
+            stroke="#646464"
+            stroke-width=".5"
+            stroke-dasharray="1 1"/>
+
+    <!-- subtle acoustic wave indicators -->
+    <circle cx="39" cy="32" r="25" fill="url(#hcsr04Wave)" opacity="0"
+            data-ultrasonic-tx="true"/>
+    <circle cx="101" cy="32" r="25" fill="url(#hcsr04Wave)" opacity="0"
+            data-ultrasonic-rx="true"/>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="70"
+      y="13"
+      text-anchor="middle"
+      fill="#ffffff"
+      font-size="6"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      HC-SR04
+    </text>
+
+    <!-- T / R markings -->
+    <text x="18" y="54" fill="#ffffff"
+          font-size="5" font-family="monospace">T</text>
+
+    <text x="118" y="54" fill="#ffffff"
+          font-size="5" font-family="monospace">R</text>
+
+    <!-- ================= 4-PIN HEADER ================= -->
+    <rect
+      x="53"
+      y="58"
+      width="34"
+      height="8"
+      rx="1"
+      fill="#202020"
+      stroke="#555"
+      stroke-width=".5"
+    />
+
+    <g fill="#c7a85f">
+      <circle cx="57" cy="62" r="1.3"/>
+      <circle cx="66" cy="62" r="1.3"/>
+      <circle cx="75" cy="62" r="1.3"/>
+      <circle cx="84" cy="62" r="1.3"/>
+    </g>
+
+    <!-- physical metal pins -->
+    <g stroke="url(#hcsr04PinMetal)" stroke-width="2" stroke-linecap="round">
+      <path d="M57 66 V78"/>
+      <path d="M66 66 V78"/>
+      <path d="M75 66 V78"/>
+      <path d="M84 66 V78"/>
+    </g>
+
+    <!-- pin labels -->
+    <g fill="#ffffff" font-size="3.2" font-family="monospace">
+      <text x="57" y="56" text-anchor="middle">VCC</text>
+      <text x="66" y="56" text-anchor="middle">TRIG</text>
+      <text x="75" y="56" text-anchor="middle">ECHO</text>
+      <text x="84" y="56" text-anchor="middle">GND</text>
+    </g>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d7d1a0" stroke="#666" stroke-width=".22">
+      <rect x="60" y="19" width="7" height="3" rx=".4"/>
+      <rect x="70" y="19" width="7" height="3" rx=".4"/>
+      <rect x="80" y="19" width="7" height="3" rx=".4"/>
+      <rect x="60" y="45" width="7" height="3" rx=".4"/>
+      <rect x="70" y="45" width="7" height="3" rx=".4"/>
+      <rect x="80" y="45" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="57" cy="80" r="2" fill="#cfcfcf" data-pin="VCC"/>
+    <circle cx="66" cy="80" r="2" fill="#cfcfcf" data-pin="TRIG"/>
+    <circle cx="75" cy="80" r="2" fill="#cfcfcf" data-pin="ECHO"/>
+    <circle cx="84" cy="80" r="2" fill="#cfcfcf" data-pin="GND"/>
+  `,
+
+  pins: [
+    {
+      id: 'VCC',
+      x: 57,
+      y: 80,
+      type: 'power',
+      label: 'VCC'
+    },
+    {
+      id: 'TRIG',
+      x: 66,
+      y: 80,
+      type: 'digital',
+      label: 'Trigger'
+    },
+    {
+      id: 'ECHO',
+      x: 75,
+      y: 80,
+      type: 'digital',
+      label: 'Echo'
+    },
+    {
+      id: 'GND',
+      x: 84,
+      y: 80,
+      type: 'gnd',
+      label: 'Ground'
+    }
+  ],
+
+  defaults: {
+    label: 'HC-SR04',
+    distance: 100,
+    maxDistance: 400,
+    enabled: true
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'distance',
+      label: 'Distance (cm)',
+      type: 'number',
+      min: 2,
+      max: 400,
+      step: 1
+    },
+    {
+      key: 'enabled',
+      label: 'Sensor Enabled',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      HC-SR04 basic simulation model.
+
+      Real behavior:
+      1. TRIG receives a short HIGH pulse.
+      2. Sensor emits an ultrasonic burst.
+      3. ECHO stays HIGH for a duration proportional to distance.
+
+      Approximate formula:
+      distance_cm = echoTime_us / 58
+    */
+
+    const enabled = state?.enabled !== false;
+
+    const distance = Math.max(
+      2,
+      Math.min(
+        Number(state?.maxDistance ?? 400),
+        Number(inputs?.distance ?? state?.distance ?? 100)
+      )
+    );
+
+    const trig = Number(inputs?.TRIG ?? 0);
+
+    const echoTimeUs = enabled && trig > 0
+      ? Math.round(distance * 58)
+      : 0;
+
+    return {
+      enabled,
+      distance,
+      echoTimeUs,
+      ECHO: echoTimeUs > 0 ? 1 : 0,
+      triggered: trig > 0
+    };
+  }
+},
   /* ════════════════════════════
      PASSIVES
   ════════════════════════════ */
