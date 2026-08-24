@@ -4389,6 +4389,295 @@ ledRgb5mm: {
     };
   }
 },
+oled096I2c: {
+  id: 'oled096I2c',
+  label: '0.96" OLED Display',
+  category: 'Displays',
+  desc: '0.96 inch 128x64 monochrome OLED display module with I2C interface (SSD1306-compatible), using GND, VCC, SCL and SDA pins',
+  w: 100,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="oledPcbGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1a6385"/>
+        <stop offset="0.55" stop-color="#14506d"/>
+        <stop offset="1" stop-color="#0c3447"/>
+      </linearGradient>
+
+      <linearGradient id="oledGlassGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#101417"/>
+        <stop offset="0.6" stop-color="#030506"/>
+        <stop offset="1" stop-color="#000000"/>
+      </linearGradient>
+
+      <linearGradient id="oledMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#9b9b9b"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="oledBlueGlow">
+        <stop offset="0" stop-color="#58ffff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#00dfff" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#00bcd4" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="6" y="4"
+      width="88" height="112"
+      rx="5"
+      fill="url(#oledPcbGrad)"
+      stroke="#0a2d3f"
+      stroke-width="1.2"
+    />
+
+    <!-- mounting holes -->
+    <g fill="#f0f0f0" stroke="#8a8a8a" stroke-width=".8">
+      <circle cx="13" cy="12" r="5"/>
+      <circle cx="87" cy="12" r="5"/>
+      <circle cx="13" cy="108" r="5"/>
+      <circle cx="87" cy="108" r="5"/>
+    </g>
+
+    <!-- ================= 4-PIN HEADER ================= -->
+    <rect
+      x="31"
+      y="4"
+      width="38"
+      height="10"
+      rx="1"
+      fill="#202020"
+      stroke="#555"
+      stroke-width=".5"
+    />
+
+    <g fill="#c7a85f" stroke="#725f34" stroke-width=".25">
+      <circle cx="36" cy="9" r="1.6"/>
+      <circle cx="45" cy="9" r="1.6"/>
+      <circle cx="54" cy="9" r="1.6"/>
+      <circle cx="63" cy="9" r="1.6"/>
+    </g>
+
+    <g fill="#ffffff" font-size="3.2" font-family="monospace">
+      <text x="36" y="20" text-anchor="middle">GND</text>
+      <text x="45" y="20" text-anchor="middle">VCC</text>
+      <text x="54" y="20" text-anchor="middle">SCL</text>
+      <text x="63" y="20" text-anchor="middle">SDA</text>
+    </g>
+
+    <!-- ================= OLED GLASS ================= -->
+    <rect
+      x="14"
+      y="25"
+      width="72"
+      height="63"
+      rx="3"
+      fill="url(#oledGlassGrad)"
+      stroke="#20282d"
+      stroke-width="1"
+    />
+
+    <!-- inner active display area -->
+    <rect
+      x="20"
+      y="31"
+      width="60"
+      height="51"
+      rx="1.5"
+      fill="#020405"
+    />
+
+    <!-- subtle blue glow -->
+    <rect
+      x="20"
+      y="31"
+      width="60"
+      height="51"
+      rx="1.5"
+      fill="url(#oledBlueGlow)"
+      opacity=".08"
+      data-oled-glow="true"
+    />
+
+    <!-- ================= SAMPLE DISPLAY CONTENT ================= -->
+    <g
+      fill="#39f6ff"
+      stroke="#39f6ff"
+      stroke-width=".5"
+      font-family="monospace"
+    >
+      <!-- signal bars -->
+      <path d="M24 44 V40 M27 44 V37 M30 44 V34 M33 44 V31"
+            fill="none" stroke-width="1.4"/>
+
+      <!-- small music icon -->
+      <path d="M69 34 V42 Q65 40 65 44 Q65 47 68 47 Q71 47 71 44 V37 L76 35 V41 Q72 39 72 43 Q72 46 75 46 Q78 46 78 43 V32 Z"
+            fill="none" stroke-width=".9"/>
+
+      <!-- equalizer -->
+      <g fill="#39f6ff" stroke="none">
+        <rect x="26" y="52" width="3" height="4"/>
+        <rect x="30" y="48" width="3" height="8"/>
+        <rect x="34" y="44" width="3" height="12"/>
+        <rect x="38" y="50" width="3" height="6"/>
+        <rect x="42" y="46" width="3" height="10"/>
+        <rect x="46" y="42" width="3" height="14"/>
+        <rect x="50" y="49" width="3" height="7"/>
+        <rect x="54" y="45" width="3" height="11"/>
+        <rect x="58" y="40" width="3" height="16"/>
+        <rect x="62" y="47" width="3" height="9"/>
+        <rect x="66" y="43" width="3" height="13"/>
+        <rect x="70" y="49" width="3" height="7"/>
+      </g>
+
+      <text x="50" y="67" text-anchor="middle"
+            fill="#39f6ff"
+            font-size="7"
+            stroke="none">
+        BEAT IT
+      </text>
+
+      <!-- tiny play/pause markers -->
+      <rect x="46" y="72" width="2" height="6" fill="#39f6ff" stroke="none"/>
+      <rect x="51" y="72" width="2" height="6" fill="#39f6ff" stroke="none"/>
+    </g>
+
+    <!-- ================= FLEX / DISPLAY CONNECTOR AREA ================= -->
+    <rect
+      x="31"
+      y="88"
+      width="38"
+      height="17"
+      rx="1.2"
+      fill="#171717"
+      stroke="#4d4d4d"
+      stroke-width=".5"
+    />
+
+    <rect
+      x="37"
+      y="92"
+      width="26"
+      height="8"
+      rx=".8"
+      fill="#2d2d2d"
+    />
+
+    <!-- FPC contacts -->
+    <g fill="#c79b3a">
+      <rect x="39" y="101" width="2" height="5"/>
+      <rect x="43" y="101" width="2" height="5"/>
+      <rect x="47" y="101" width="2" height="5"/>
+      <rect x="51" y="101" width="2" height="5"/>
+      <rect x="55" y="101" width="2" height="5"/>
+      <rect x="59" y="101" width="2" height="5"/>
+    </g>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d6d0a1" stroke="#646257" stroke-width=".25">
+      <rect x="21" y="92" width="7" height="3" rx=".4"/>
+      <rect x="72" y="92" width="7" height="3" rx=".4"/>
+      <rect x="22" y="99" width="7" height="3" rx=".4"/>
+      <rect x="71" y="99" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="50"
+      y="113"
+      text-anchor="middle"
+      fill="#dffaff"
+      font-size="3"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      OLED 128x64 I2C
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="36" cy="0" r="2" fill="#cfcfcf" data-pin="GND"/>
+    <circle cx="45" cy="0" r="2" fill="#cfcfcf" data-pin="VCC"/>
+    <circle cx="54" cy="0" r="2" fill="#cfcfcf" data-pin="SCL"/>
+    <circle cx="63" cy="0" r="2" fill="#cfcfcf" data-pin="SDA"/>
+  `,
+
+  pins: [
+    {
+      id: 'GND',
+      x: 36,
+      y: 0,
+      type: 'gnd',
+      label: 'Ground'
+    },
+    {
+      id: 'VCC',
+      x: 45,
+      y: 0,
+      type: 'power',
+      label: 'VCC'
+    },
+    {
+      id: 'SCL',
+      x: 54,
+      y: 0,
+      type: 'digital',
+      label: 'I2C Clock (SCL)'
+    },
+    {
+      id: 'SDA',
+      x: 63,
+      y: 0,
+      type: 'digital',
+      label: 'I2C Data (SDA)'
+    }
+  ],
+
+  defaults: {
+    label: 'OLED',
+    text: 'BEAT IT',
+    powered: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'text',
+      label: 'Display Text',
+      type: 'text'
+    },
+    {
+      key: 'powered',
+      label: 'Powered',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic display-state placeholder.
+
+      For a full SSD1306 simulation later, this component can accept
+      I2C commands/data and render a 128x64 monochrome framebuffer.
+    */
+
+    const vcc = Number(inputs?.VCC ?? 0);
+    const powered = vcc > 0;
+
+    return {
+      powered,
+      text: state?.text ?? 'BEAT IT'
+    };
+  }
+},
+
 
   /* ════════════════════════════
      INPUTS
