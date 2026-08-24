@@ -417,14 +417,26 @@ async function handleGoogleSignIn() {
   }
 }
 
+// Prevents onAuthStateChanged from redirecting while we are processing the
+// Google redirect result (e.g. writing a new user profile to Firestore).
+let _googleRedirectHandled = false;
+
 // ── Handle Google Redirect Result (called on page load) ──────────────────
 async function handleGoogleRedirectResult() {
   try {
     const result = await auth.getRedirectResult();
-    if (!result || !result.user) return; // No redirect happened, normal page load
+    if (!result || !result.user) {
+      // Normal page load — not returning from Google redirect
+      _googleRedirectHandled = true;
+      return;
+    }
+
+    // We ARE returning from a Google redirect — block onAuthStateChanged redirect
+    // until we've finished writing the user profile.
+    _googleRedirectHandled = false;
 
     const user = result.user;
-    const isNew = result.additionalUserInfo.isNewUser;
+    const isNew = result.additionalUserInfo?.isNewUser ?? false;
     setLoading(true);
     setStatus('VERIFYING IDENTITY…');
 
@@ -447,13 +459,16 @@ async function handleGoogleRedirectResult() {
       await db.collection('users').doc(user.uid).set(userData);
       setLoading(false);
       showToast('Google account linked! Please complete your profile.', 'success');
+      _googleRedirectHandled = true;
       setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
     } else {
       setLoading(false);
       showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
+      _googleRedirectHandled = true;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
     }
   } catch (err) {
+    _googleRedirectHandled = true; // unblock in case of error
     setLoading(false);
     setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
     const msgs = {
@@ -680,9 +695,11 @@ async function showForgotPassword(e) {
 }
 
 // ── Auth State Observer ─────────────────────────────────────
+// Note: This deliberately does NOT redirect until the Google redirect result
+// has been processed (to avoid a race condition for new users).
 auth.onAuthStateChanged(user => {
+  if (!_googleRedirectHandled) return; // wait for redirect result to finish
   if (user) {
-    // Already logged in — redirect if not on a setup page
     const params = new URLSearchParams(window.location.search);
     if (!params.has('setup')) {
       window.location.href = 'dashboard.html';
@@ -691,5 +708,6 @@ auth.onAuthStateChanged(user => {
 });
 
 // ── Handle Google Redirect on Page Load ─────────────────────
-// This catches the result when Google redirects back to this page.
+// Run first — sets _googleRedirectHandled = true when done,
+// which unblocks onAuthStateChanged.
 handleGoogleRedirectResult();
