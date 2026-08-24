@@ -727,10 +727,33 @@ async function runUpload() {
   setSimUI(false);
   resetVisuals();
 
+  // Enable console input during sim
+  const cInput = document.getElementById('consoleInput');
+  const cSend  = document.getElementById('consoleSend');
+  if (cInput) cInput.disabled = false;
+  if (cSend)  cSend.disabled  = false;
+
   const ok = await EduSimulator.compileAndSimulate(code, defId, {
-    onLog:  (msg, type) => clog(msg, type),
-    onError:(msg)       => clog(msg, 'err'),
-    onReady: ()         => setSimUI(true),
+    onLog: (msg, type) => {
+      clog(msg, type);
+      if (type !== 'err') SerialPlotter.pushData(msg);
+    },
+    onError: (msg) => clog(msg, 'err'),
+    onReady: () => setSimUI(true),
+    onSerial: (line) => {
+      SerialPlotter.pushData(line);
+      const sBody = document.getElementById('serialBody');
+      if (sBody) {
+        const d = document.createElement('div');
+        d.className = 'clog';
+        d.textContent = line;
+        sBody.appendChild(d);
+        sBody.scrollTop = 9999;
+      }
+    },
+    onMemory: (stats, fqbn) => {
+      MemoryMeter.update(stats, defId);
+    },
     onPin: (portName, bit, pinState) => {
       const isHigh = (pinState === 1 || pinState === true);
 
@@ -772,7 +795,11 @@ async function runUpload() {
     },
   });
 
-  if (!ok) setSimUI(false);
+  if (!ok) {
+    setSimUI(false);
+    if (cInput) cInput.disabled = true;
+    if (cSend)  cSend.disabled  = true;
+  }
 }
 
 // ── Save ──────────────────────────────────────────────────
@@ -883,6 +910,16 @@ function populateDeviceSelect() {
 
 document.getElementById('codeDeviceSelect').addEventListener('focus', populateDeviceSelect);
 document.getElementById('codeDeviceSelect').addEventListener('mousedown', populateDeviceSelect);
+document.getElementById('codeDeviceSelect').addEventListener('change', (e) => {
+  const deviceId = e.target.value;
+  const comp = components.find(c => c.id === deviceId);
+  const defId = comp?.defId || 'arduino_uno_r3';
+  if (labEditor) {
+    MemoryMeter.update(EduSimulator.estimateMemory(labEditor.getValue(), defId), defId);
+  } else {
+    MemoryMeter.update({}, defId);
+  }
+});
 
 document.getElementById('toggleCodeBtn').addEventListener('click', () => {
   const isOpening = codePanel.style.display === 'none';
@@ -947,9 +984,350 @@ if (typeof require !== 'undefined') {
   });
 }
 
+// ── Memory Meter Module ────────────────────────────────────
+const MemoryMeter = {
+  profiles: {
+    arduino_uno_r3:   { name: 'ATmega328P', flashTotal: 32256, ramTotal: 2048 },
+    arduino_nano:     { name: 'ATmega328P', flashTotal: 32256, ramTotal: 2048 },
+    esp32_dev_module: { name: 'ESP32 (WROOM)', flashTotal: 1310720, ramTotal: 524288 },
+    esp32:            { name: 'ESP32', flashTotal: 1310720, ramTotal: 524288 },
+    raspberry_pi_pico:{ name: 'RP2040', flashTotal: 2097152, ramTotal: 270336 }
+  },
+
+  formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+  },
+
+  update(stats = {}, boardKey = 'arduino_uno_r3') {
+    const profile = this.profiles[boardKey] || this.profiles.arduino_uno_r3;
+    const badge = document.getElementById('memBoardBadge');
+    if (badge) badge.textContent = profile.name;
+
+    const flashUsed = stats.flashUsed || 0;
+    const flashTotal = stats.flashTotal || profile.flashTotal;
+    const flashPct = Math.min(100, stats.flashPercent !== undefined ? stats.flashPercent : ((flashUsed / flashTotal) * 100));
+
+    const ramUsed = stats.ramUsed || 0;
+    const ramTotal = stats.ramTotal || profile.ramTotal;
+    const ramPct = Math.min(100, stats.ramPercent !== undefined ? stats.ramPercent : ((ramUsed / ramTotal) * 100));
+
+    // Flash UI
+    const flashValEl = document.getElementById('flashUsageVal');
+    const flashBarEl = document.getElementById('flashProgressBar');
+    const flashFreeEl = document.getElementById('flashFreeVal');
+    const flashStateEl = document.getElementById('flashState');
+
+    if (flashValEl) flashValEl.textContent = `${this.formatBytes(flashUsed)} / ${this.formatBytes(flashTotal)} (${flashPct.toFixed(1)}%)`;
+    if (flashBarEl) {
+      flashBarEl.style.width = `${Math.max(1, flashPct)}%`;
+      flashBarEl.className = 'mem-bar flash-bar' + (flashPct > 90 ? ' danger' : flashPct > 75 ? ' warn' : '');
+    }
+    if (flashFreeEl) flashFreeEl.textContent = `${this.formatBytes(Math.max(0, flashTotal - flashUsed))} Free`;
+    if (flashStateEl) {
+      flashStateEl.textContent = flashPct > 90 ? 'Critical' : flashPct > 75 ? 'Warning' : 'Optimal';
+      flashStateEl.className = 'mem-state' + (flashPct > 90 ? ' danger' : flashPct > 75 ? ' warn' : '');
+    }
+
+    // SRAM UI
+    const sramValEl = document.getElementById('sramUsageVal');
+    const sramBarEl = document.getElementById('sramProgressBar');
+    const sramFreeEl = document.getElementById('sramFreeVal');
+    const sramStateEl = document.getElementById('sramState');
+
+    if (sramValEl) sramValEl.textContent = `${this.formatBytes(ramUsed)} / ${this.formatBytes(ramTotal)} (${ramPct.toFixed(1)}%)`;
+    if (sramBarEl) {
+      sramBarEl.style.width = `${Math.max(1, ramPct)}%`;
+      sramBarEl.className = 'mem-bar sram-bar' + (ramPct > 90 ? ' danger' : ramPct > 75 ? ' warn' : '');
+    }
+    if (sramFreeEl) sramFreeEl.textContent = `${this.formatBytes(Math.max(0, ramTotal - ramUsed))} Free`;
+    if (sramStateEl) {
+      sramStateEl.textContent = ramPct > 90 ? 'Critical' : ramPct > 75 ? 'Warning' : 'Optimal';
+      sramStateEl.className = 'mem-state' + (ramPct > 90 ? ' danger' : ramPct > 75 ? ' warn' : '');
+    }
+  }
+};
+
+// ── Real-Time Serial Plotter Engine ────────────────────────
+const SerialPlotter = {
+  canvas: null,
+  ctx: null,
+  channels: new Map(), // name -> { color, data: [], latest }
+  maxPoints: 75,
+  palette: ['#00d4ff', '#b34eff', '#00ff88', '#ffd700', '#ff4466', '#ff8c00', '#2de2e6'],
+  isPaused: false,
+  demoTimer: null,
+  demoAngle: 0,
+  animationId: null,
+
+  init() {
+    this.canvas = document.getElementById('serialPlotterCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+
+    this.handleResize();
+    window.addEventListener('resize', () => this.handleResize());
+
+    const pauseBtn = document.getElementById('plotPauseBtn');
+    if (pauseBtn) pauseBtn.addEventListener('click', () => this.togglePause());
+
+    const clearBtn = document.getElementById('plotClearBtn');
+    if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
+
+    const demoBtn = document.getElementById('plotDemoBtn');
+    if (demoBtn) demoBtn.addEventListener('click', () => this.toggleDemo());
+
+    this.renderLoop();
+  },
+
+  handleResize() {
+    if (!this.canvas) return;
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      this.canvas.width = Math.floor(rect.width * (window.devicePixelRatio || 1));
+      this.canvas.height = Math.floor(rect.height * (window.devicePixelRatio || 1));
+    }
+  },
+
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    const pauseText = document.getElementById('plotPauseText');
+    const pauseBtn = document.getElementById('plotPauseBtn');
+    if (pauseText) pauseText.textContent = this.isPaused ? 'Resume' : 'Pause';
+    if (pauseBtn) pauseBtn.classList.toggle('active', this.isPaused);
+  },
+
+  clear() {
+    this.channels.clear();
+    this.updateChannelTags();
+  },
+
+  toggleDemo() {
+    const demoBtn = document.getElementById('plotDemoBtn');
+    if (this.demoTimer) {
+      clearInterval(this.demoTimer);
+      this.demoTimer = null;
+      if (demoBtn) demoBtn.classList.remove('active');
+    } else {
+      if (demoBtn) demoBtn.classList.add('active');
+      this.demoTimer = setInterval(() => {
+        this.demoAngle += 0.12;
+        const sinVal = Math.sin(this.demoAngle) * 50 + 50;
+        const cosVal = Math.cos(this.demoAngle * 0.7) * 30 + 40;
+        const noise  = Math.sin(this.demoAngle * 2.3) * 15 + Math.random() * 8 + 25;
+        this.pushData(`sine:${sinVal.toFixed(1)}, cos:${cosVal.toFixed(1)}, sensor:${noise.toFixed(1)}`);
+      }, 50);
+    }
+  },
+
+  pushData(rawLine) {
+    if (this.isPaused || !rawLine) return;
+    const trimmed = String(rawLine).trim();
+    if (!trimmed || trimmed.startsWith('[') || trimmed.startsWith('>')) return;
+
+    // Pattern 1: key:val, key2:val2 OR CSV: 12.3, 45.6
+    if (trimmed.includes(':') || trimmed.includes(',')) {
+      const parts = trimmed.split(',');
+      let matchedAny = false;
+
+      parts.forEach((p, idx) => {
+        const seg = p.trim();
+        if (seg.includes(':')) {
+          const [key, valStr] = seg.split(':');
+          const num = parseFloat(valStr);
+          if (!isNaN(num)) {
+            this.addPoint(key.trim(), num);
+            matchedAny = true;
+          }
+        } else {
+          const num = parseFloat(seg);
+          if (!isNaN(num)) {
+            this.addPoint(`Ch ${idx + 1}`, num);
+            matchedAny = true;
+          }
+        }
+      });
+
+      if (matchedAny) {
+        this.updateChannelTags();
+        return;
+      }
+    }
+
+    // Pattern 2: Single number
+    const singleNum = parseFloat(trimmed);
+    if (!isNaN(singleNum)) {
+      this.addPoint('Value', singleNum);
+      this.updateChannelTags();
+    }
+  },
+
+  addPoint(channelName, value) {
+    if (!this.channels.has(channelName)) {
+      const color = this.palette[this.channels.size % this.palette.length];
+      this.channels.set(channelName, { color, data: [], latest: value });
+    }
+    const ch = this.channels.get(channelName);
+    ch.latest = value;
+    ch.data.push(value);
+    if (ch.data.length > this.maxPoints) {
+      ch.data.shift();
+    }
+  },
+
+  updateChannelTags() {
+    const wrap = document.getElementById('plotterChannels');
+    if (!wrap) return;
+    if (this.channels.size === 0) {
+      wrap.innerHTML = '<span class="no-stream-msg">Waiting for serial stream data…</span>';
+      return;
+    }
+    wrap.innerHTML = '';
+    this.channels.forEach((ch, name) => {
+      const tag = document.createElement('div');
+      tag.className = 'channel-tag';
+      tag.innerHTML = `
+        <span class="ch-color-dot" style="background: ${ch.color};"></span>
+        <span>${name}:</span>
+        <strong style="color: ${ch.color};">${typeof ch.latest === 'number' ? ch.latest.toFixed(1) : ch.latest}</strong>
+      `;
+      wrap.appendChild(tag);
+    });
+  },
+
+  renderLoop() {
+    this.render();
+    this.animationId = requestAnimationFrame(() => this.renderLoop());
+  },
+
+  render() {
+    if (!this.ctx || !this.canvas) return;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    if (w === 0 || h === 0) return;
+
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, w, h);
+
+    // Compute min / max range
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+
+    this.channels.forEach(ch => {
+      ch.data.forEach(val => {
+        if (val < minVal) minVal = val;
+        if (val > maxVal) maxVal = val;
+      });
+    });
+
+    if (minVal === Infinity || maxVal === -Infinity) {
+      minVal = 0;
+      maxVal = 100;
+    } else if (minVal === maxVal) {
+      minVal -= 5;
+      maxVal += 5;
+    } else {
+      const pad = (maxVal - minVal) * 0.12;
+      minVal -= pad;
+      maxVal += pad;
+    }
+
+    // Update Y-Axis labels
+    const maxEl = document.getElementById('plotterYMax');
+    const midEl = document.getElementById('plotterYMid');
+    const minEl = document.getElementById('plotterYMin');
+    if (maxEl) maxEl.textContent = maxVal > 1000 ? (maxVal/1000).toFixed(1)+'k' : maxVal.toFixed(0);
+    if (midEl) midEl.textContent = ((maxVal + minVal) / 2).toFixed(0);
+    if (minEl) minEl.textContent = minVal < -1000 ? (minVal/1000).toFixed(1)+'k' : minVal.toFixed(0);
+
+    // Grid lines
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const y = (h / gridLines) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // Zero-line if spanned
+    if (minVal < 0 && maxVal > 0) {
+      const zeroY = h - ((0 - minVal) / (maxVal - minVal)) * h;
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, zeroY);
+      ctx.lineTo(w, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw lines
+    const range = maxVal - minVal;
+    this.channels.forEach(ch => {
+      if (ch.data.length < 1) return;
+      ctx.beginPath();
+      ctx.strokeStyle = ch.color;
+      ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+
+      const step = w / Math.max(1, this.maxPoints - 1);
+      const startOffset = (this.maxPoints - ch.data.length) * step;
+
+      ch.data.forEach((val, idx) => {
+        const x = startOffset + idx * step;
+        const norm = (val - minVal) / range;
+        const y = Math.max(2, Math.min(h - 2, h - norm * h));
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+  }
+};
+
+// ── Side Panel Tabs ────────────────────────────────────────
+document.querySelectorAll('.side-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tabName = tab.dataset.stab;
+    const propsTab = document.getElementById('sideTabProps');
+    const telemTab = document.getElementById('sideTabTelemetry');
+    if (propsTab) propsTab.style.display = tabName === 'props' ? 'flex' : 'none';
+    if (telemTab) telemTab.style.display = tabName === 'telemetry' ? 'flex' : 'none';
+    if (tabName === 'telemetry') {
+      setTimeout(() => SerialPlotter.handleResize(), 30);
+    }
+  });
+});
+
+// ── Console Serial Send ────────────────────────────────────
+const consoleSendBtn = document.getElementById('consoleSend');
+const consoleInputEl = document.getElementById('consoleInput');
+if (consoleSendBtn && consoleInputEl) {
+  const sendAction = () => {
+    const val = consoleInputEl.value.trim();
+    if (!val) return;
+    clog('> ' + val, 'sys');
+    SerialPlotter.pushData(val);
+    consoleInputEl.value = '';
+  };
+  consoleSendBtn.addEventListener('click', sendAction);
+  consoleInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendAction(); });
+}
+
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('contextmenu', e => {
   if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
 });
 applyTransform();
 loadProject();
+SerialPlotter.init();
+MemoryMeter.update({}, PROJECT.controller || 'arduino_uno_r3');
+

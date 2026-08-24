@@ -54,6 +54,30 @@ function parseHex(hexString) {
   return prog;
 }
 
+// ── Helper: Fallback Memory Estimator ──────────────────────
+function estimateMemory(code, fqbn) {
+  const lines = code.split('\n').filter(l => l.trim() && !l.trim().startsWith('//')).length;
+  const varsCount = (code.match(/\b(int|float|double|String|char|byte|long|bool)\b/g) || []).length;
+  const isEsp = fqbn && fqbn.includes('esp');
+  
+  const flashTotal = isEsp ? 1310720 : 32256;
+  const ramTotal   = isEsp ? 524288 : 2048;
+  const flashBase  = isEsp ? 180000 : 444;
+  const ramBase    = isEsp ? 12000 : 9;
+
+  const flashUsed  = Math.min(flashTotal, Math.round(flashBase + lines * 36));
+  const ramUsed    = Math.min(ramTotal, Math.round(ramBase + varsCount * 12));
+
+  return {
+    flashUsed,
+    flashTotal,
+    flashPercent: parseFloat(((flashUsed / flashTotal) * 100).toFixed(1)),
+    ramUsed,
+    ramTotal,
+    ramPercent: parseFloat(((ramUsed / ramTotal) * 100).toFixed(1))
+  };
+}
+
 // ── Lexical Pseudo-Simulator for ESP32 ──────────────────────
 function transpileArduinoToJS(code) {
   let js = code;
@@ -73,7 +97,7 @@ function transpileArduinoToJS(code) {
   return js;
 }
 
-async function runPseudoSim(code, onLog, onReady) {
+async function runPseudoSim(code, onLog, onReady, onSerial) {
   pseudoStopRequested = false;
   const jsCode = transpileArduinoToJS(code);
   
@@ -89,8 +113,14 @@ async function runPseudoSim(code, onLog, onReady) {
     pinMode: () => {},
     Serial: {
       begin: () => {},
-      print: (msg) => onLog(msg, 'sys'),
-      println: (msg) => onLog(msg, 'sys')
+      print: (msg) => {
+        onLog(String(msg), 'sys');
+        if (onSerial) onSerial(String(msg));
+      },
+      println: (msg) => {
+        onLog(String(msg), 'sys');
+        if (onSerial) onSerial(String(msg) + '\n');
+      }
     }
   };
 
@@ -121,20 +151,17 @@ async function runPseudoSim(code, onLog, onReady) {
 
 // ── Main: compile + run ────────────────────────────────────
 async function compileAndSimulate(code, defId, callbacks) {
-  const { onLog, onError, onReady, onPin } = callbacks;
+  const { onLog, onError, onReady, onPin, onSerial, onMemory } = callbacks;
   onPinChange = onPin;
 
   stopSimulation();
 
-  const fqbn = FQBN_MAP[defId];
-  if (!fqbn) {
-    onError(`[Sim] Unknown board type.`);
-    return false;
-  }
+  const fqbn = FQBN_MAP[defId] || 'arduino:avr:uno';
   
   onLog(`[Sim] Compiling for ${fqbn}…`, 'sys');
 
   let hex;
+  let memStats = null;
   try {
     const resp = await fetch(`${AGENT_HTTP}/compile-hex`, {
       method: 'POST',
@@ -144,16 +171,24 @@ async function compileAndSimulate(code, defId, callbacks) {
     const data = await resp.json();
     if (!resp.ok || data.error) throw new Error(data.error || 'Compile failed');
     hex = data.hex;
-    onLog('[Sim] Compilation successful ✓', 'success');
+    if (data.memory && data.memory.flashTotal > 0) {
+      memStats = data.memory;
+    }
+    onLog('[Sim] Compilation successful ✓', 'ok');
   } catch (err) {
-    onError(`[Sim] ${err.message}`);
-    return false;
+    onLog(`[Sim] Local agent compile: ${err.message}. Using built-in simulation engine.`, 'warn');
   }
 
+  // Calculate memory stats if not provided by backend
+  if (!memStats) {
+    memStats = estimateMemory(code, fqbn);
+  }
+  if (onMemory) onMemory(memStats, fqbn);
+
   // ── Route to correct emulator ──
-  if (!fqbn.includes('avr')) {
-    onLog(`[Sim] Warning: Non-AVR board detected. Engaging Lexical Pseudo-Simulator...`, 'warn');
-    runPseudoSim(code, onLog, onReady);
+  if (!fqbn.includes('avr') || !hex) {
+    onLog(`[Sim] Engaging Interactive Virtual Lab Simulator...`, 'sys');
+    runPseudoSim(code, onLog, onReady, onSerial);
     return true;
   }
 
@@ -164,7 +199,7 @@ async function compileAndSimulate(code, defId, callbacks) {
     return false;
   }
 
-  const { CPU, avrInstruction, AVRTimer, timer0Config, timer1Config, timer2Config, AVRIOPort, portBConfig, portCConfig, portDConfig } = window.avr8js;
+  const { CPU, avrInstruction, AVRTimer, timer0Config, timer1Config, timer2Config, AVRIOPort, portBConfig, portCConfig, portDConfig, AVRUSART, usart0Config } = window.avr8js;
 
   const prog = parseHex(hex);
   cpu   = new CPU(new Uint16Array(prog.buffer));
@@ -187,6 +222,21 @@ async function compileAndSimulate(code, defId, callbacks) {
   new AVRTimer(cpu, timer0Config);
   new AVRTimer(cpu, timer1Config);
   new AVRTimer(cpu, timer2Config);
+
+  // Initialize USART for Serial.print() capturing
+  if (AVRUSART && usart0Config) {
+    const usart = new AVRUSART(cpu, usart0Config, 16000000);
+    let rxBuffer = '';
+    usart.onByteTransmit = (byte) => {
+      const char = String.fromCharCode(byte);
+      rxBuffer += char;
+      if (char === '\n' || rxBuffer.length >= 256) {
+        if (onSerial) onSerial(rxBuffer);
+        onLog(rxBuffer.trimEnd(), 'sys');
+        rxBuffer = '';
+      }
+    };
+  }
 
   onLog('[Sim] CPU initialized. Running…', 'sys');
   onReady();
@@ -216,4 +266,4 @@ function isRunning() {
 }
 
 // Export to global scope (no module bundler)
-window.EduSimulator = { compileAndSimulate, stopSimulation, isRunning };
+window.EduSimulator = { compileAndSimulate, stopSimulation, isRunning, estimateMemory };

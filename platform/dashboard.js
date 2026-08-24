@@ -431,10 +431,17 @@ async function initMonaco() {
       renderLineHighlight: 'gutter',
     });
 
-    // Mark unsaved on edit
+    // Mark unsaved on edit & sync with AI Context
     window._monacoEditor.onDidChangeModelContent(() => {
       document.getElementById('unsavedDot').classList.add('show');
+      if (window.EduSimContext) {
+        window.EduSimContext.setSketch(window._monacoEditor.getValue());
+      }
     });
+
+    if (window.EduSimContext) {
+      window.EduSimContext.setSketch(STARTER_CODE.cpp);
+    }
 
     console.log('Monaco loaded via unpkg.');
   } catch (err) {
@@ -650,12 +657,29 @@ function handleAgentMessage(msg) {
     case 'compiled':
       uploadBtn.disabled = false;
       buildLog('[EduSim] Ready to upload ↑', 'sys');
+      if (window.EduSimContext) window.EduSimContext.setCompileOutput({ success: true, rawLog: '' });
       break;
 
     case 'compile_error':
       uploadBtn.disabled = false;
       document.getElementById('compileBtn').disabled = false;
       showToast('Compilation failed — check Build Output', 'error');
+      if (window.EduSimContext) window.EduSimContext.setCompileOutput({ success: false, rawLog: msg.message || '' });
+      buildLog('[AI Assistant] Need help resolving this error?', 'warn');
+      const debugPromptBtn = document.createElement('button');
+      debugPromptBtn.className = 'btn ai-toggle-btn';
+      debugPromptBtn.style.cssText = 'margin: 6px 0; display: inline-flex;';
+      debugPromptBtn.innerHTML = '✨ Debug with AI';
+      debugPromptBtn.onclick = () => window.AIAssistantInstance?.triggerDebug(msg.message || '');
+      document.getElementById('buildOutput').appendChild(debugPromptBtn);
+      break;
+
+    case 'ai_message_response':
+      window.AIAssistantInstance?.onAgentResponse(msg);
+      break;
+
+    case 'ai_debug_result':
+      window.AIAssistantInstance?.onDebugResult(msg);
       break;
 
     case 'upload_done':
@@ -993,7 +1017,7 @@ if (createLabProjectBtn) {
     const mode = document.querySelector('input[name="labMode"]:checked').value;
     
     const id = 'vlab_' + Date.now();
-    const url = `virtual-lab/lab.html?id=${id}&name=${encodeURIComponent(name)}&controller=${encodeURIComponent(controller)}&mode=${mode}`;
+    const url = `../virtual-lab/lab.html?id=${id}&name=${encodeURIComponent(name)}&controller=${encodeURIComponent(controller)}&mode=${mode}`;
     window.location.href = url;
   });
 }
@@ -1062,3 +1086,25 @@ loadVirtualLabs();
 connectAgent();
 // Also show offline banner immediately (before WS connects)
 showAgentBanner(false);
+
+// ── AI Assistant Button Listener ──────────────────────────
+const aiBtn = document.getElementById('aiAssistantBtn');
+if (aiBtn) {
+  aiBtn.addEventListener('click', () => {
+    window.AIAssistantInstance?.toggle();
+  });
+}
+
+// ── Sync Board to AI Context ──────────────────────────────
+const bSelect = document.getElementById('boardSelect');
+if (bSelect) {
+  bSelect.addEventListener('change', function() {
+    if (window.EduSimContext) {
+      window.EduSimContext.setBoard(this.value, getBoardProfile().fqbn);
+    }
+  });
+  // Initial sync
+  if (window.EduSimContext) {
+    window.EduSimContext.setBoard(bSelect.value, getBoardProfile().fqbn);
+  }
+}

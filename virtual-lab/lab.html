@@ -127,15 +127,112 @@
       </div>
     </aside>
 
-    <!-- Right: Properties Inspector -->
+    <!-- Right: Properties & Telemetry Inspector -->
     <aside class="props-panel" id="propsPanel">
-      <div class="props-header">
-        <h3>Properties</h3>
+      <div class="side-panel-tabs">
+        <button class="side-tab active" id="tabProps" data-stab="props" title="Component Properties">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Properties
+        </button>
+        <button class="side-tab" id="tabTelemetry" data-stab="telemetry" title="Real-Time Telemetry & Serial Plotter">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Telemetry
+        </button>
       </div>
-      <div class="props-body" id="propsBody">
-        <div class="props-empty">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <p>Select a component to inspect its properties</p>
+
+      <!-- Tab View 1: Component Properties -->
+      <div class="side-tab-content active" id="sideTabProps">
+        <div class="props-body" id="propsBody">
+          <div class="props-empty">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>Select a component to inspect its properties</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab View 2: Live Telemetry (Memory Meter + Serial Plotter) -->
+      <div class="side-tab-content" id="sideTabTelemetry" style="display:none;">
+        <div class="telemetry-panel">
+          
+          <!-- Board Memory Usage Meter -->
+          <div class="telemetry-section memory-section">
+            <div class="section-title">
+              <span class="sec-label">Board Memory Usage</span>
+              <span class="board-badge" id="memBoardBadge">ATmega328P</span>
+            </div>
+
+            <!-- Flash Memory Card -->
+            <div class="mem-card">
+              <div class="mem-header">
+                <span class="mem-name">Flash (Program Storage)</span>
+                <span class="mem-val" id="flashUsageVal">0 B / 32 KB (0%)</span>
+              </div>
+              <div class="mem-track">
+                <div class="mem-bar flash-bar" id="flashProgressBar" style="width: 0%;"></div>
+              </div>
+              <div class="mem-footer">
+                <span class="mem-free" id="flashFreeVal">32 KB Free</span>
+                <span class="mem-state" id="flashState">Optimal</span>
+              </div>
+            </div>
+
+            <!-- SRAM Memory Card -->
+            <div class="mem-card">
+              <div class="mem-header">
+                <span class="mem-name">SRAM (Dynamic Memory)</span>
+                <span class="mem-val" id="sramUsageVal">0 B / 2 KB (0%)</span>
+              </div>
+              <div class="mem-track">
+                <div class="mem-bar sram-bar" id="sramProgressBar" style="width: 0%;"></div>
+              </div>
+              <div class="mem-footer">
+                <span class="mem-free" id="sramFreeVal">2 KB Free</span>
+                <span class="mem-state" id="sramState">Optimal</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Serial Plotter -->
+          <div class="telemetry-section plotter-section">
+            <div class="section-title">
+              <span class="sec-label">Real-Time Serial Plotter</span>
+              <div class="plotter-live-indicator" id="plotterLiveDot">
+                <span class="p-dot"></span> LIVE
+              </div>
+            </div>
+
+            <!-- Plotter Legend & Channels -->
+            <div class="plotter-channels" id="plotterChannels">
+              <span class="no-stream-msg">Waiting for serial stream data…</span>
+            </div>
+
+            <!-- Plotter Canvas Container -->
+            <div class="plotter-canvas-wrap">
+              <canvas id="serialPlotterCanvas" width="300" height="170"></canvas>
+              <div class="plotter-axis-labels">
+                <span class="axis-max" id="plotterYMax">+100</span>
+                <span class="axis-mid" id="plotterYMid">0</span>
+                <span class="axis-min" id="plotterYMin">-100</span>
+              </div>
+            </div>
+
+            <!-- Plotter Controls -->
+            <div class="plotter-controls">
+              <button class="plot-btn" id="plotPauseBtn" title="Pause/Resume Plot">
+                <svg id="plotPauseIcon" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span id="plotPauseText">Pause</span>
+              </button>
+              <button class="plot-btn" id="plotClearBtn" title="Clear Plotter History">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Clear
+              </button>
+              <button class="plot-btn demo-btn" id="plotDemoBtn" title="Generate Simulated Test Waveform">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg>
+                Test Wave
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </aside>
@@ -163,7 +260,7 @@
     </div>
   </footer>
 
-  <script src="../config.js"></script>
+  <script src="../config/config.js"></script>
   <script>
     // Monaco from CDN — configure worker before loading
     window.MonacoEnvironment = {

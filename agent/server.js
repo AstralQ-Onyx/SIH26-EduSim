@@ -19,15 +19,20 @@
 
 'use strict';
 
+const path  = require('path');
+const fs    = require('fs');
+const os    = require('os');
+const https = require('https');
+const http  = require('http');
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const aiService = require('../ai/backend/ai-service');
+
 const { WebSocketServer } = require('ws');
 const { spawn, execSync, exec } = require('child_process');
 const { SerialPort }      = require('serialport');
 const { ReadlineParser }  = require('@serialport/parser-readline');
-const fs    = require('fs');
-const path  = require('path');
-const os    = require('os');
-const https = require('https');
-const http  = require('http');
 
 const AGENT_PORT    = 3745;
 const HTTP_PORT     = 3746;   // REST API for virtual lab compile-hex
@@ -78,12 +83,15 @@ async function setupArduinoCli() {
 
   // 2. Initialize config and update index
   console.log('\n[Setup] Updating arduino-cli core index (this may take a moment)...');
+  await runCmd(ARDUINO_CLI, ['config', 'init'], true);
+  await runCmd(ARDUINO_CLI, ['config', 'add', 'board_manager.additional_urls', 'https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json'], true);
+  await runCmd(ARDUINO_CLI, ['config', 'add', 'board_manager.additional_urls', 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'], true);
+  await runCmd(ARDUINO_CLI, ['config', 'add', 'board_manager.additional_urls', 'https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json'], true);
   await runCmd(ARDUINO_CLI, ['core', 'update-index'], true);
 
   // 3. Install required cores if missing
   const requiredCores = [
-    { id: 'arduino:avr', name: 'Arduino AVR (Uno, Nano, Mega)' },
-    { id: 'esp32:esp32', name: 'ESP32' },
+    { id: 'arduino:avr', name: 'Arduino AVR (Uno, Nano, Mega)' }
   ];
 
   const installedCores = await runCmdSilent(ARDUINO_CLI, ['core', 'list']);
@@ -92,12 +100,6 @@ async function setupArduinoCli() {
     if (!installedCores.includes(core.id)) {
       console.log(`\n[Setup] Installing core: ${core.name} (${core.id})...`);
       try {
-        if (core.id === 'esp32:esp32') {
-            await runCmd(ARDUINO_CLI, ['config', 'init'], true);
-            await runCmd(ARDUINO_CLI, ['config', 'add', 'board_manager.additional_urls', 'https://dl.espressif.com/dl/package_esp32_index.json'], true);
-            console.log('[Setup] Updating index for ESP32...');
-            await runCmd(ARDUINO_CLI, ['core', 'update-index'], true);
-        }
         await runCmd(ARDUINO_CLI, ['core', 'install', core.id]);
         console.log(`[Setup] ✓ Successfully installed ${core.id}`);
       } catch (err) {
@@ -185,6 +187,17 @@ async function startServer() {
       res.writeHead(404); res.end('Not found');
     }
   });
+
+  // Gracefully handle port-in-use: don't crash, just warn
+  httpServer.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[Agent] ⚠ HTTP port ${HTTP_PORT} already in use — REST API unavailable this session.`);
+      console.warn(`[Agent]   To free it: run  Stop-Process -Id (Get-NetTCPConnection -LocalPort ${HTTP_PORT}).OwningProcess -Force  in PowerShell`);
+    } else {
+      console.error('[Agent] HTTP server error:', err.message);
+    }
+  });
+
   httpServer.listen(HTTP_PORT, '127.0.0.1', () => {
     console.log(`[Agent] ✓ HTTP REST API listening on http://127.0.0.1:${HTTP_PORT}`);
   });
@@ -216,6 +229,8 @@ async function startServer() {
         case 'serial_open':  await handleSerialOpen(ws, msg);           break;
         case 'serial_close': await handleSerialClose(ws);               break;
         case 'serial_send':  await handleSerialSend(ws, msg);           break;
+        case 'ai_debug':     await handleAIDebug(ws, msg);               break;
+        case 'ai_message':   await handleAIMessage(ws, msg);             break;
       }
     });
 
@@ -283,8 +298,36 @@ function guessFriendlyName(p) {
   return p.path;
 }
 
+function parseMemoryStats(output) {
+  const mem = {
+    flashUsed: 0,
+    flashTotal: 0,
+    flashPercent: 0,
+    ramUsed: 0,
+    ramTotal: 0,
+    ramPercent: 0
+  };
+  if (!output) return mem;
+
+  const flashMatch = output.match(/Sketch uses ([\d,]+) bytes \(([\d.]+)%\) of program storage space\. Maximum is ([\d,]+) bytes/i);
+  if (flashMatch) {
+    mem.flashUsed = parseInt(flashMatch[1].replace(/,/g, ''), 10);
+    mem.flashPercent = parseFloat(flashMatch[2]);
+    mem.flashTotal = parseInt(flashMatch[3].replace(/,/g, ''), 10);
+  }
+
+  const ramMatch = output.match(/Global variables use ([\d,]+) bytes \(([\d.]+)%\) of dynamic memory.*?Maximum is ([\d,]+) bytes/i);
+  if (ramMatch) {
+    mem.ramUsed = parseInt(ramMatch[1].replace(/,/g, ''), 10);
+    mem.ramPercent = parseFloat(ramMatch[2]);
+    mem.ramTotal = parseInt(ramMatch[3].replace(/,/g, ''), 10);
+  }
+
+  return mem;
+}
+
 // ── compileToHex — used by HTTP REST endpoint ─────────────
-// Returns { hex: '<intel hex string>', fqbn } or throws on error.
+// Returns { hex: '<intel hex string>', fqbn, memory: {...} } or throws on error.
 function compileToHex(code, fqbn) {
   return new Promise((resolve, reject) => {
     if (!isCLIAvailable()) {
@@ -330,9 +373,10 @@ function compileToHex(code, fqbn) {
         try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
         return reject(new Error('No .hex or .bin output found after compilation'));
       }
+      const memory = parseMemoryStats(stdout + '\n' + stderr);
       // Cleanup
       try { fs.rmSync(tmpBase, { recursive: true, force: true }); } catch {}
-      resolve({ hex, fqbn });
+      resolve({ hex, fqbn, memory, stdout });
     });
     proc.on('error', err => reject(err));
   });
@@ -556,6 +600,26 @@ async function handleSerialSend(ws, msg) {
   sp.write(text, err => {
     if (err) log(ws, `[Serial] Write error: ${err.message}`, 'err');
   });
+}
+
+// ── AI Assistant Handlers ─────────────────────────────────
+async function handleAIDebug(ws, msg) {
+  const { context, compileOutput } = msg;
+  log(ws, '[AI Assistant] Analyzing errors with Gemini...', 'sys');
+  const result = await aiService.handleDebugRequest(context, compileOutput);
+  send(ws, { type: 'ai_debug_result', result });
+}
+
+async function handleAIMessage(ws, msg) {
+  const { context, text, mode, history } = msg;
+  log(ws, `[AI Assistant] Processing in ${String(mode || 'tutor').toUpperCase()} mode...`, 'sys');
+  if (mode === 'build') {
+    const result = await aiService.handleFullCodeGeneration(context, text, compileToHex);
+    send(ws, { type: 'ai_message_response', result });
+  } else {
+    const result = await aiService.handleTutorChat(context, text, history);
+    send(ws, { type: 'ai_message_response', result });
+  }
 }
 
 // ── Utility ───────────────────────────────────────────────

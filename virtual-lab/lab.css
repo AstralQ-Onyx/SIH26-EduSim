@@ -17,7 +17,7 @@
   --warning:  #ffd700;
   --header-h: 48px;
   --palette-w:220px;
-  --props-w:  240px;
+  --props-w:  300px;
   --console-h:160px;
   --font:     'Inter', sans-serif;
   --font-ui:  'Rajdhani', sans-serif;
@@ -244,14 +244,57 @@ body.light-theme .canvas-container {
 }
 .pin-tooltip strong { color: var(--accent); font-size: 12px; }
 
-/* ── PROPERTIES PANEL ── */
+/* ── PROPERTIES & TELEMETRY PANEL ── */
 .props-panel {
   width: var(--props-w);
   background: var(--surface);
   border-left: 1px solid var(--border);
   display:flex; flex-direction:column;
   flex-shrink:0;
+  overflow: hidden;
 }
+.side-panel-tabs {
+  display: flex;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.side-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.side-tab:hover {
+  color: var(--text);
+  background: rgba(0, 212, 255, 0.04);
+}
+.side-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--surface);
+}
+
+.side-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .props-header {
   padding:12px 14px; border-bottom:1px solid var(--border);
 }
@@ -276,6 +319,223 @@ body.light-theme .canvas-container {
 .prop-input:focus { border-color:var(--border-h); }
 .prop-select { appearance:none; cursor:pointer; }
 .prop-color { padding:2px 4px; height:32px; cursor:pointer; }
+
+/* ── TELEMETRY & MONITOR PANEL ── */
+.telemetry-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.telemetry-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sec-label {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.board-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Memory Cards */
+.mem-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.mem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mem-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+}
+.mem-val {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.mem-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.mem-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background 0.3s;
+}
+.flash-bar {
+  background: linear-gradient(90deg, #00d4ff, #00ff88);
+}
+.sram-bar {
+  background: linear-gradient(90deg, #7b2fff, #00d4ff);
+}
+.mem-bar.warn {
+  background: linear-gradient(90deg, #ffd700, #ff8c00) !important;
+}
+.mem-bar.danger {
+  background: linear-gradient(90deg, #ff4466, #ff1744) !important;
+}
+.mem-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.mem-state {
+  color: var(--success);
+  font-weight: 600;
+}
+.mem-state.warn { color: var(--warning); }
+.mem-state.danger { color: var(--error); }
+
+/* Serial Plotter */
+.plotter-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--success);
+}
+.p-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse 1.2s infinite;
+}
+.plotter-channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 20px;
+}
+.no-stream-msg {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+.channel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.ch-color-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.plotter-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #030710;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+#serialPlotterCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.plotter-axis-labels {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.35);
+}
+.plotter-controls {
+  display: flex;
+  gap: 6px;
+}
+.plot-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.plot-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border-h);
+}
+.plot-btn.active {
+  background: rgba(0, 212, 255, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.plot-btn.demo-btn {
+  background: rgba(123, 47, 255, 0.15);
+  border-color: rgba(123, 47, 255, 0.35);
+  color: #c499ff;
+}
+.plot-btn.demo-btn:hover {
+  background: rgba(123, 47, 255, 0.25);
+  color: #ffffff;
+}
 
 /* ── CONSOLE ── */
 .lab-console {
