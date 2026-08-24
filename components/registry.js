@@ -2429,18 +2429,3094 @@ const EDUSIM_COMPONENTS = {
     return {};
   }
   },
-  
+  raspberryPi4: {
+  id: 'raspberryPi4',
+  label: 'Raspberry Pi 4 Model B',
+  category: 'Controllers',
+  desc: 'Raspberry Pi 4 Model B single-board computer with 40-pin GPIO, dual micro-HDMI, USB 3.0, USB 2.0, Gigabit Ethernet and CSI/DSI interfaces',
+  w: 190,
+  h: 130,
+
+  svg: `
+    <defs>
+      <linearGradient id="rpi4Pcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#45b95f"/>
+        <stop offset="0.55" stop-color="#2aa54d"/>
+        <stop offset="1" stop-color="#16813a"/>
+      </linearGradient>
+
+      <linearGradient id="rpi4Metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#efefef"/>
+        <stop offset="1" stop-color="#8a8a8a"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect x="8" y="8" width="174" height="114" rx="8"
+          fill="url(#rpi4Pcb)" stroke="#126a32" stroke-width="1.2"/>
+
+    <!-- ================= MOUNTING HOLES ================= -->
+    <g fill="#f0f0f0" stroke="#888" stroke-width=".7">
+      <circle cx="17" cy="17" r="4.5"/>
+      <circle cx="173" cy="17" r="4.5"/>
+      <circle cx="17" cy="113" r="4.5"/>
+      <circle cx="173" cy="113" r="4.5"/>
+    </g>
+
+    <!-- ================= 40 PIN GPIO HEADER ================= -->
+    <rect x="42" y="10" width="93" height="12" rx="1.5"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c7a85f" stroke="#725f34" stroke-width=".25">
+      <circle cx="46" cy="14" r="1.5"/><circle cx="46" cy="18" r="1.5"/>
+      <circle cx="50" cy="14" r="1.5"/><circle cx="50" cy="18" r="1.5"/>
+      <circle cx="54" cy="14" r="1.5"/><circle cx="54" cy="18" r="1.5"/>
+      <circle cx="58" cy="14" r="1.5"/><circle cx="58" cy="18" r="1.5"/>
+      <circle cx="62" cy="14" r="1.5"/><circle cx="62" cy="18" r="1.5"/>
+      <circle cx="66" cy="14" r="1.5"/><circle cx="66" cy="18" r="1.5"/>
+      <circle cx="70" cy="14" r="1.5"/><circle cx="70" cy="18" r="1.5"/>
+      <circle cx="74" cy="14" r="1.5"/><circle cx="74" cy="18" r="1.5"/>
+      <circle cx="78" cy="14" r="1.5"/><circle cx="78" cy="18" r="1.5"/>
+      <circle cx="82" cy="14" r="1.5"/><circle cx="82" cy="18" r="1.5"/>
+      <circle cx="86" cy="14" r="1.5"/><circle cx="86" cy="18" r="1.5"/>
+      <circle cx="90" cy="14" r="1.5"/><circle cx="90" cy="18" r="1.5"/>
+      <circle cx="94" cy="14" r="1.5"/><circle cx="94" cy="18" r="1.5"/>
+      <circle cx="98" cy="14" r="1.5"/><circle cx="98" cy="18" r="1.5"/>
+      <circle cx="102" cy="14" r="1.5"/><circle cx="102" cy="18" r="1.5"/>
+      <circle cx="106" cy="14" r="1.5"/><circle cx="106" cy="18" r="1.5"/>
+      <circle cx="110" cy="14" r="1.5"/><circle cx="110" cy="18" r="1.5"/>
+      <circle cx="114" cy="14" r="1.5"/><circle cx="114" cy="18" r="1.5"/>
+      <circle cx="118" cy="14" r="1.5"/><circle cx="118" cy="18" r="1.5"/>
+      <circle cx="122" cy="14" r="1.5"/><circle cx="122" cy="18" r="1.5"/>
+    </g>
+
+    <text x="88" y="28" text-anchor="middle" fill="#ffffff"
+          font-size="4" font-family="Arial, sans-serif" font-weight="bold">
+      Raspberry Pi 4 Model B
+    </text>
+
+    <!-- ================= BCM2711 CPU ================= -->
+    <rect x="76" y="45" width="34" height="34" rx="2"
+          fill="#252525" stroke="#555" stroke-width=".7"/>
+    <text x="93" y="58" text-anchor="middle" fill="#777"
+          font-size="3.4" font-family="monospace">BCM2711</text>
+    <text x="93" y="64" text-anchor="middle" fill="#666"
+          font-size="2.5" font-family="monospace">CPU</text>
+
+    <!-- ================= RAM ================= -->
+    <rect x="116" y="45" width="20" height="28" rx="1.5"
+          fill="#303030" stroke="#555" stroke-width=".6"/>
+    <text x="126" y="60" text-anchor="middle" fill="#777"
+          font-size="2.8" font-family="monospace">RAM</text>
+
+    <!-- ================= WIFI / BLUETOOTH MODULE ================= -->
+    <rect x="38" y="34" width="24" height="28" rx="1.5"
+          fill="#c9c9c9" stroke="#7e7e7e" stroke-width=".6"/>
+    <text x="50" y="47" text-anchor="middle" fill="#666"
+          font-size="2.6" font-family="monospace">WiFi</text>
+    <text x="50" y="52" text-anchor="middle" fill="#666"
+          font-size="2.4" font-family="monospace">BT 5.0</text>
+
+    <!-- ================= microSD SLOT ================= -->
+    <rect x="10" y="46" width="15" height="22" rx="1.5"
+          fill="#202020" stroke="#555" stroke-width=".6"/>
+    <text x="17.5" y="58" transform="rotate(-90 17.5 58)"
+          text-anchor="middle" fill="#eeeeee"
+          font-size="2.4" font-family="monospace">microSD</text>
+
+    <!-- ================= DSI DISPLAY CONNECTOR ================= -->
+    <rect x="29" y="60" width="9" height="30" rx="1"
+          fill="#efefef" stroke="#999" stroke-width=".4"/>
+    <text x="33.5" y="75" transform="rotate(-90 33.5 75)"
+          text-anchor="middle" fill="#777"
+          font-size="2.2" font-family="monospace">DSI</text>
+
+    <!-- ================= CSI CAMERA CONNECTOR ================= -->
+    <rect x="120" y="85" width="9" height="28" rx="1"
+          fill="#efefef" stroke="#999" stroke-width=".4"/>
+    <text x="124.5" y="99" transform="rotate(-90 124.5 99)"
+          text-anchor="middle" fill="#777"
+          font-size="2.2" font-family="monospace">CSI</text>
+
+    <!-- ================= USB-C POWER ================= -->
+    <rect x="29" y="104" width="24" height="12" rx="3"
+          fill="url(#rpi4Metal)" stroke="#777" stroke-width=".7"/>
+    <rect x="32" y="107" width="18" height="6" rx="2.5" fill="#333"/>
+
+    <!-- ================= DUAL MICRO HDMI ================= -->
+    <g>
+      <rect x="57" y="105" width="18" height="8" rx="1.2"
+            fill="url(#rpi4Metal)" stroke="#747474" stroke-width=".6"/>
+      <rect x="79" y="105" width="18" height="8" rx="1.2"
+            fill="url(#rpi4Metal)" stroke="#747474" stroke-width=".6"/>
+      <rect x="61" y="107" width="10" height="4" fill="#222"/>
+      <rect x="83" y="107" width="10" height="4" fill="#222"/>
+    </g>
+
+    <!-- ================= AUDIO JACK ================= -->
+    <rect x="104" y="104" width="13" height="12" rx="2"
+          fill="#242424" stroke="#555" stroke-width=".6"/>
+    <circle cx="110.5" cy="110" r="3.2" fill="#111"/>
+
+    <!-- ================= USB 3.0 ================= -->
+    <g>
+      <rect x="145" y="44" width="27" height="18" rx="1"
+            fill="url(#rpi4Metal)" stroke="#666" stroke-width=".7"/>
+      <rect x="149" y="47" width="19" height="12" rx=".8" fill="#2d2d2d"/>
+      <rect x="150.5" y="49" width="16" height="3" fill="#3775bb"/>
+    </g>
+
+    <!-- ================= USB 2.0 ================= -->
+    <g>
+      <rect x="145" y="70" width="27" height="18" rx="1"
+            fill="url(#rpi4Metal)" stroke="#666" stroke-width=".7"/>
+      <rect x="149" y="73" width="19" height="12" rx=".8" fill="#2d2d2d"/>
+    </g>
+
+    <!-- ================= GIGABIT ETHERNET ================= -->
+    <rect x="143" y="18" width="31" height="24" rx="2"
+          fill="url(#rpi4Metal)" stroke="#666" stroke-width=".8"/>
+    <rect x="148" y="23" width="21" height="14" rx="1" fill="#3d3d3d"/>
+    <text x="158.5" y="16" text-anchor="middle" fill="#fff"
+          font-size="2.5" font-family="monospace">ETH</text>
+
+    <!-- ================= PoE HAT HEADER ================= -->
+    <rect x="132" y="24" width="8" height="12" rx="1"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+    <g fill="#c7a85f">
+      <circle cx="134" cy="27" r=".9"/><circle cx="138" cy="27" r=".9"/>
+      <circle cx="134" cy="33" r=".9"/><circle cx="138" cy="33" r=".9"/>
+    </g>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d8d2a5" stroke="#666" stroke-width=".22">
+      <rect x="44" y="71" width="7" height="3" rx=".4"/>
+      <rect x="54" y="71" width="7" height="3" rx=".4"/>
+      <rect x="64" y="71" width="7" height="3" rx=".4"/>
+      <rect x="114" y="74" width="7" height="3" rx=".4"/>
+      <rect x="124" y="74" width="7" height="3" rx=".4"/>
+      <rect x="134" y="74" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= BOARD MARKINGS ================= -->
+    <text x="62" y="86" fill="#e9ffe9"
+          font-size="5.5" font-family="Arial, sans-serif" font-weight="bold">
+      Raspberry Pi
+    </text>
+
+    <text x="70" y="95" fill="#ffffff"
+          font-size="3.5" font-family="monospace">
+      HDMI
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION HINTS ================= -->
+    <g fill="#cfcfcf" opacity=".95">
+      <!-- 40 header points -->
+      <circle cx="46" cy="0" r="1.3"/><circle cx="50" cy="0" r="1.3"/>
+      <circle cx="54" cy="0" r="1.3"/><circle cx="58" cy="0" r="1.3"/>
+      <circle cx="62" cy="0" r="1.3"/><circle cx="66" cy="0" r="1.3"/>
+      <circle cx="70" cy="0" r="1.3"/><circle cx="74" cy="0" r="1.3"/>
+      <circle cx="78" cy="0" r="1.3"/><circle cx="82" cy="0" r="1.3"/>
+      <circle cx="86" cy="0" r="1.3"/><circle cx="90" cy="0" r="1.3"/>
+      <circle cx="94" cy="0" r="1.3"/><circle cx="98" cy="0" r="1.3"/>
+      <circle cx="102" cy="0" r="1.3"/><circle cx="106" cy="0" r="1.3"/>
+      <circle cx="110" cy="0" r="1.3"/><circle cx="114" cy="0" r="1.3"/>
+      <circle cx="118" cy="0" r="1.3"/><circle cx="122" cy="0" r="1.3"/>
+      <circle cx="126" cy="0" r="1.3"/><circle cx="130" cy="0" r="1.3"/>
+      <circle cx="134" cy="0" r="1.3"/><circle cx="138" cy="0" r="1.3"/>
+      <circle cx="142" cy="0" r="1.3"/><circle cx="146" cy="0" r="1.3"/>
+      <circle cx="150" cy="0" r="1.3"/><circle cx="154" cy="0" r="1.3"/>
+      <circle cx="158" cy="0" r="1.3"/><circle cx="162" cy="0" r="1.3"/>
+      <circle cx="166" cy="0" r="1.3"/><circle cx="170" cy="0" r="1.3"/>
+      <circle cx="174" cy="0" r="1.3"/><circle cx="178" cy="0" r="1.3"/>
+      <circle cx="182" cy="0" r="1.3"/><circle cx="186" cy="0" r="1.3"/>
+      <circle cx="190" cy="0" r="1.3"/><circle cx="194" cy="0" r="1.3"/>
+      <circle cx="198" cy="0" r="1.3"/><circle cx="202" cy="0" r="1.3"/>
+    </g>
+  `,
+
+  pins: [
+    { id:'3V3_1',  x:46,  y:0, type:'power',   label:'Pin 1 - 3.3V' },
+    { id:'5V_1',   x:50,  y:0, type:'power',   label:'Pin 2 - 5V' },
+    { id:'GPIO2',  x:54,  y:0, type:'digital', label:'Pin 3 - GPIO2 / SDA1' },
+    { id:'5V_2',   x:58,  y:0, type:'power',   label:'Pin 4 - 5V' },
+    { id:'GPIO3',  x:62,  y:0, type:'digital', label:'Pin 5 - GPIO3 / SCL1' },
+    { id:'GND1',   x:66,  y:0, type:'gnd',     label:'Pin 6 - GND' },
+    { id:'GPIO4',  x:70,  y:0, type:'digital', label:'Pin 7 - GPIO4' },
+    { id:'GPIO14', x:74,  y:0, type:'digital', label:'Pin 8 - GPIO14 / TXD0' },
+    { id:'GND2',   x:78,  y:0, type:'gnd',     label:'Pin 9 - GND' },
+    { id:'GPIO15', x:82,  y:0, type:'digital', label:'Pin 10 - GPIO15 / RXD0' },
+    { id:'GPIO17', x:86,  y:0, type:'digital', label:'Pin 11 - GPIO17' },
+    { id:'GPIO18', x:90,  y:0, type:'digital', label:'Pin 12 - GPIO18 / PWM0' },
+    { id:'GPIO27', x:94,  y:0, type:'digital', label:'Pin 13 - GPIO27' },
+    { id:'GND3',   x:98,  y:0, type:'gnd',     label:'Pin 14 - GND' },
+    { id:'GPIO22', x:102, y:0, type:'digital', label:'Pin 15 - GPIO22' },
+    { id:'GPIO23', x:106, y:0, type:'digital', label:'Pin 16 - GPIO23' },
+    { id:'3V3_2',  x:110, y:0, type:'power',   label:'Pin 17 - 3.3V' },
+    { id:'GPIO24', x:114, y:0, type:'digital', label:'Pin 18 - GPIO24' },
+    { id:'GPIO10', x:118, y:0, type:'digital', label:'Pin 19 - GPIO10 / MOSI' },
+    { id:'GND4',   x:122, y:0, type:'gnd',     label:'Pin 20 - GND' },
+
+    { id:'GPIO9',  x:126, y:0, type:'digital', label:'Pin 21 - GPIO9 / MISO' },
+    { id:'GPIO25', x:130, y:0, type:'digital', label:'Pin 22 - GPIO25' },
+    { id:'GPIO11', x:134, y:0, type:'digital', label:'Pin 23 - GPIO11 / SCLK' },
+    { id:'GPIO8',  x:138, y:0, type:'digital', label:'Pin 24 - GPIO8 / CE0' },
+    { id:'GND5',   x:142, y:0, type:'gnd',     label:'Pin 25 - GND' },
+    { id:'GPIO7',  x:146, y:0, type:'digital', label:'Pin 26 - GPIO7 / CE1' },
+    { id:'GPIO0',  x:150, y:0, type:'digital', label:'Pin 27 - GPIO0 / ID_SD' },
+    { id:'GPIO1',  x:154, y:0, type:'digital', label:'Pin 28 - GPIO1 / ID_SC' },
+    { id:'GPIO5',  x:158, y:0, type:'digital', label:'Pin 29 - GPIO5' },
+    { id:'GND6',   x:162, y:0, type:'gnd',     label:'Pin 30 - GND' },
+    { id:'GPIO6',  x:166, y:0, type:'digital', label:'Pin 31 - GPIO6' },
+    { id:'GPIO12', x:170, y:0, type:'digital', label:'Pin 32 - GPIO12 / PWM0' },
+    { id:'GPIO13', x:174, y:0, type:'digital', label:'Pin 33 - GPIO13 / PWM1' },
+    { id:'GND7',   x:178, y:0, type:'gnd',     label:'Pin 34 - GND' },
+    { id:'GPIO19', x:182, y:0, type:'digital', label:'Pin 35 - GPIO19 / PCM_FS' },
+    { id:'GPIO16', x:186, y:0, type:'digital', label:'Pin 36 - GPIO16' },
+    { id:'GPIO26', x:190, y:0, type:'digital', label:'Pin 37 - GPIO26' },
+    { id:'GPIO20', x:194, y:0, type:'digital', label:'Pin 38 - GPIO20 / PCM_DIN' },
+    { id:'GND8',   x:198, y:0, type:'gnd',     label:'Pin 39 - GND' },
+    { id:'GPIO21', x:202, y:0, type:'digital', label:'Pin 40 - GPIO21 / PCM_DOUT' }
+  ],
+
+  defaults: {
+    label: 'Raspberry Pi 4'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+  },
+  raspberryPiPico2W: {
+  id: 'raspberryPiPico2W',
+  label: 'Raspberry Pi Pico 2 W',
+  category: 'Controllers',
+  desc: 'Raspberry Pi Pico 2 W microcontroller board with RP2350, Wi-Fi/Bluetooth, 26 GPIO, ADC, SPI, I2C, UART and USB',
+  w: 100,
+  h: 220,
+
+  svg: `
+    <defs>
+      <linearGradient id="pico2wPcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#167a55"/>
+        <stop offset="0.55" stop-color="#0f6748"/>
+        <stop offset="1" stop-color="#0a4f39"/>
+      </linearGradient>
+
+      <linearGradient id="pico2wMetal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#eeeeee"/>
+        <stop offset="1" stop-color="#929292"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="17" y="4"
+      width="66" height="212"
+      rx="7"
+      fill="url(#pico2wPcb)"
+      stroke="#0a4b36"
+      stroke-width="1.2"
+    />
+
+    <!-- castellated side edges -->
+    <g fill="#c7b27a" stroke="#705f35" stroke-width=".3">
+      <!-- left -->
+      <rect x="14" y="20" width="5" height="6" rx="1"/>
+      <rect x="14" y="30" width="5" height="6" rx="1"/>
+      <rect x="14" y="40" width="5" height="6" rx="1"/>
+      <rect x="14" y="50" width="5" height="6" rx="1"/>
+      <rect x="14" y="60" width="5" height="6" rx="1"/>
+      <rect x="14" y="70" width="5" height="6" rx="1"/>
+      <rect x="14" y="80" width="5" height="6" rx="1"/>
+      <rect x="14" y="90" width="5" height="6" rx="1"/>
+      <rect x="14" y="100" width="5" height="6" rx="1"/>
+      <rect x="14" y="110" width="5" height="6" rx="1"/>
+      <rect x="14" y="120" width="5" height="6" rx="1"/>
+      <rect x="14" y="130" width="5" height="6" rx="1"/>
+      <rect x="14" y="140" width="5" height="6" rx="1"/>
+      <rect x="14" y="150" width="5" height="6" rx="1"/>
+      <rect x="14" y="160" width="5" height="6" rx="1"/>
+      <rect x="14" y="170" width="5" height="6" rx="1"/>
+      <rect x="14" y="180" width="5" height="6" rx="1"/>
+      <rect x="14" y="190" width="5" height="6" rx="1"/>
+      <rect x="14" y="200" width="5" height="6" rx="1"/>
+
+      <!-- right -->
+      <rect x="81" y="20" width="5" height="6" rx="1"/>
+      <rect x="81" y="30" width="5" height="6" rx="1"/>
+      <rect x="81" y="40" width="5" height="6" rx="1"/>
+      <rect x="81" y="50" width="5" height="6" rx="1"/>
+      <rect x="81" y="60" width="5" height="6" rx="1"/>
+      <rect x="81" y="70" width="5" height="6" rx="1"/>
+      <rect x="81" y="80" width="5" height="6" rx="1"/>
+      <rect x="81" y="90" width="5" height="6" rx="1"/>
+      <rect x="81" y="100" width="5" height="6" rx="1"/>
+      <rect x="81" y="110" width="5" height="6" rx="1"/>
+      <rect x="81" y="120" width="5" height="6" rx="1"/>
+      <rect x="81" y="130" width="5" height="6" rx="1"/>
+      <rect x="81" y="140" width="5" height="6" rx="1"/>
+      <rect x="81" y="150" width="5" height="6" rx="1"/>
+      <rect x="81" y="160" width="5" height="6" rx="1"/>
+      <rect x="81" y="170" width="5" height="6" rx="1"/>
+      <rect x="81" y="180" width="5" height="6" rx="1"/>
+      <rect x="81" y="190" width="5" height="6" rx="1"/>
+      <rect x="81" y="200" width="5" height="6" rx="1"/>
+    </g>
+
+    <!-- ================= USB CONNECTOR ================= -->
+    <path
+      d="M35 4 H65
+         L69 9
+         V25
+         L65 30
+         H35
+         L31 25
+         V9 Z"
+      fill="url(#pico2wMetal)"
+      stroke="#666"
+      stroke-width=".8"
+    />
+
+    <rect x="38" y="8" width="24" height="15" rx="1.5" fill="#4a4a4a"/>
+    <rect x="42" y="11" width="16" height="9" rx="1" fill="#171717"/>
+
+    <!-- ================= BOOTSEL BUTTON ================= -->
+    <rect x="42" y="36" width="16" height="13" rx="2"
+          fill="#efefef" stroke="#888" stroke-width=".6"/>
+    <circle cx="50" cy="42.5" r="3.5" fill="#d9d9d9"/>
+    <text x="50" y="55" text-anchor="middle" fill="#e8e8e8"
+          font-size="3" font-family="monospace">BOOTSEL</text>
+
+    <!-- ================= RP2350 ================= -->
+    <rect x="35" y="80" width="30" height="30" rx="1.5"
+          fill="#242424" stroke="#555" stroke-width=".6"/>
+    <text x="50" y="93" text-anchor="middle" fill="#777"
+          font-size="3.2" font-family="monospace">RP2350</text>
+    <text x="50" y="99" text-anchor="middle" fill="#666"
+          font-size="2.5" font-family="monospace">MCU</text>
+
+    <!-- ================= WIFI / BT MODULE ================= -->
+    <rect x="34" y="124" width="32" height="36" rx="2"
+          fill="#d8d8d2" stroke="#888" stroke-width=".6"/>
+    <rect x="37" y="127" width="26" height="30" rx="1"
+          fill="#eeeeea" stroke="#aaa" stroke-width=".35"/>
+    <text x="50" y="139" text-anchor="middle" fill="#666"
+          font-size="2.7" font-family="monospace">CYW43439</text>
+    <text x="50" y="145" text-anchor="middle" fill="#777"
+          font-size="2.4" font-family="monospace">WiFi / BT</text>
+
+    <!-- antenna trace -->
+    <path d="M38 153 h7 v-3 h6 v3 h6 v-3 h6"
+          fill="none" stroke="#9e7e38" stroke-width="1.1"/>
+
+    <!-- ================= LED ================= -->
+    <circle cx="28" cy="32" r="2.5"
+            fill="#e7e32e" stroke="#8f8b14" stroke-width=".5"/>
+    <text x="28" y="27" text-anchor="middle" fill="#fff"
+          font-size="2.5" font-family="monospace">LED</text>
+
+    <!-- ================= DEBUG HEADER ================= -->
+    <g>
+      <rect x="38" y="178" width="24" height="10" rx="1"
+            fill="#222" stroke="#555" stroke-width=".5"/>
+      <circle cx="43" cy="183" r="1.3" fill="#c7a85f"/>
+      <circle cx="50" cy="183" r="1.3" fill="#c7a85f"/>
+      <circle cx="57" cy="183" r="1.3" fill="#c7a85f"/>
+    </g>
+    <text x="50" y="194" text-anchor="middle" fill="#fff"
+          font-size="2.6" font-family="monospace">DEBUG</text>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text x="50" y="169" text-anchor="middle"
+          fill="#e9fff4" font-size="3.3"
+          font-family="Arial, sans-serif" font-weight="bold">
+      Raspberry Pi Pico 2 W
+    </text>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d7d2a2" stroke="#666" stroke-width=".22">
+      <rect x="26" y="62" width="8" height="3" rx=".4"/>
+      <rect x="36" y="62" width="8" height="3" rx=".4"/>
+      <rect x="56" y="62" width="8" height="3" rx=".4"/>
+      <rect x="66" y="62" width="8" height="3" rx=".4"/>
+      <rect x="26" y="69" width="8" height="3" rx=".4"/>
+      <rect x="66" y="69" width="8" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= PIN LABELS ================= -->
+    <g fill="#fff" font-size="2.5" font-family="monospace">
+      <!-- LEFT -->
+      <text x="21" y="24">GP0</text>
+      <text x="21" y="34">GP1</text>
+      <text x="21" y="44">GND</text>
+      <text x="21" y="54">GP2</text>
+      <text x="21" y="64">GP3</text>
+      <text x="21" y="74">GP4</text>
+      <text x="21" y="84">GP5</text>
+      <text x="21" y="94">GND</text>
+      <text x="21" y="104">GP6</text>
+      <text x="21" y="114">GP7</text>
+      <text x="21" y="124">GP8</text>
+      <text x="21" y="134">GP9</text>
+      <text x="21" y="144">GND</text>
+      <text x="21" y="154">GP10</text>
+      <text x="21" y="164">GP11</text>
+      <text x="21" y="174">GP12</text>
+      <text x="21" y="184">GP13</text>
+      <text x="21" y="194">GND</text>
+      <text x="21" y="204">GP14</text>
+      <text x="21" y="214">GP15</text>
+
+      <!-- RIGHT -->
+      <text x="79" y="24" text-anchor="end">VBUS</text>
+      <text x="79" y="34" text-anchor="end">VSYS</text>
+      <text x="79" y="44" text-anchor="end">GND</text>
+      <text x="79" y="54" text-anchor="end">3V3_EN</text>
+      <text x="79" y="64" text-anchor="end">3V3</text>
+      <text x="79" y="74" text-anchor="end">ADC_VREF</text>
+      <text x="79" y="84" text-anchor="end">GP28</text>
+      <text x="79" y="94" text-anchor="end">GND</text>
+      <text x="79" y="104" text-anchor="end">GP27</text>
+      <text x="79" y="114" text-anchor="end">GP26</text>
+      <text x="79" y="124" text-anchor="end">RUN</text>
+      <text x="79" y="134" text-anchor="end">GP22</text>
+      <text x="79" y="144" text-anchor="end">GND</text>
+      <text x="79" y="154" text-anchor="end">GP21</text>
+      <text x="79" y="164" text-anchor="end">GP20</text>
+      <text x="79" y="174" text-anchor="end">GP19</text>
+      <text x="79" y="184" text-anchor="end">GP18</text>
+      <text x="79" y="194" text-anchor="end">GND</text>
+      <text x="79" y="204" text-anchor="end">GP17</text>
+      <text x="79" y="214" text-anchor="end">GP16</text>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <g fill="#cfcfcf" opacity=".95">
+      <!-- LEFT -->
+      <circle cx="0" cy="20" r="1.5"/>
+      <circle cx="0" cy="30" r="1.5"/>
+      <circle cx="0" cy="40" r="1.5"/>
+      <circle cx="0" cy="50" r="1.5"/>
+      <circle cx="0" cy="60" r="1.5"/>
+      <circle cx="0" cy="70" r="1.5"/>
+      <circle cx="0" cy="80" r="1.5"/>
+      <circle cx="0" cy="90" r="1.5"/>
+      <circle cx="0" cy="100" r="1.5"/>
+      <circle cx="0" cy="110" r="1.5"/>
+      <circle cx="0" cy="120" r="1.5"/>
+      <circle cx="0" cy="130" r="1.5"/>
+      <circle cx="0" cy="140" r="1.5"/>
+      <circle cx="0" cy="150" r="1.5"/>
+      <circle cx="0" cy="160" r="1.5"/>
+      <circle cx="0" cy="170" r="1.5"/>
+      <circle cx="0" cy="180" r="1.5"/>
+      <circle cx="0" cy="190" r="1.5"/>
+      <circle cx="0" cy="200" r="1.5"/>
+      <circle cx="0" cy="210" r="1.5"/>
+
+      <!-- RIGHT -->
+      <circle cx="100" cy="20" r="1.5"/>
+      <circle cx="100" cy="30" r="1.5"/>
+      <circle cx="100" cy="40" r="1.5"/>
+      <circle cx="100" cy="50" r="1.5"/>
+      <circle cx="100" cy="60" r="1.5"/>
+      <circle cx="100" cy="70" r="1.5"/>
+      <circle cx="100" cy="80" r="1.5"/>
+      <circle cx="100" cy="90" r="1.5"/>
+      <circle cx="100" cy="100" r="1.5"/>
+      <circle cx="100" cy="110" r="1.5"/>
+      <circle cx="100" cy="120" r="1.5"/>
+      <circle cx="100" cy="130" r="1.5"/>
+      <circle cx="100" cy="140" r="1.5"/>
+      <circle cx="100" cy="150" r="1.5"/>
+      <circle cx="100" cy="160" r="1.5"/>
+      <circle cx="100" cy="170" r="1.5"/>
+      <circle cx="100" cy="180" r="1.5"/>
+      <circle cx="100" cy="190" r="1.5"/>
+      <circle cx="100" cy="200" r="1.5"/>
+      <circle cx="100" cy="210" r="1.5"/>
+    </g>
+  `,
+
+  pins: [
+    // LEFT SIDE — physical pins 1–20
+    { id:'GP0',  x:0, y:20,  type:'digital', label:'Pin 1 - GP0 / UART0 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP1',  x:0, y:30,  type:'digital', label:'Pin 2 - GP1 / UART0 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND1', x:0, y:40,  type:'gnd',     label:'Pin 3 - GND' },
+    { id:'GP2',  x:0, y:50,  type:'digital', label:'Pin 4 - GP2 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP3',  x:0, y:60,  type:'digital', label:'Pin 5 - GP3 / I2C1 SCL / SPI0 TX' },
+    { id:'GP4',  x:0, y:70,  type:'digital', label:'Pin 6 - GP4 / UART1 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP5',  x:0, y:80,  type:'digital', label:'Pin 7 - GP5 / UART1 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND2', x:0, y:90,  type:'gnd',     label:'Pin 8 - GND' },
+    { id:'GP6',  x:0, y:100, type:'digital', label:'Pin 9 - GP6 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP7',  x:0, y:110, type:'digital', label:'Pin 10 - GP7 / I2C1 SCL / SPI0 TX' },
+    { id:'GP8',  x:0, y:120, type:'digital', label:'Pin 11 - GP8 / UART1 TX / I2C0 SDA / SPI1 RX' },
+    { id:'GP9',  x:0, y:130, type:'digital', label:'Pin 12 - GP9 / UART1 RX / I2C0 SCL / SPI1 CSn' },
+    { id:'GND3', x:0, y:140, type:'gnd',     label:'Pin 13 - GND' },
+    { id:'GP10', x:0, y:150, type:'digital', label:'Pin 14 - GP10 / I2C1 SDA / SPI1 SCK' },
+    { id:'GP11', x:0, y:160, type:'digital', label:'Pin 15 - GP11 / I2C1 SCL / SPI1 TX' },
+    { id:'GP12', x:0, y:170, type:'digital', label:'Pin 16 - GP12 / UART0 TX / I2C0 SDA / SPI1 RX' },
+    { id:'GP13', x:0, y:180, type:'digital', label:'Pin 17 - GP13 / UART0 RX / I2C0 SCL / SPI1 CSn' },
+    { id:'GND4', x:0, y:190, type:'gnd',     label:'Pin 18 - GND' },
+    { id:'GP14', x:0, y:200, type:'digital', label:'Pin 19 - GP14 / I2C1 SDA / SPI1 SCK' },
+    { id:'GP15', x:0, y:210, type:'digital', label:'Pin 20 - GP15 / I2C1 SCL / SPI1 TX' },
+
+    // RIGHT SIDE — physical pins 21–40, bottom to top on the real board
+    { id:'GP16',     x:100, y:210, type:'digital', label:'Pin 21 - GP16 / UART0 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP17',     x:100, y:200, type:'digital', label:'Pin 22 - GP17 / UART0 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND5',     x:100, y:190, type:'gnd',     label:'Pin 23 - GND' },
+    { id:'GP18',     x:100, y:180, type:'digital', label:'Pin 24 - GP18 / I2C1 SDA / SPI0 SCK' },
+    { id:'GP19',     x:100, y:170, type:'digital', label:'Pin 25 - GP19 / I2C1 SCL / SPI0 TX' },
+    { id:'GP20',     x:100, y:160, type:'digital', label:'Pin 26 - GP20 / UART1 TX / I2C0 SDA / SPI0 RX' },
+    { id:'GP21',     x:100, y:150, type:'digital', label:'Pin 27 - GP21 / UART1 RX / I2C0 SCL / SPI0 CSn' },
+    { id:'GND6',     x:100, y:140, type:'gnd',     label:'Pin 28 - GND' },
+    { id:'GP22',     x:100, y:130, type:'digital', label:'Pin 29 - GP22' },
+    { id:'RUN',      x:100, y:120, type:'digital', label:'Pin 30 - RUN' },
+    { id:'GP26',     x:100, y:110, type:'analog',  label:'Pin 31 - GP26 / ADC0' },
+    { id:'GP27',     x:100, y:100, type:'analog',  label:'Pin 32 - GP27 / ADC1' },
+    { id:'GND7',     x:100, y:90,  type:'gnd',     label:'Pin 33 - AGND' },
+    { id:'GP28',     x:100, y:80,  type:'analog',  label:'Pin 34 - GP28 / ADC2' },
+    { id:'ADC_VREF', x:100, y:70,  type:'power',   label:'Pin 35 - ADC_VREF' },
+    { id:'3V3_OUT',  x:100, y:60,  type:'power',   label:'Pin 36 - 3.3V OUT' },
+    { id:'3V3_EN',   x:100, y:50,  type:'power',   label:'Pin 37 - 3V3_EN' },
+    { id:'GND8',     x:100, y:40,  type:'gnd',     label:'Pin 38 - GND' },
+    { id:'VSYS',     x:100, y:30,  type:'power',   label:'Pin 39 - VSYS' },
+    { id:'VBUS',     x:100, y:20,  type:'power',   label:'Pin 40 - VBUS' },
+
+    // Debug pads
+    { id:'SWCLK', x:42, y:220, type:'digital', label:'SWCLK' },
+    { id:'DBG_GND', x:50, y:220, type:'gnd', label:'Debug GND' },
+    { id:'SWDIO', x:58, y:220, type:'digital', label:'SWDIO' }
+  ],
+
+  defaults: {
+    label: 'Raspberry Pi Pico 2 W'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+  },
+
 
   /* ════════════════════════════
      OUTPUTS
   ════════════════════════════ */
+ledRed5mm: {
+  id: 'ledRed5mm',
+  label: 'Red LED',
+  category: 'Outputs',
+  desc: '5mm red light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
 
+  svg: `
+    <defs>
+      <!-- LED red plastic body -->
+      <linearGradient id="redLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff6666"/>
+        <stop offset="0.35" stop-color="#ed1c24"/>
+        <stop offset="0.75" stop-color="#b50812"/>
+        <stop offset="1" stop-color="#76040a"/>
+      </linearGradient>
 
+      <!-- Transparent highlight -->
+      <linearGradient id="redLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".8"/>
+        <stop offset=".5" stop-color="#ffaaaa" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- Metal legs -->
+      <linearGradient id="ledLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a7a7a7"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Glow when LED is ON -->
+      <radialGradient id="redLedGlow">
+        <stop offset="0" stop-color="#ff3030" stop-opacity=".9"/>
+        <stop offset=".5" stop-color="#ff2020" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="26"
+      fill="url(#redLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE: longer lead -->
+    <path
+      d="M24 53
+         L22 117"
+      fill="none"
+      stroke="url(#ledLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE: shorter lead -->
+    <path
+      d="M36 53
+         L38 104"
+      fill="none"
+      stroke="url(#ledLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL LED POSTS ================= -->
+    <path d="M24 50 L24 36"
+          stroke="#bdbdbd"
+          stroke-width="2"
+          opacity=".75"/>
+
+    <path d="M36 50 L36 35"
+          stroke="#bdbdbd"
+          stroke-width="2"
+          opacity=".75"/>
+
+    <!-- bond wire -->
+    <path d="M24 36 Q29 29 34 35"
+          fill="none"
+          stroke="#d7d7d7"
+          stroke-width=".8"
+          opacity=".75"/>
+
+    <!-- internal die -->
+    <rect
+      x="32"
+      y="32"
+      width="6"
+      height="5"
+      rx=".5"
+      fill="#8c0c12"
+      opacity=".85"
+    />
+
+    <!-- ================= LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#redLedBody)"
+      stroke="#8e0710"
+      stroke-width="1"
+      opacity=".92"
+    />
+
+    <!-- flat cathode edge -->
+    <path
+      d="M42 38 L42 50"
+      stroke="#6e050b"
+      stroke-width="1.5"
+      opacity=".9"
+    />
+
+    <!-- ================= BODY HIGHLIGHT ================= -->
+    <path
+      d="M22 18
+         C23 11 27 8 31 8
+         C27 15 26 25 27 39
+         C23 34 21 26 22 18 Z"
+      fill="url(#redLedHighlight)"
+      opacity=".7"
+    />
+
+    <ellipse
+      cx="34"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".35"
+      transform="rotate(-25 34 12)"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#a20a12"
+      stroke-width="2"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Red LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic LED simulation:
+      A = anode input
+      K = cathode.
+
+      The LED is considered ON when the anode is HIGH
+      and the cathode is LOW/GND.
+    */
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
+ledWhite5mm: {
+  id: 'ledWhite5mm',
+  label: 'White LED',
+  category: 'Outputs',
+  desc: '5mm clear white light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="whiteLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>
+        <stop offset=".35" stop-color="#eaf5ff" stop-opacity=".58"/>
+        <stop offset=".72" stop-color="#c8d5df" stop-opacity=".38"/>
+        <stop offset="1" stop-color="#8f9ca5" stop-opacity=".55"/>
+      </linearGradient>
+
+      <linearGradient id="whiteLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".55" stop-color="#ffffff" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <linearGradient id="whiteLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".3" stop-color="#eeeeee"/>
+        <stop offset=".62" stop-color="#a9a9a9"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="whiteLedGlow">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".35" stop-color="#e9f6ff" stop-opacity=".65"/>
+        <stop offset=".7" stop-color="#cfeaff" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="27"
+      fill="url(#whiteLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE (+), longer lead -->
+    <path
+      d="M24 53 L22 117"
+      fill="none"
+      stroke="url(#whiteLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE (-), shorter lead -->
+    <path
+      d="M36 53 L38 104"
+      fill="none"
+      stroke="url(#whiteLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL POSTS ================= -->
+    <path d="M24 51 L24 35"
+          stroke="#b7b7b7"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <path d="M36 51 L36 34"
+          stroke="#b7b7b7"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <!-- reflector cup -->
+    <path
+      d="M32 36
+         L35 31
+         L39 36
+         L37 42
+         L33 42 Z"
+      fill="#d8d8d8"
+      stroke="#888"
+      stroke-width=".45"
+      opacity=".85"
+    />
+
+    <!-- semiconductor die -->
+    <rect
+      x="33.5"
+      y="32"
+      width="4.5"
+      height="4"
+      rx=".4"
+      fill="#d9ecf7"
+      stroke="#8c9aa3"
+      stroke-width=".35"
+    />
+
+    <!-- bond wire -->
+    <path
+      d="M24 35 Q29 27 35 33"
+      fill="none"
+      stroke="#d8d8d8"
+      stroke-width=".8"
+      opacity=".9"
+    />
+
+    <!-- ================= CLEAR LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#whiteLedBody)"
+      stroke="#8d9ba4"
+      stroke-width="1"
+      opacity=".82"
+    />
+
+    <!-- cathode flat side -->
+    <path
+      d="M42 37 L42 50"
+      stroke="#77848d"
+      stroke-width="1.5"
+      opacity=".8"
+    />
+
+    <!-- ================= BODY HIGHLIGHTS ================= -->
+    <path
+      d="M21 19
+         C22 11 26 8 30 8
+         C27 15 26 25 27 39
+         C23 34 20 27 21 19 Z"
+      fill="url(#whiteLedHighlight)"
+      opacity=".85"
+    />
+
+    <ellipse
+      cx="35"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".7"
+      transform="rotate(-25 35 12)"
+    />
+
+    <ellipse
+      cx="28"
+      cy="23"
+      rx="7"
+      ry="12"
+      fill="#ffffff"
+      opacity=".12"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#9aa6ad"
+      stroke-width="2"
+      opacity=".9"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'White LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
+ledBlue5mm: {
+  id: 'ledBlue5mm',
+  label: 'Blue LED',
+  category: 'Outputs',
+  desc: '5mm blue light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
+
+  svg: `
+    <defs>
+      <!-- Blue transparent LED body -->
+      <linearGradient id="blueLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6db7ff" stop-opacity=".95"/>
+        <stop offset=".30" stop-color="#1685ff" stop-opacity=".92"/>
+        <stop offset=".68" stop-color="#005bea" stop-opacity=".90"/>
+        <stop offset="1" stop-color="#00359b" stop-opacity=".95"/>
+      </linearGradient>
+
+      <!-- Plastic highlight -->
+      <linearGradient id="blueLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset=".45" stop-color="#9fd2ff" stop-opacity=".3"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- Metal leads -->
+      <linearGradient id="blueLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".32" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Blue glow -->
+      <radialGradient id="blueLedGlow">
+        <stop offset="0" stop-color="#58b7ff" stop-opacity=".95"/>
+        <stop offset=".38" stop-color="#168cff" stop-opacity=".65"/>
+        <stop offset=".72" stop-color="#006cff" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#0055ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="27"
+      fill="url(#blueLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE (+): longer lead -->
+    <path
+      d="M24 53 L22 117"
+      fill="none"
+      stroke="url(#blueLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE (-): shorter lead -->
+    <path
+      d="M36 53 L38 104"
+      fill="none"
+      stroke="url(#blueLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL POSTS ================= -->
+    <path d="M24 51 L24 35"
+          stroke="#bfc8d0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <path d="M36 51 L36 34"
+          stroke="#bfc8d0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <!-- reflector -->
+    <path
+      d="M32 36
+         L35 31
+         L39 36
+         L37 42
+         L33 42 Z"
+      fill="#9fc7e8"
+      stroke="#48779e"
+      stroke-width=".45"
+      opacity=".8"
+    />
+
+    <!-- LED die -->
+    <rect
+      x="33.5"
+      y="32"
+      width="4.5"
+      height="4"
+      rx=".4"
+      fill="#45b4ff"
+      stroke="#176aa4"
+      stroke-width=".35"
+    />
+
+    <!-- bond wire -->
+    <path
+      d="M24 35 Q29 27 35 33"
+      fill="none"
+      stroke="#d9e8f5"
+      stroke-width=".8"
+      opacity=".9"
+    />
+
+    <!-- ================= BLUE LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#blueLedBody)"
+      stroke="#003fbb"
+      stroke-width="1"
+      opacity=".92"
+    />
+
+    <!-- Cathode flat edge -->
+    <path
+      d="M42 37 L42 50"
+      stroke="#002f8c"
+      stroke-width="1.5"
+      opacity=".9"
+    />
+
+    <!-- ================= HIGHLIGHTS ================= -->
+    <path
+      d="M21 19
+         C22 11 26 8 30 8
+         C27 15 26 25 27 39
+         C23 34 20 27 21 19 Z"
+      fill="url(#blueLedHighlight)"
+      opacity=".8"
+    />
+
+    <ellipse
+      cx="35"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".55"
+      transform="rotate(-25 35 12)"
+    />
+
+    <ellipse
+      cx="29"
+      cy="24"
+      rx="7"
+      ry="13"
+      fill="#77c5ff"
+      opacity=".12"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#0048ca"
+      stroke-width="2"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Blue LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
+ledGreen5mm: {
+  id: 'ledGreen5mm',
+  label: 'Green LED',
+  category: 'Outputs',
+  desc: '5mm green light-emitting diode with anode (+) and cathode (-) terminals',
+  w: 60,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="greenLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#9dffae" stop-opacity=".95"/>
+        <stop offset=".30" stop-color="#42ed68" stop-opacity=".92"/>
+        <stop offset=".68" stop-color="#0bc642" stop-opacity=".90"/>
+        <stop offset="1" stop-color="#07832c" stop-opacity=".95"/>
+      </linearGradient>
+
+      <linearGradient id="greenLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset=".45" stop-color="#baffc6" stop-opacity=".3"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <linearGradient id="greenLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".32" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="greenLedGlow">
+        <stop offset="0" stop-color="#7dff9c" stop-opacity=".95"/>
+        <stop offset=".38" stop-color="#25ef62" stop-opacity=".65"/>
+        <stop offset=".72" stop-color="#00c83d" stop-opacity=".25"/>
+        <stop offset="1" stop-color="#00a832" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= LED GLOW ================= -->
+    <circle
+      cx="30"
+      cy="29"
+      r="27"
+      fill="url(#greenLedGlow)"
+      opacity="0"
+      data-led-glow="true"
+    />
+
+    <!-- ================= METAL LEGS ================= -->
+
+    <!-- ANODE (+): longer lead -->
+    <path
+      d="M24 53 L22 117"
+      fill="none"
+      stroke="url(#greenLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- CATHODE (-): shorter lead -->
+    <path
+      d="M36 53 L38 104"
+      fill="none"
+      stroke="url(#greenLedLeadMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= INTERNAL POSTS ================= -->
+    <path d="M24 51 L24 35"
+          stroke="#bfc8c0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <path d="M36 51 L36 34"
+          stroke="#bfc8c0"
+          stroke-width="2"
+          opacity=".8"/>
+
+    <!-- reflector -->
+    <path
+      d="M32 36
+         L35 31
+         L39 36
+         L37 42
+         L33 42 Z"
+      fill="#9fe8b0"
+      stroke="#3f9456"
+      stroke-width=".45"
+      opacity=".8"
+    />
+
+    <!-- LED die -->
+    <rect
+      x="33.5"
+      y="32"
+      width="4.5"
+      height="4"
+      rx=".4"
+      fill="#46f278"
+      stroke="#16883a"
+      stroke-width=".35"
+    />
+
+    <!-- bond wire -->
+    <path
+      d="M24 35 Q29 27 35 33"
+      fill="none"
+      stroke="#d9f5df"
+      stroke-width=".8"
+      opacity=".9"
+    />
+
+    <!-- ================= GREEN LED BODY ================= -->
+    <path
+      d="M17 49
+         L17 25
+         C17 12 22 5 30 5
+         C38 5 43 12 43 25
+         L43 49
+         Q43 55 37 55
+         H23
+         Q17 55 17 49 Z"
+      fill="url(#greenLedBody)"
+      stroke="#087f2c"
+      stroke-width="1"
+      opacity=".92"
+    />
+
+    <!-- Cathode flat edge -->
+    <path
+      d="M42 37 L42 50"
+      stroke="#066523"
+      stroke-width="1.5"
+      opacity=".9"
+    />
+
+    <!-- ================= HIGHLIGHTS ================= -->
+    <path
+      d="M21 19
+         C22 11 26 8 30 8
+         C27 15 26 25 27 39
+         C23 34 20 27 21 19 Z"
+      fill="url(#greenLedHighlight)"
+      opacity=".8"
+    />
+
+    <ellipse
+      cx="35"
+      cy="12"
+      rx="3"
+      ry="5"
+      fill="#ffffff"
+      opacity=".55"
+      transform="rotate(-25 35 12)"
+    />
+
+    <ellipse
+      cx="29"
+      cy="24"
+      rx="7"
+      ry="13"
+      fill="#78ff9b"
+      opacity=".12"
+    />
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M15 48
+         Q15 54 21 56
+         H39
+         Q45 54 45 48"
+      fill="none"
+      stroke="#079235"
+      stroke-width="2"
+    />
+
+    <!-- ================= TERMINAL LABELS ================= -->
+    <text
+      x="17"
+      y="112"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      A
+    </text>
+
+    <text
+      x="43"
+      y="101"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      K
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="22"
+      cy="120"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="A"
+    />
+
+    <circle
+      cx="38"
+      cy="107"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="K"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'A',
+      x: 22,
+      y: 120,
+      type: 'digital',
+      label: 'Anode (+)'
+    },
+    {
+      id: 'K',
+      x: 38,
+      y: 107,
+      type: 'gnd',
+      label: 'Cathode (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Green LED',
+    state: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'state',
+      label: 'LED State',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    const anode = Number(inputs?.A ?? 0);
+    const cathode = Number(inputs?.K ?? 0);
+    const on = anode > cathode;
+
+    return {
+      state: on,
+      on: on
+    };
+  }
+},
+ledRgb5mm: {
+  id: 'ledRgb5mm',
+  label: 'RGB LED',
+  category: 'Outputs',
+  desc: '5mm RGB LED with independently controllable red, green and blue channels and a common cathode terminal',
+  w: 76,
+  h: 130,
+
+  svg: `
+    <defs>
+      <!-- Clear RGB LED body -->
+      <linearGradient id="rgbLedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".32" stop-color="#edf5fa" stop-opacity=".62"/>
+        <stop offset=".70" stop-color="#c9d3da" stop-opacity=".42"/>
+        <stop offset="1" stop-color="#8e9aa2" stop-opacity=".58"/>
+      </linearGradient>
+
+      <linearGradient id="rgbLedHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".50" stop-color="#ffffff" stop-opacity=".28"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <linearGradient id="rgbLedMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".30" stop-color="#eeeeee"/>
+        <stop offset=".65" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- RGB glow gradients -->
+      <radialGradient id="rgbRedGlow">
+        <stop offset="0" stop-color="#ff4b4b" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#ff1515" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
+      </radialGradient>
+
+      <radialGradient id="rgbGreenGlow">
+        <stop offset="0" stop-color="#6dff8d" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#18e94b" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#00c83d" stop-opacity="0"/>
+      </radialGradient>
+
+      <radialGradient id="rgbBlueGlow">
+        <stop offset="0" stop-color="#63bdff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#168cff" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#005eff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= RGB GLOW ================= -->
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbRedGlow)"
+            opacity="0"
+            data-led-red-glow="true"/>
+
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbGreenGlow)"
+            opacity="0"
+            data-led-green-glow="true"/>
+
+    <circle cx="38" cy="28" r="29"
+            fill="url(#rgbBlueGlow)"
+            opacity="0"
+            data-led-blue-glow="true"/>
+
+    <!-- ================= FOUR METAL LEGS ================= -->
+
+    <!-- RED -->
+    <path d="M24 54 L18 119"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- COMMON CATHODE - longest -->
+    <path d="M33 54 L31 128"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.8"
+          stroke-linecap="round"/>
+
+    <!-- GREEN -->
+    <path d="M43 54 L46 116"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- BLUE -->
+    <path d="M52 54 L59 111"
+          fill="none"
+          stroke="url(#rgbLedMetal)"
+          stroke-width="2.6"
+          stroke-linecap="round"/>
+
+    <!-- ================= INTERNAL ELECTRODES ================= -->
+    <path d="M24 52 L26 36"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <path d="M33 52 L34 32"
+          stroke="#b7b7b7" stroke-width="2.2" opacity=".85"/>
+
+    <path d="M43 52 L42 36"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <path d="M52 52 L49 37"
+          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
+
+    <!-- common reflector -->
+    <path d="M29 37 L34 31 L39 37 L37 44 L31 44 Z"
+          fill="#d8d8d8"
+          stroke="#888"
+          stroke-width=".45"
+          opacity=".82"/>
+
+    <!-- red die -->
+    <rect x="25" y="33" width="4.5" height="4"
+          rx=".4" fill="#ff4141"
+          stroke="#a31b1b" stroke-width=".3"/>
+
+    <!-- green die -->
+    <rect x="39" y="33" width="4.5" height="4"
+          rx=".4" fill="#39e963"
+          stroke="#168837" stroke-width=".3"/>
+
+    <!-- blue die -->
+    <rect x="47" y="35" width="4.5" height="4"
+          rx=".4" fill="#3ba7ff"
+          stroke="#176aa4" stroke-width=".3"/>
+
+    <!-- bond wires -->
+    <path d="M34 33 Q30 27 27 34"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <path d="M34 33 Q38 27 41 34"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <path d="M34 34 Q43 28 49 36"
+          fill="none" stroke="#d8d8d8"
+          stroke-width=".7" opacity=".9"/>
+
+    <!-- ================= CLEAR 5MM LED BODY ================= -->
+    <path
+      d="M19 49
+         L19 25
+         C19 11 26 4 38 4
+         C50 4 57 11 57 25
+         L57 49
+         Q57 56 50 57
+         H26
+         Q19 56 19 49 Z"
+      fill="url(#rgbLedBody)"
+      stroke="#8d9ba4"
+      stroke-width="1"
+      opacity=".84"
+    />
+
+    <!-- flat cathode identification side -->
+    <path d="M20 38 L20 50"
+          stroke="#77848d"
+          stroke-width="1.5"
+          opacity=".8"/>
+
+    <!-- ================= BODY HIGHLIGHTS ================= -->
+    <path
+      d="M24 18
+         C26 10 31 7 36 7
+         C31 15 30 27 31 42
+         C26 36 23 27 24 18 Z"
+      fill="url(#rgbLedHighlight)"
+      opacity=".82"
+    />
+
+    <ellipse cx="45" cy="12"
+             rx="3.5" ry="5.5"
+             fill="#ffffff"
+             opacity=".62"
+             transform="rotate(-25 45 12)"/>
+
+    <ellipse cx="38" cy="25"
+             rx="11" ry="15"
+             fill="#ffffff"
+             opacity=".10"/>
+
+    <!-- ================= BASE RIM ================= -->
+    <path
+      d="M17 48
+         Q17 55 24 58
+         H52
+         Q59 55 59 48"
+      fill="none"
+      stroke="#9aa6ad"
+      stroke-width="2"
+      opacity=".9"
+    />
+
+    <!-- ================= PIN LABELS ================= -->
+    <g fill="#d9d9d9" font-size="4.5" font-family="monospace">
+      <text x="14" y="113" text-anchor="end">R</text>
+      <text x="28" y="123" text-anchor="end">COM</text>
+      <text x="49" y="111">G</text>
+      <text x="62" y="106">B</text>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="18" cy="122" r="2"
+            fill="#cfcfcf" data-pin="R"/>
+
+    <circle cx="31" cy="130" r="2"
+            fill="#cfcfcf" data-pin="COM"/>
+
+    <circle cx="46" cy="119" r="2"
+            fill="#cfcfcf" data-pin="G"/>
+
+    <circle cx="59" cy="114" r="2"
+            fill="#cfcfcf" data-pin="B"/>
+  `,
+
+  pins: [
+    {
+      id: 'R',
+      x: 18,
+      y: 122,
+      type: 'digital',
+      label: 'Red Anode (+)'
+    },
+    {
+      id: 'COM',
+      x: 31,
+      y: 130,
+      type: 'gnd',
+      label: 'Common Cathode (-)'
+    },
+    {
+      id: 'G',
+      x: 46,
+      y: 119,
+      type: 'digital',
+      label: 'Green Anode (+)'
+    },
+    {
+      id: 'B',
+      x: 59,
+      y: 114,
+      type: 'digital',
+      label: 'Blue Anode (+)'
+    }
+  ],
+
+  defaults: {
+    label: 'RGB LED',
+    red: false,
+    green: false,
+    blue: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'red',
+      label: 'Red',
+      type: 'checkbox'
+    },
+    {
+      key: 'green',
+      label: 'Green',
+      type: 'checkbox'
+    },
+    {
+      key: 'blue',
+      label: 'Blue',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Common-cathode RGB LED:
+      COM should normally be connected to GND.
+
+      R HIGH -> Red
+      G HIGH -> Green
+      B HIGH -> Blue
+
+      Multiple channels can be enabled together:
+      R + G       = Yellow
+      R + B       = Magenta
+      G + B       = Cyan
+      R + G + B   = White
+    */
+
+    const common = Number(inputs?.COM ?? 0);
+
+    const red =
+      Number(inputs?.R ?? 0) > common;
+
+    const green =
+      Number(inputs?.G ?? 0) > common;
+
+    const blue =
+      Number(inputs?.B ?? 0) > common;
+
+    return {
+      red,
+      green,
+      blue,
+      on: red || green || blue,
+
+      // Convenient RGB value for a renderer if required.
+      rgb: {
+        r: red ? 255 : 0,
+        g: green ? 255 : 0,
+        b: blue ? 255 : 0
+      }
+    };
+  }
+},
+oled096I2c: {
+  id: 'oled096I2c',
+  label: '0.96" OLED Display',
+  category: 'Displays',
+  desc: '0.96 inch 128x64 monochrome OLED display module with I2C interface (SSD1306-compatible), using GND, VCC, SCL and SDA pins',
+  w: 100,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="oledPcbGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1a6385"/>
+        <stop offset="0.55" stop-color="#14506d"/>
+        <stop offset="1" stop-color="#0c3447"/>
+      </linearGradient>
+
+      <linearGradient id="oledGlassGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#101417"/>
+        <stop offset="0.6" stop-color="#030506"/>
+        <stop offset="1" stop-color="#000000"/>
+      </linearGradient>
+
+      <linearGradient id="oledMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#9b9b9b"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="oledBlueGlow">
+        <stop offset="0" stop-color="#58ffff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#00dfff" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#00bcd4" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="6" y="4"
+      width="88" height="112"
+      rx="5"
+      fill="url(#oledPcbGrad)"
+      stroke="#0a2d3f"
+      stroke-width="1.2"
+    />
+
+    <!-- mounting holes -->
+    <g fill="#f0f0f0" stroke="#8a8a8a" stroke-width=".8">
+      <circle cx="13" cy="12" r="5"/>
+      <circle cx="87" cy="12" r="5"/>
+      <circle cx="13" cy="108" r="5"/>
+      <circle cx="87" cy="108" r="5"/>
+    </g>
+
+    <!-- ================= 4-PIN HEADER ================= -->
+    <rect
+      x="31"
+      y="4"
+      width="38"
+      height="10"
+      rx="1"
+      fill="#202020"
+      stroke="#555"
+      stroke-width=".5"
+    />
+
+    <g fill="#c7a85f" stroke="#725f34" stroke-width=".25">
+      <circle cx="36" cy="9" r="1.6"/>
+      <circle cx="45" cy="9" r="1.6"/>
+      <circle cx="54" cy="9" r="1.6"/>
+      <circle cx="63" cy="9" r="1.6"/>
+    </g>
+
+    <g fill="#ffffff" font-size="3.2" font-family="monospace">
+      <text x="36" y="20" text-anchor="middle">GND</text>
+      <text x="45" y="20" text-anchor="middle">VCC</text>
+      <text x="54" y="20" text-anchor="middle">SCL</text>
+      <text x="63" y="20" text-anchor="middle">SDA</text>
+    </g>
+
+    <!-- ================= OLED GLASS ================= -->
+    <rect
+      x="14"
+      y="25"
+      width="72"
+      height="63"
+      rx="3"
+      fill="url(#oledGlassGrad)"
+      stroke="#20282d"
+      stroke-width="1"
+    />
+
+    <!-- inner active display area -->
+    <rect
+      x="20"
+      y="31"
+      width="60"
+      height="51"
+      rx="1.5"
+      fill="#020405"
+    />
+
+    <!-- subtle blue glow -->
+    <rect
+      x="20"
+      y="31"
+      width="60"
+      height="51"
+      rx="1.5"
+      fill="url(#oledBlueGlow)"
+      opacity=".08"
+      data-oled-glow="true"
+    />
+
+    <!-- ================= SAMPLE DISPLAY CONTENT ================= -->
+    <g
+      fill="#39f6ff"
+      stroke="#39f6ff"
+      stroke-width=".5"
+      font-family="monospace"
+    >
+      <!-- signal bars -->
+      <path d="M24 44 V40 M27 44 V37 M30 44 V34 M33 44 V31"
+            fill="none" stroke-width="1.4"/>
+
+      <!-- small music icon -->
+      <path d="M69 34 V42 Q65 40 65 44 Q65 47 68 47 Q71 47 71 44 V37 L76 35 V41 Q72 39 72 43 Q72 46 75 46 Q78 46 78 43 V32 Z"
+            fill="none" stroke-width=".9"/>
+
+      <!-- equalizer -->
+      <g fill="#39f6ff" stroke="none">
+        <rect x="26" y="52" width="3" height="4"/>
+        <rect x="30" y="48" width="3" height="8"/>
+        <rect x="34" y="44" width="3" height="12"/>
+        <rect x="38" y="50" width="3" height="6"/>
+        <rect x="42" y="46" width="3" height="10"/>
+        <rect x="46" y="42" width="3" height="14"/>
+        <rect x="50" y="49" width="3" height="7"/>
+        <rect x="54" y="45" width="3" height="11"/>
+        <rect x="58" y="40" width="3" height="16"/>
+        <rect x="62" y="47" width="3" height="9"/>
+        <rect x="66" y="43" width="3" height="13"/>
+        <rect x="70" y="49" width="3" height="7"/>
+      </g>
+
+      <text x="50" y="67" text-anchor="middle"
+            fill="#39f6ff"
+            font-size="7"
+            stroke="none">
+        BEAT IT
+      </text>
+
+      <!-- tiny play/pause markers -->
+      <rect x="46" y="72" width="2" height="6" fill="#39f6ff" stroke="none"/>
+      <rect x="51" y="72" width="2" height="6" fill="#39f6ff" stroke="none"/>
+    </g>
+
+    <!-- ================= FLEX / DISPLAY CONNECTOR AREA ================= -->
+    <rect
+      x="31"
+      y="88"
+      width="38"
+      height="17"
+      rx="1.2"
+      fill="#171717"
+      stroke="#4d4d4d"
+      stroke-width=".5"
+    />
+
+    <rect
+      x="37"
+      y="92"
+      width="26"
+      height="8"
+      rx=".8"
+      fill="#2d2d2d"
+    />
+
+    <!-- FPC contacts -->
+    <g fill="#c79b3a">
+      <rect x="39" y="101" width="2" height="5"/>
+      <rect x="43" y="101" width="2" height="5"/>
+      <rect x="47" y="101" width="2" height="5"/>
+      <rect x="51" y="101" width="2" height="5"/>
+      <rect x="55" y="101" width="2" height="5"/>
+      <rect x="59" y="101" width="2" height="5"/>
+    </g>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d6d0a1" stroke="#646257" stroke-width=".25">
+      <rect x="21" y="92" width="7" height="3" rx=".4"/>
+      <rect x="72" y="92" width="7" height="3" rx=".4"/>
+      <rect x="22" y="99" width="7" height="3" rx=".4"/>
+      <rect x="71" y="99" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="50"
+      y="113"
+      text-anchor="middle"
+      fill="#dffaff"
+      font-size="3"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      OLED 128x64 I2C
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="36" cy="0" r="2" fill="#cfcfcf" data-pin="GND"/>
+    <circle cx="45" cy="0" r="2" fill="#cfcfcf" data-pin="VCC"/>
+    <circle cx="54" cy="0" r="2" fill="#cfcfcf" data-pin="SCL"/>
+    <circle cx="63" cy="0" r="2" fill="#cfcfcf" data-pin="SDA"/>
+  `,
+
+  pins: [
+    {
+      id: 'GND',
+      x: 36,
+      y: 0,
+      type: 'gnd',
+      label: 'Ground'
+    },
+    {
+      id: 'VCC',
+      x: 45,
+      y: 0,
+      type: 'power',
+      label: 'VCC'
+    },
+    {
+      id: 'SCL',
+      x: 54,
+      y: 0,
+      type: 'digital',
+      label: 'I2C Clock (SCL)'
+    },
+    {
+      id: 'SDA',
+      x: 63,
+      y: 0,
+      type: 'digital',
+      label: 'I2C Data (SDA)'
+    }
+  ],
+
+  defaults: {
+    label: 'OLED',
+    text: 'BEAT IT',
+    powered: false
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'text',
+      label: 'Display Text',
+      type: 'text'
+    },
+    {
+      key: 'powered',
+      label: 'Powered',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic display-state placeholder.
+
+      For a full SSD1306 simulation later, this component can accept
+      I2C commands/data and render a 128x64 monochrome framebuffer.
+    */
+
+    const vcc = Number(inputs?.VCC ?? 0);
+    const powered = vcc > 0;
+
+    return {
+      powered,
+      text: state?.text ?? 'BEAT IT'
+    };
+  }
+},
+buzzerPassive: {
+  id: 'buzzerPassive',
+  label: 'Piezo Buzzer',
+  category: 'Outputs',
+  desc: 'Two-pin piezo buzzer for tone and alert generation using a digital or PWM signal',
+  w: 70,
+  h: 100,
+
+  svg: `
+    <defs>
+      <!-- Buzzer body -->
+      <linearGradient id="buzzerBodyGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3a3a3a"/>
+        <stop offset=".45" stop-color="#151515"/>
+        <stop offset="1" stop-color="#050505"/>
+      </linearGradient>
+
+      <!-- Top surface -->
+      <radialGradient id="buzzerTopGrad" cx="45%" cy="35%" r="70%">
+        <stop offset="0" stop-color="#4a4a4a"/>
+        <stop offset=".55" stop-color="#202020"/>
+        <stop offset="1" stop-color="#080808"/>
+      </radialGradient>
+
+      <!-- Metal pins -->
+      <linearGradient id="buzzerPinMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <!-- Sound wave glow -->
+      <radialGradient id="buzzerSoundGlow">
+        <stop offset="0" stop-color="#ffd54a" stop-opacity=".5"/>
+        <stop offset=".6" stop-color="#ffd54a" stop-opacity=".18"/>
+        <stop offset="1" stop-color="#ffd54a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= SOUND GLOW ================= -->
+    <circle
+      cx="35"
+      cy="34"
+      r="31"
+      fill="url(#buzzerSoundGlow)"
+      opacity="0"
+      data-buzzer-glow="true"
+    />
+
+    <!-- ================= METAL PINS ================= -->
+
+    <!-- Positive pin -->
+    <path
+      d="M27 67 L26 98"
+      fill="none"
+      stroke="url(#buzzerPinMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- Negative pin -->
+    <path
+      d="M43 67 L44 92"
+      fill="none"
+      stroke="url(#buzzerPinMetal)"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <!-- ================= LOWER BODY ================= -->
+    <rect
+      x="15"
+      y="37"
+      width="40"
+      height="30"
+      rx="6"
+      fill="url(#buzzerBodyGrad)"
+      stroke="#050505"
+      stroke-width="1.2"
+    />
+
+    <!-- lower rim -->
+    <path
+      d="M15 55
+         Q15 65 25 67
+         H45
+         Q55 65 55 55"
+      fill="#111"
+      stroke="#050505"
+      stroke-width="1"
+    />
+
+    <!-- ================= TOP CYLINDER ================= -->
+    <ellipse
+      cx="35"
+      cy="26"
+      rx="22"
+      ry="10"
+      fill="url(#buzzerTopGrad)"
+      stroke="#111"
+      stroke-width="1"
+    />
+
+    <rect
+      x="13"
+      y="26"
+      width="44"
+      height="23"
+      fill="#151515"
+    />
+
+    <ellipse
+      cx="35"
+      cy="49"
+      rx="22"
+      ry="10"
+      fill="#111"
+      stroke="#090909"
+      stroke-width="1"
+    />
+
+    <ellipse
+      cx="35"
+      cy="26"
+      rx="22"
+      ry="10"
+      fill="url(#buzzerTopGrad)"
+      stroke="#111"
+      stroke-width="1"
+    />
+
+    <!-- ================= SOUND HOLE ================= -->
+    <ellipse
+      cx="35"
+      cy="25"
+      rx="6"
+      ry="3.2"
+      fill="#020202"
+    />
+
+    <!-- subtle top highlight -->
+    <ellipse
+      cx="29"
+      cy="21"
+      rx="10"
+      ry="4"
+      fill="#ffffff"
+      opacity=".05"
+    />
+
+    <!-- ================= POLARITY MARK ================= -->
+    <text
+      x="24"
+      y="58"
+      text-anchor="middle"
+      fill="#d9d9d9"
+      font-size="6"
+      font-family="monospace"
+      font-weight="bold"
+    >
+      +
+    </text>
+
+    <text
+      x="46"
+      y="58"
+      text-anchor="middle"
+      fill="#9c9c9c"
+      font-size="6"
+      font-family="monospace"
+    >
+      -
+    </text>
+
+    <!-- ================= PIN LABELS ================= -->
+    <text
+      x="22"
+      y="93"
+      text-anchor="end"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      +
+    </text>
+
+    <text
+      x="48"
+      y="87"
+      fill="#d9d9d9"
+      font-size="5"
+      font-family="monospace"
+    >
+      -
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle
+      cx="26"
+      cy="100"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="POS"
+    />
+
+    <circle
+      cx="44"
+      cy="94"
+      r="2"
+      fill="#cfcfcf"
+      data-pin="NEG"
+    />
+  `,
+
+  pins: [
+    {
+      id: 'POS',
+      x: 26,
+      y: 100,
+      type: 'digital',
+      label: 'Positive (+)'
+    },
+    {
+      id: 'NEG',
+      x: 44,
+      y: 94,
+      type: 'gnd',
+      label: 'Negative (-)'
+    }
+  ],
+
+  defaults: {
+    label: 'Buzzer',
+    enabled: false,
+    frequency: 1000
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'enabled',
+      label: 'Sound',
+      type: 'checkbox'
+    },
+    {
+      key: 'frequency',
+      label: 'Frequency (Hz)',
+      type: 'number',
+      min: 20,
+      max: 20000,
+      step: 10
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Basic buzzer simulation.
+
+      POS HIGH and NEG LOW -> buzzer active.
+
+      For tone()/PWM simulation, the engine can later pass
+      a frequency value into inputs.frequency.
+    */
+
+    const positive = Number(inputs?.POS ?? 0);
+    const negative = Number(inputs?.NEG ?? 0);
+
+    const enabled = positive > negative;
+
+    const frequency =
+      Number(inputs?.frequency ?? state?.frequency ?? 1000);
+
+    return {
+      enabled,
+      on: enabled,
+      frequency
+    };
+  }
+},
 
   /* ════════════════════════════
      INPUTS
+  ════════════════════════════ */
+irObstacleSensor: {
+  id: 'irObstacleSensor',
+  label: 'IR Obstacle Sensor',
+  category: 'Inputs',
+  desc: 'Infrared reflective obstacle detection module with IR transmitter, IR receiver, sensitivity potentiometer and LM393 comparator output',
+  w: 130,
+  h: 60,
 
+  svg: `
+    <defs>
+      <!-- PCB -->
+      <linearGradient id="irObsPcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2d78d4"/>
+        <stop offset="0.55" stop-color="#1761b6"/>
+        <stop offset="1" stop-color="#0d478e"/>
+      </linearGradient>
 
+      <!-- Clear IR LED -->
+      <linearGradient id="irObsEmitter" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#e9f6ff" stop-opacity=".75"/>
+        <stop offset="1" stop-color="#b7cbd8" stop-opacity=".55"/>
+      </linearGradient>
+
+      <!-- Black IR receiver -->
+      <linearGradient id="irObsReceiver" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#333"/>
+        <stop offset=".5" stop-color="#111"/>
+        <stop offset="1" stop-color="#020202"/>
+      </linearGradient>
+
+      <!-- Metal -->
+      <linearGradient id="irObsMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="8" y="6"
+      width="108" height="48"
+      rx="3"
+      fill="url(#irObsPcb)"
+      stroke="#0a3973"
+      stroke-width="1"
+    />
+
+    <!-- mounting / solder pads -->
+    <g fill="#d6d2a2" stroke="#7b7043" stroke-width=".25">
+      <circle cx="18" cy="14" r="2.2"/>
+      <circle cx="18" cy="46" r="2.2"/>
+      <circle cx="107" cy="14" r="2.2"/>
+      <circle cx="107" cy="46" r="2.2"/>
+    </g>
+
+    <!-- ================= IR RECEIVER (BLACK) ================= -->
+    <rect x="9" y="15" width="10" height="14" rx="4"
+          fill="url(#irObsReceiver)"
+          stroke="#222" stroke-width=".6"/>
+
+    <rect x="11" y="28" width="2" height="8"
+          fill="url(#irObsMetal)"/>
+    <rect x="15" y="28" width="2" height="8"
+          fill="url(#irObsMetal)"/>
+
+    <!-- ================= IR EMITTER (CLEAR) ================= -->
+    <rect x="9" y="33" width="10" height="14" rx="4"
+          fill="url(#irObsEmitter)"
+          stroke="#9caab3" stroke-width=".6"/>
+
+    <rect x="11" y="46" width="2" height="6"
+          fill="url(#irObsMetal)"/>
+    <rect x="15" y="46" width="2" height="6"
+          fill="url(#irObsMetal)"/>
+
+    <!-- ================= RESISTORS / PASSIVES ================= -->
+    <g fill="#d8d2a5" stroke="#666" stroke-width=".22">
+      <rect x="26" y="13" width="9" height="3" rx=".4"/>
+      <rect x="26" y="20" width="9" height="3" rx=".4"/>
+      <rect x="26" y="27" width="9" height="3" rx=".4"/>
+      <rect x="26" y="34" width="9" height="3" rx=".4"/>
+      <rect x="26" y="41" width="9" height="3" rx=".4"/>
+
+      <rect x="83" y="16" width="8" height="3" rx=".4"/>
+      <rect x="83" y="23" width="8" height="3" rx=".4"/>
+      <rect x="83" y="30" width="8" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= SENSITIVITY POTENTIOMETER ================= -->
+    <rect x="45" y="11" width="22" height="18" rx="2"
+          fill="#1b5da9" stroke="#0c3769" stroke-width=".6"/>
+
+    <circle cx="56" cy="20" r="6"
+            fill="#387bc0" stroke="#d0d0d0" stroke-width=".7"/>
+
+    <path d="M53 17 L59 23"
+          stroke="#5b5b5b" stroke-width="1.2"/>
+
+    <text x="56" y="34" text-anchor="middle"
+          fill="#e8f5ff" font-size="2.6" font-family="monospace">
+      SENS
+    </text>
+
+    <!-- ================= LM393 COMPARATOR ================= -->
+    <rect x="49" y="34" width="25" height="12" rx="1"
+          fill="#191919" stroke="#555" stroke-width=".5"/>
+
+    <g stroke="#bdbdbd" stroke-width=".3">
+      <path d="M52 34V31"/><path d="M57 34V31"/>
+      <path d="M62 34V31"/><path d="M67 34V31"/>
+      <path d="M52 46V49"/><path d="M57 46V49"/>
+      <path d="M62 46V49"/><path d="M67 46V49"/>
+    </g>
+
+    <text x="61.5" y="41.5"
+          text-anchor="middle"
+          fill="#777"
+          font-size="2.6"
+          font-family="monospace">
+      LM393
+    </text>
+
+    <!-- ================= STATUS LEDs ================= -->
+    <circle cx="79" cy="40" r="2"
+            fill="#e3d93c"
+            stroke="#8a8420"
+            stroke-width=".35"
+            data-indicator="power"/>
+
+    <circle cx="86" cy="40" r="2"
+            fill="#e84b4b"
+            stroke="#8b2525"
+            stroke-width=".35"
+            data-indicator="detect"/>
+
+    <!-- ================= 3-PIN HEADER ================= -->
+    <rect x="111" y="18" width="9" height="24" rx="1"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c7a85f">
+      <circle cx="115.5" cy="22" r="1.4"/>
+      <circle cx="115.5" cy="30" r="1.4"/>
+      <circle cx="115.5" cy="38" r="1.4"/>
+    </g>
+
+    <!-- metal header pins -->
+    <g stroke="url(#irObsMetal)" stroke-width="2" stroke-linecap="round">
+      <path d="M120 22 H128"/>
+      <path d="M120 30 H128"/>
+      <path d="M120 38 H128"/>
+    </g>
+
+    <!-- labels -->
+    <g fill="#ffffff" font-size="2.6" font-family="monospace">
+      <text x="108" y="23" text-anchor="end">OUT</text>
+      <text x="108" y="31" text-anchor="end">GND</text>
+      <text x="108" y="39" text-anchor="end">VCC</text>
+    </g>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="94"
+      y="12"
+      text-anchor="middle"
+      fill="#e8f5ff"
+      font-size="2.8"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      IR OBSTACLE
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="130" cy="22" r="2" fill="#cfcfcf" data-pin="OUT"/>
+    <circle cx="130" cy="30" r="2" fill="#cfcfcf" data-pin="GND"/>
+    <circle cx="130" cy="38" r="2" fill="#cfcfcf" data-pin="VCC"/>
+  `,
+
+  pins: [
+    {
+      id: 'OUT',
+      x: 130,
+      y: 22,
+      type: 'digital',
+      label: 'Digital Output'
+    },
+    {
+      id: 'GND',
+      x: 130,
+      y: 30,
+      type: 'gnd',
+      label: 'Ground'
+    },
+    {
+      id: 'VCC',
+      x: 130,
+      y: 38,
+      type: 'power',
+      label: 'VCC'
+    }
+  ],
+
+  defaults: {
+    label: 'IR Obstacle Sensor',
+    obstacle: false,
+    threshold: 50,
+    distance: 100
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'obstacle',
+      label: 'Obstacle Detected',
+      type: 'checkbox'
+    },
+    {
+      key: 'threshold',
+      label: 'Sensitivity',
+      type: 'number',
+      min: 0,
+      max: 100,
+      step: 1
+    },
+    {
+      key: 'distance',
+      label: 'Object Distance',
+      type: 'number',
+      min: 0,
+      max: 500,
+      step: 1
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Common LM393 IR obstacle modules usually provide
+      a digital comparator output.
+
+      This simplified simulator treats the sensor as ACTIVE LOW:
+      obstacle detected -> OUT = 0
+      no obstacle       -> OUT = 1
+    */
+
+    const distance = Number(
+      inputs?.distance ?? state?.distance ?? 100
+    );
+
+    const threshold = Number(
+      state?.threshold ?? 50
+    );
+
+    const obstacle = distance <= threshold;
+
+    return {
+      obstacle,
+      detected: obstacle,
+      OUT: obstacle ? 0 : 1,
+      output: obstacle ? 0 : 1
+    };
+  }
+},
+ultrasonicHCSR04: {
+  id: 'ultrasonicHCSR04',
+  label: 'HC-SR04 Ultrasonic Sensor',
+  category: 'Inputs',
+  desc: 'HC-SR04 ultrasonic distance sensor with VCC, TRIG, ECHO and GND pins',
+  w: 140,
+  h: 80,
+
+  svg: `
+    <defs>
+      <linearGradient id="hcsr04Pcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#1464b8"/>
+        <stop offset=".55" stop-color="#0e4e95"/>
+        <stop offset="1" stop-color="#073b73"/>
+      </linearGradient>
+
+      <radialGradient id="hcsr04Transducer" cx="50%" cy="50%" r="65%">
+        <stop offset="0" stop-color="#454545"/>
+        <stop offset=".35" stop-color="#1f1f1f"/>
+        <stop offset=".72" stop-color="#0b0b0b"/>
+        <stop offset="1" stop-color="#020202"/>
+      </radialGradient>
+
+      <linearGradient id="hcsr04Metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0f0f0"/>
+        <stop offset=".45" stop-color="#c5c5c5"/>
+        <stop offset="1" stop-color="#777"/>
+      </linearGradient>
+
+      <linearGradient id="hcsr04PinMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#666"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+
+      <radialGradient id="hcsr04Wave">
+        <stop offset="0" stop-color="#58d7ff" stop-opacity=".28"/>
+        <stop offset="1" stop-color="#58d7ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="5"
+      y="5"
+      width="130"
+      height="58"
+      rx="3"
+      fill="url(#hcsr04Pcb)"
+      stroke="#062f5e"
+      stroke-width="1"
+    />
+
+    <!-- mounting holes -->
+    <g fill="#f0f0f0" stroke="#7e7e7e" stroke-width=".6">
+      <circle cx="11" cy="11" r="3.5"/>
+      <circle cx="129" cy="11" r="3.5"/>
+      <circle cx="11" cy="57" r="3.5"/>
+      <circle cx="129" cy="57" r="3.5"/>
+    </g>
+
+    <!-- ================= LEFT TRANSDUCER ================= -->
+    <circle cx="39" cy="32" r="20"
+            fill="url(#hcsr04Metal)"
+            stroke="#8a8a8a"
+            stroke-width="1.2"/>
+
+    <circle cx="39" cy="32" r="16.2"
+            fill="url(#hcsr04Transducer)"
+            stroke="#111"
+            stroke-width=".8"/>
+
+    <circle cx="39" cy="32" r="12.5"
+            fill="none"
+            stroke="#4a4a4a"
+            stroke-width=".6"
+            stroke-dasharray="1.2 1.2"/>
+
+    <circle cx="39" cy="32" r="8.5"
+            fill="none"
+            stroke="#646464"
+            stroke-width=".5"
+            stroke-dasharray="1 1"/>
+
+    <!-- ================= RIGHT TRANSDUCER ================= -->
+    <circle cx="101" cy="32" r="20"
+            fill="url(#hcsr04Metal)"
+            stroke="#8a8a8a"
+            stroke-width="1.2"/>
+
+    <circle cx="101" cy="32" r="16.2"
+            fill="url(#hcsr04Transducer)"
+            stroke="#111"
+            stroke-width=".8"/>
+
+    <circle cx="101" cy="32" r="12.5"
+            fill="none"
+            stroke="#4a4a4a"
+            stroke-width=".6"
+            stroke-dasharray="1.2 1.2"/>
+
+    <circle cx="101" cy="32" r="8.5"
+            fill="none"
+            stroke="#646464"
+            stroke-width=".5"
+            stroke-dasharray="1 1"/>
+
+    <!-- subtle acoustic wave indicators -->
+    <circle cx="39" cy="32" r="25" fill="url(#hcsr04Wave)" opacity="0"
+            data-ultrasonic-tx="true"/>
+    <circle cx="101" cy="32" r="25" fill="url(#hcsr04Wave)" opacity="0"
+            data-ultrasonic-rx="true"/>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="70"
+      y="13"
+      text-anchor="middle"
+      fill="#ffffff"
+      font-size="6"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      HC-SR04
+    </text>
+
+    <!-- T / R markings -->
+    <text x="18" y="54" fill="#ffffff"
+          font-size="5" font-family="monospace">T</text>
+
+    <text x="118" y="54" fill="#ffffff"
+          font-size="5" font-family="monospace">R</text>
+
+    <!-- ================= 4-PIN HEADER ================= -->
+    <rect
+      x="53"
+      y="58"
+      width="34"
+      height="8"
+      rx="1"
+      fill="#202020"
+      stroke="#555"
+      stroke-width=".5"
+    />
+
+    <g fill="#c7a85f">
+      <circle cx="57" cy="62" r="1.3"/>
+      <circle cx="66" cy="62" r="1.3"/>
+      <circle cx="75" cy="62" r="1.3"/>
+      <circle cx="84" cy="62" r="1.3"/>
+    </g>
+
+    <!-- physical metal pins -->
+    <g stroke="url(#hcsr04PinMetal)" stroke-width="2" stroke-linecap="round">
+      <path d="M57 66 V78"/>
+      <path d="M66 66 V78"/>
+      <path d="M75 66 V78"/>
+      <path d="M84 66 V78"/>
+    </g>
+
+    <!-- pin labels -->
+    <g fill="#ffffff" font-size="3.2" font-family="monospace">
+      <text x="57" y="56" text-anchor="middle">VCC</text>
+      <text x="66" y="56" text-anchor="middle">TRIG</text>
+      <text x="75" y="56" text-anchor="middle">ECHO</text>
+      <text x="84" y="56" text-anchor="middle">GND</text>
+    </g>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d7d1a0" stroke="#666" stroke-width=".22">
+      <rect x="60" y="19" width="7" height="3" rx=".4"/>
+      <rect x="70" y="19" width="7" height="3" rx=".4"/>
+      <rect x="80" y="19" width="7" height="3" rx=".4"/>
+      <rect x="60" y="45" width="7" height="3" rx=".4"/>
+      <rect x="70" y="45" width="7" height="3" rx=".4"/>
+      <rect x="80" y="45" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="57" cy="80" r="2" fill="#cfcfcf" data-pin="VCC"/>
+    <circle cx="66" cy="80" r="2" fill="#cfcfcf" data-pin="TRIG"/>
+    <circle cx="75" cy="80" r="2" fill="#cfcfcf" data-pin="ECHO"/>
+    <circle cx="84" cy="80" r="2" fill="#cfcfcf" data-pin="GND"/>
+  `,
+
+  pins: [
+    {
+      id: 'VCC',
+      x: 57,
+      y: 80,
+      type: 'power',
+      label: 'VCC'
+    },
+    {
+      id: 'TRIG',
+      x: 66,
+      y: 80,
+      type: 'digital',
+      label: 'Trigger'
+    },
+    {
+      id: 'ECHO',
+      x: 75,
+      y: 80,
+      type: 'digital',
+      label: 'Echo'
+    },
+    {
+      id: 'GND',
+      x: 84,
+      y: 80,
+      type: 'gnd',
+      label: 'Ground'
+    }
+  ],
+
+  defaults: {
+    label: 'HC-SR04',
+    distance: 100,
+    maxDistance: 400,
+    enabled: true
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'distance',
+      label: 'Distance (cm)',
+      type: 'number',
+      min: 2,
+      max: 400,
+      step: 1
+    },
+    {
+      key: 'enabled',
+      label: 'Sensor Enabled',
+      type: 'checkbox'
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      HC-SR04 basic simulation model.
+
+      Real behavior:
+      1. TRIG receives a short HIGH pulse.
+      2. Sensor emits an ultrasonic burst.
+      3. ECHO stays HIGH for a duration proportional to distance.
+
+      Approximate formula:
+      distance_cm = echoTime_us / 58
+    */
+
+    const enabled = state?.enabled !== false;
+
+    const distance = Math.max(
+      2,
+      Math.min(
+        Number(state?.maxDistance ?? 400),
+        Number(inputs?.distance ?? state?.distance ?? 100)
+      )
+    );
+
+    const trig = Number(inputs?.TRIG ?? 0);
+
+    const echoTimeUs = enabled && trig > 0
+      ? Math.round(distance * 58)
+      : 0;
+
+    return {
+      enabled,
+      distance,
+      echoTimeUs,
+      ECHO: echoTimeUs > 0 ? 1 : 0,
+      triggered: trig > 0
+    };
+  }
+},
   /* ════════════════════════════
      PASSIVES
   ════════════════════════════ */
