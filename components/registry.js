@@ -1837,6 +1837,340 @@ const EDUSIM_COMPONENTS = {
     return {};
   }
   },
+  arduinoUnoR4Wifi: {
+  id: 'arduinoUnoR4Wifi',
+  label: 'Arduino UNO R4 WiFi',
+  category: 'Controllers',
+  desc: 'Arduino UNO R4 WiFi development board with Renesas RA4M1 MCU, ESP32-S3 WiFi/Bluetooth module and 12x8 LED matrix',
+  w: 180,
+  h: 130,
+
+  svg: `
+    <defs>
+      <linearGradient id="unoR4Pcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#0f4f87"/>
+        <stop offset="0.55" stop-color="#0b3f70"/>
+        <stop offset="1" stop-color="#082e53"/>
+      </linearGradient>
+
+      <linearGradient id="unoR4Metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#efefef"/>
+        <stop offset="1" stop-color="#8d8d8d"/>
+      </linearGradient>
+
+      <linearGradient id="unoR4Module" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f1f1e9"/>
+        <stop offset="1" stop-color="#bdbdb4"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <path
+      d="M12 7 H166
+         Q173 7 173 14
+         V112
+         Q173 120 165 120
+         H22
+         Q14 120 14 112
+         V103
+         H8
+         V77
+         H14
+         V16
+         Q14 7 22 7 Z"
+      fill="url(#unoR4Pcb)"
+      stroke="#062c4d"
+      stroke-width="1.2"
+    />
+
+    <!-- ================= MOUNTING HOLES ================= -->
+    <g fill="#e9e9e9" stroke="#858585" stroke-width=".7">
+      <circle cx="20" cy="15" r="4.5"/>
+      <circle cx="164" cy="15" r="4.5"/>
+      <circle cx="23" cy="111" r="4.5"/>
+      <circle cx="162" cy="111" r="4.5"/>
+    </g>
+
+    <!-- ================= USB-C CONNECTOR ================= -->
+    <rect x="3" y="70" width="30" height="17" rx="3"
+          fill="url(#unoR4Metal)" stroke="#6c6c6c" stroke-width=".9"/>
+    <rect x="4.5" y="74" width="26" height="9" rx="3"
+          fill="#333"/>
+    <rect x="7" y="76" width="21" height="5" rx="2.5"
+          fill="#161616"/>
+
+    <!-- ================= RESET BUTTON ================= -->
+    <rect x="14" y="22" width="14" height="12" rx="2"
+          fill="#dedede" stroke="#7c7c7c" stroke-width=".6"/>
+    <circle cx="21" cy="28" r="3.6" fill="#d9d9d9"/>
+    <text x="21" y="39" text-anchor="middle" fill="#f5f5f5"
+          font-size="3" font-family="monospace">RESET</text>
+
+    <!-- ================= MAIN MCU: RA4M1 ================= -->
+    <rect x="70" y="43" width="38" height="38" rx="2"
+          fill="#202020" stroke="#555" stroke-width=".7"/>
+    <circle cx="76" cy="49" r="1.3" fill="#575757"/>
+
+    <text x="89" y="57" text-anchor="middle" fill="#777"
+          font-size="3.5" font-family="monospace">RENESAS</text>
+    <text x="89" y="63" text-anchor="middle" fill="#6a6a6a"
+          font-size="3.2" font-family="monospace">RA4M1</text>
+
+    <g stroke="#bcbcbc" stroke-width=".35">
+      <path d="M74 43V39"/><path d="M79 43V39"/><path d="M84 43V39"/><path d="M89 43V39"/>
+      <path d="M94 43V39"/><path d="M99 43V39"/><path d="M104 43V39"/>
+
+      <path d="M74 81V85"/><path d="M79 81V85"/><path d="M84 81V85"/><path d="M89 81V85"/>
+      <path d="M94 81V85"/><path d="M99 81V85"/><path d="M104 81V85"/>
+
+      <path d="M70 47H66"/><path d="M70 52H66"/><path d="M70 57H66"/><path d="M70 62H66"/>
+      <path d="M70 67H66"/><path d="M70 72H66"/><path d="M70 77H66"/>
+
+      <path d="M108 47H112"/><path d="M108 52H112"/><path d="M108 57H112"/><path d="M108 62H112"/>
+      <path d="M108 67H112"/><path d="M108 72H112"/><path d="M108 77H112"/>
+    </g>
+
+    <!-- ================= ESP32-S3 MODULE ================= -->
+    <rect x="66" y="86" width="42" height="25" rx="2"
+          fill="url(#unoR4Module)" stroke="#777" stroke-width=".6"/>
+
+    <rect x="69" y="89" width="36" height="19" rx="1"
+          fill="#e2e2da" stroke="#aaa" stroke-width=".4"/>
+
+    <text x="87" y="96" text-anchor="middle" fill="#555"
+          font-size="2.8" font-family="monospace">ESP32-S3</text>
+
+    <text x="87" y="101" text-anchor="middle" fill="#666"
+          font-size="2.4" font-family="monospace">WiFi / BT</text>
+
+    <!-- PCB antenna on module -->
+    <path d="M70 105 h9 v-3 h7 v3 h7 v-3 h8"
+          fill="none" stroke="#9d7d35" stroke-width="1.1"/>
+
+    <!-- ================= 12x8 LED MATRIX ================= -->
+    <g fill="#e7e7cf" stroke="#777" stroke-width=".22">
+      <!-- row 1 -->
+      <rect x="118" y="44" width="3.2" height="3.2"/><rect x="123" y="44" width="3.2" height="3.2"/>
+      <rect x="128" y="44" width="3.2" height="3.2"/><rect x="133" y="44" width="3.2" height="3.2"/>
+      <rect x="138" y="44" width="3.2" height="3.2"/><rect x="143" y="44" width="3.2" height="3.2"/>
+      <rect x="148" y="44" width="3.2" height="3.2"/><rect x="153" y="44" width="3.2" height="3.2"/>
+      <rect x="158" y="44" width="3.2" height="3.2"/><rect x="163" y="44" width="3.2" height="3.2"/>
+      <rect x="168" y="44" width="3.2" height="3.2"/><rect x="173" y="44" width="3.2" height="3.2"/>
+
+      <!-- row 2 -->
+      <rect x="118" y="49" width="3.2" height="3.2"/><rect x="123" y="49" width="3.2" height="3.2"/>
+      <rect x="128" y="49" width="3.2" height="3.2"/><rect x="133" y="49" width="3.2" height="3.2"/>
+      <rect x="138" y="49" width="3.2" height="3.2"/><rect x="143" y="49" width="3.2" height="3.2"/>
+      <rect x="148" y="49" width="3.2" height="3.2"/><rect x="153" y="49" width="3.2" height="3.2"/>
+      <rect x="158" y="49" width="3.2" height="3.2"/><rect x="163" y="49" width="3.2" height="3.2"/>
+      <rect x="168" y="49" width="3.2" height="3.2"/><rect x="173" y="49" width="3.2" height="3.2"/>
+
+      <!-- row 3 -->
+      <rect x="118" y="54" width="3.2" height="3.2"/><rect x="123" y="54" width="3.2" height="3.2"/>
+      <rect x="128" y="54" width="3.2" height="3.2"/><rect x="133" y="54" width="3.2" height="3.2"/>
+      <rect x="138" y="54" width="3.2" height="3.2"/><rect x="143" y="54" width="3.2" height="3.2"/>
+      <rect x="148" y="54" width="3.2" height="3.2"/><rect x="153" y="54" width="3.2" height="3.2"/>
+      <rect x="158" y="54" width="3.2" height="3.2"/><rect x="163" y="54" width="3.2" height="3.2"/>
+      <rect x="168" y="54" width="3.2" height="3.2"/><rect x="173" y="54" width="3.2" height="3.2"/>
+
+      <!-- row 4 -->
+      <rect x="118" y="59" width="3.2" height="3.2"/><rect x="123" y="59" width="3.2" height="3.2"/>
+      <rect x="128" y="59" width="3.2" height="3.2"/><rect x="133" y="59" width="3.2" height="3.2"/>
+      <rect x="138" y="59" width="3.2" height="3.2"/><rect x="143" y="59" width="3.2" height="3.2"/>
+      <rect x="148" y="59" width="3.2" height="3.2"/><rect x="153" y="59" width="3.2" height="3.2"/>
+      <rect x="158" y="59" width="3.2" height="3.2"/><rect x="163" y="59" width="3.2" height="3.2"/>
+      <rect x="168" y="59" width="3.2" height="3.2"/><rect x="173" y="59" width="3.2" height="3.2"/>
+
+      <!-- row 5 -->
+      <rect x="118" y="64" width="3.2" height="3.2"/><rect x="123" y="64" width="3.2" height="3.2"/>
+      <rect x="128" y="64" width="3.2" height="3.2"/><rect x="133" y="64" width="3.2" height="3.2"/>
+      <rect x="138" y="64" width="3.2" height="3.2"/><rect x="143" y="64" width="3.2" height="3.2"/>
+      <rect x="148" y="64" width="3.2" height="3.2"/><rect x="153" y="64" width="3.2" height="3.2"/>
+      <rect x="158" y="64" width="3.2" height="3.2"/><rect x="163" y="64" width="3.2" height="3.2"/>
+      <rect x="168" y="64" width="3.2" height="3.2"/><rect x="173" y="64" width="3.2" height="3.2"/>
+
+      <!-- row 6 -->
+      <rect x="118" y="69" width="3.2" height="3.2"/><rect x="123" y="69" width="3.2" height="3.2"/>
+      <rect x="128" y="69" width="3.2" height="3.2"/><rect x="133" y="69" width="3.2" height="3.2"/>
+      <rect x="138" y="69" width="3.2" height="3.2"/><rect x="143" y="69" width="3.2" height="3.2"/>
+      <rect x="148" y="69" width="3.2" height="3.2"/><rect x="153" y="69" width="3.2" height="3.2"/>
+      <rect x="158" y="69" width="3.2" height="3.2"/><rect x="163" y="69" width="3.2" height="3.2"/>
+      <rect x="168" y="69" width="3.2" height="3.2"/><rect x="173" y="69" width="3.2" height="3.2"/>
+
+      <!-- row 7 -->
+      <rect x="118" y="74" width="3.2" height="3.2"/><rect x="123" y="74" width="3.2" height="3.2"/>
+      <rect x="128" y="74" width="3.2" height="3.2"/><rect x="133" y="74" width="3.2" height="3.2"/>
+      <rect x="138" y="74" width="3.2" height="3.2"/><rect x="143" y="74" width="3.2" height="3.2"/>
+      <rect x="148" y="74" width="3.2" height="3.2"/><rect x="153" y="74" width="3.2" height="3.2"/>
+      <rect x="158" y="74" width="3.2" height="3.2"/><rect x="163" y="74" width="3.2" height="3.2"/>
+      <rect x="168" y="74" width="3.2" height="3.2"/><rect x="173" y="74" width="3.2" height="3.2"/>
+
+      <!-- row 8 -->
+      <rect x="118" y="79" width="3.2" height="3.2"/><rect x="123" y="79" width="3.2" height="3.2"/>
+      <rect x="128" y="79" width="3.2" height="3.2"/><rect x="133" y="79" width="3.2" height="3.2"/>
+      <rect x="138" y="79" width="3.2" height="3.2"/><rect x="143" y="79" width="3.2" height="3.2"/>
+      <rect x="148" y="79" width="3.2" height="3.2"/><rect x="153" y="79" width="3.2" height="3.2"/>
+      <rect x="158" y="79" width="3.2" height="3.2"/><rect x="163" y="79" width="3.2" height="3.2"/>
+      <rect x="168" y="79" width="3.2" height="3.2"/><rect x="173" y="79" width="3.2" height="3.2"/>
+    </g>
+
+    <!-- ================= TOP DIGITAL HEADER ================= -->
+    <rect x="55" y="7" width="111" height="10" rx="1"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c9c9c9">
+      <circle cx="60" cy="12" r="1.6"/><circle cx="67" cy="12" r="1.6"/>
+      <circle cx="74" cy="12" r="1.6"/><circle cx="81" cy="12" r="1.6"/>
+      <circle cx="88" cy="12" r="1.6"/><circle cx="95" cy="12" r="1.6"/>
+      <circle cx="102" cy="12" r="1.6"/><circle cx="109" cy="12" r="1.6"/>
+      <circle cx="116" cy="12" r="1.6"/><circle cx="123" cy="12" r="1.6"/>
+      <circle cx="130" cy="12" r="1.6"/><circle cx="137" cy="12" r="1.6"/>
+      <circle cx="144" cy="12" r="1.6"/><circle cx="151" cy="12" r="1.6"/>
+      <circle cx="158" cy="12" r="1.6"/>
+    </g>
+
+    <g fill="#fff" font-size="2.4" font-family="monospace">
+      <text x="60" y="5" text-anchor="middle">AREF</text>
+      <text x="67" y="5" text-anchor="middle">GND</text>
+      <text x="74" y="5" text-anchor="middle">13</text>
+      <text x="81" y="5" text-anchor="middle">12</text>
+      <text x="88" y="5" text-anchor="middle">11</text>
+      <text x="95" y="5" text-anchor="middle">10</text>
+      <text x="102" y="5" text-anchor="middle">9</text>
+      <text x="109" y="5" text-anchor="middle">8</text>
+      <text x="116" y="5" text-anchor="middle">7</text>
+      <text x="123" y="5" text-anchor="middle">6</text>
+      <text x="130" y="5" text-anchor="middle">5</text>
+      <text x="137" y="5" text-anchor="middle">4</text>
+      <text x="144" y="5" text-anchor="middle">3</text>
+      <text x="151" y="5" text-anchor="middle">2</text>
+      <text x="158" y="5" text-anchor="middle">1/0</text>
+    </g>
+
+    <!-- ================= BOTTOM POWER + ANALOG HEADER ================= -->
+    <rect x="54" y="109" width="112" height="10" rx="1"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c9c9c9">
+      <circle cx="59" cy="114" r="1.6"/><circle cx="66" cy="114" r="1.6"/>
+      <circle cx="73" cy="114" r="1.6"/><circle cx="80" cy="114" r="1.6"/>
+      <circle cx="87" cy="114" r="1.6"/><circle cx="94" cy="114" r="1.6"/>
+      <circle cx="101" cy="114" r="1.6"/>
+      <circle cx="111" cy="114" r="1.6"/><circle cx="118" cy="114" r="1.6"/>
+      <circle cx="125" cy="114" r="1.6"/><circle cx="132" cy="114" r="1.6"/>
+      <circle cx="139" cy="114" r="1.6"/><circle cx="146" cy="114" r="1.6"/>
+    </g>
+
+    <g fill="#fff" font-size="2.3" font-family="monospace">
+      <text x="59" y="125" text-anchor="middle">IOREF</text>
+      <text x="66" y="125" text-anchor="middle">RST</text>
+      <text x="73" y="125" text-anchor="middle">3V3</text>
+      <text x="80" y="125" text-anchor="middle">5V</text>
+      <text x="87" y="125" text-anchor="middle">GND</text>
+      <text x="94" y="125" text-anchor="middle">GND</text>
+      <text x="101" y="125" text-anchor="middle">VIN</text>
+
+      <text x="111" y="125" text-anchor="middle">A0</text>
+      <text x="118" y="125" text-anchor="middle">A1</text>
+      <text x="125" y="125" text-anchor="middle">A2</text>
+      <text x="132" y="125" text-anchor="middle">A3</text>
+      <text x="139" y="125" text-anchor="middle">A4</text>
+      <text x="146" y="125" text-anchor="middle">A5</text>
+    </g>
+
+    <!-- ================= QWIIC / JST-SH STYLE CONNECTOR ================= -->
+    <rect x="155" y="29" width="17" height="10" rx="2"
+          fill="#eeeeee" stroke="#a5a5a5" stroke-width=".5"/>
+    <rect x="158" y="31" width="11" height="6" rx="1"
+          fill="#d7d7d7"/>
+
+    <!-- ================= SILKSCREEN ================= -->
+    <text x="68" y="32" fill="#fff"
+          font-size="5" font-family="Arial, sans-serif" font-weight="bold">
+      ARDUINO
+    </text>
+
+    <text x="91" y="91" fill="#fff"
+          font-size="4" font-family="Arial, sans-serif" font-weight="bold">
+      UNO R4 WiFi
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION HINTS ================= -->
+    <g fill="#cfcfcf" opacity=".95">
+      <!-- top -->
+      <circle cx="60" cy="0" r="1.5"/><circle cx="67" cy="0" r="1.5"/>
+      <circle cx="74" cy="0" r="1.5"/><circle cx="81" cy="0" r="1.5"/>
+      <circle cx="88" cy="0" r="1.5"/><circle cx="95" cy="0" r="1.5"/>
+      <circle cx="102" cy="0" r="1.5"/><circle cx="109" cy="0" r="1.5"/>
+      <circle cx="116" cy="0" r="1.5"/><circle cx="123" cy="0" r="1.5"/>
+      <circle cx="130" cy="0" r="1.5"/><circle cx="137" cy="0" r="1.5"/>
+      <circle cx="144" cy="0" r="1.5"/><circle cx="151" cy="0" r="1.5"/>
+      <circle cx="158" cy="0" r="1.5"/>
+
+      <!-- bottom -->
+      <circle cx="59" cy="130" r="1.5"/><circle cx="66" cy="130" r="1.5"/>
+      <circle cx="73" cy="130" r="1.5"/><circle cx="80" cy="130" r="1.5"/>
+      <circle cx="87" cy="130" r="1.5"/><circle cx="94" cy="130" r="1.5"/>
+      <circle cx="101" cy="130" r="1.5"/>
+
+      <circle cx="111" cy="130" r="1.5"/><circle cx="118" cy="130" r="1.5"/>
+      <circle cx="125" cy="130" r="1.5"/><circle cx="132" cy="130" r="1.5"/>
+      <circle cx="139" cy="130" r="1.5"/><circle cx="146" cy="130" r="1.5"/>
+    </g>
+  `,
+
+  pins: [
+    // TOP HEADER
+    { id:'AREF', x:60,  y:0, type:'power',   label:'AREF' },
+    { id:'GND_TOP', x:67, y:0, type:'gnd',   label:'GND' },
+    { id:'D13', x:74,  y:0, type:'digital', label:'D13 / SCK / LED' },
+    { id:'D12', x:81,  y:0, type:'digital', label:'D12 / MISO' },
+    { id:'D11', x:88,  y:0, type:'digital', label:'D11 / MOSI / PWM' },
+    { id:'D10', x:95,  y:0, type:'digital', label:'D10 / PWM' },
+    { id:'D9',  x:102, y:0, type:'digital', label:'D9 / PWM' },
+    { id:'D8',  x:109, y:0, type:'digital', label:'D8' },
+    { id:'D7',  x:116, y:0, type:'digital', label:'D7' },
+    { id:'D6',  x:123, y:0, type:'digital', label:'D6 / PWM' },
+    { id:'D5',  x:130, y:0, type:'digital', label:'D5 / PWM' },
+    { id:'D4',  x:137, y:0, type:'digital', label:'D4' },
+    { id:'D3',  x:144, y:0, type:'digital', label:'D3 / PWM' },
+    { id:'D2',  x:151, y:0, type:'digital', label:'D2' },
+    { id:'D1_D0', x:158, y:0, type:'digital', label:'D1 TX / D0 RX' },
+
+    // POWER HEADER
+    { id:'IOREF', x:59,  y:130, type:'power',   label:'IOREF' },
+    { id:'RESET', x:66,  y:130, type:'digital', label:'RESET' },
+    { id:'3V3',   x:73,  y:130, type:'power',   label:'3.3V' },
+    { id:'5V',    x:80,  y:130, type:'power',   label:'5V' },
+    { id:'GND1',  x:87,  y:130, type:'gnd',     label:'GND' },
+    { id:'GND2',  x:94,  y:130, type:'gnd',     label:'GND' },
+    { id:'VIN',   x:101, y:130, type:'power',   label:'VIN' },
+
+    // ANALOG HEADER
+    { id:'A0', x:111, y:130, type:'analog', label:'A0' },
+    { id:'A1', x:118, y:130, type:'analog', label:'A1' },
+    { id:'A2', x:125, y:130, type:'analog', label:'A2' },
+    { id:'A3', x:132, y:130, type:'analog', label:'A3' },
+    { id:'A4', x:139, y:130, type:'analog', label:'A4 / SDA' },
+    { id:'A5', x:146, y:130, type:'analog', label:'A5 / SCL' }
+  ],
+
+  defaults: {
+    label: 'Arduino UNO R4 WiFi'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+  },
   
 
   /* ════════════════════════════
