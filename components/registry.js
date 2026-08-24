@@ -2171,6 +2171,264 @@ const EDUSIM_COMPONENTS = {
     return {};
   }
   },
+  raspberryPi5: {
+  id: 'raspberryPi5',
+  label: 'Raspberry Pi 5',
+  category: 'Controllers',
+  desc: 'Raspberry Pi 5 single-board computer with 40-pin GPIO, dual micro-HDMI, USB, Ethernet, CSI/DSI and PCIe',
+  w: 190,
+  h: 130,
+
+  svg: `
+    <defs>
+      <linearGradient id="rpi5Pcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#39b35e"/>
+        <stop offset="0.55" stop-color="#1f9f4b"/>
+        <stop offset="1" stop-color="#147d39"/>
+      </linearGradient>
+
+      <linearGradient id="rpi5Metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f0f0f0"/>
+        <stop offset="1" stop-color="#939393"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect x="8" y="8" width="174" height="114" rx="8"
+          fill="url(#rpi5Pcb)" stroke="#126a32" stroke-width="1.2"/>
+
+    <!-- mounting holes -->
+    <g fill="#f0f0f0" stroke="#8b8b8b" stroke-width=".7">
+      <circle cx="17" cy="17" r="4.5"/>
+      <circle cx="173" cy="17" r="4.5"/>
+      <circle cx="17" cy="113" r="4.5"/>
+      <circle cx="173" cy="113" r="4.5"/>
+    </g>
+
+    <!-- ================= 40-PIN GPIO HEADER ================= -->
+    <rect x="43" y="10" width="91" height="12" rx="1.5"
+          fill="#232323" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c7a85f" stroke="#725f34" stroke-width=".25">
+      <circle cx="47" cy="14" r="1.6"/><circle cx="47" cy="18" r="1.6"/>
+      <circle cx="51" cy="14" r="1.6"/><circle cx="51" cy="18" r="1.6"/>
+      <circle cx="55" cy="14" r="1.6"/><circle cx="55" cy="18" r="1.6"/>
+      <circle cx="59" cy="14" r="1.6"/><circle cx="59" cy="18" r="1.6"/>
+      <circle cx="63" cy="14" r="1.6"/><circle cx="63" cy="18" r="1.6"/>
+      <circle cx="67" cy="14" r="1.6"/><circle cx="67" cy="18" r="1.6"/>
+      <circle cx="71" cy="14" r="1.6"/><circle cx="71" cy="18" r="1.6"/>
+      <circle cx="75" cy="14" r="1.6"/><circle cx="75" cy="18" r="1.6"/>
+      <circle cx="79" cy="14" r="1.6"/><circle cx="79" cy="18" r="1.6"/>
+      <circle cx="83" cy="14" r="1.6"/><circle cx="83" cy="18" r="1.6"/>
+      <circle cx="87" cy="14" r="1.6"/><circle cx="87" cy="18" r="1.6"/>
+      <circle cx="91" cy="14" r="1.6"/><circle cx="91" cy="18" r="1.6"/>
+      <circle cx="95" cy="14" r="1.6"/><circle cx="95" cy="18" r="1.6"/>
+      <circle cx="99" cy="14" r="1.6"/><circle cx="99" cy="18" r="1.6"/>
+      <circle cx="103" cy="14" r="1.6"/><circle cx="103" cy="18" r="1.6"/>
+      <circle cx="107" cy="14" r="1.6"/><circle cx="107" cy="18" r="1.6"/>
+      <circle cx="111" cy="14" r="1.6"/><circle cx="111" cy="18" r="1.6"/>
+      <circle cx="115" cy="14" r="1.6"/><circle cx="115" cy="18" r="1.6"/>
+      <circle cx="119" cy="14" r="1.6"/><circle cx="119" cy="18" r="1.6"/>
+      <circle cx="123" cy="14" r="1.6"/><circle cx="123" cy="18" r="1.6"/>
+    </g>
+
+    <text x="89" y="28" text-anchor="middle" fill="#fff"
+          font-size="4" font-family="Arial, sans-serif" font-weight="bold">
+      Raspberry Pi 5
+    </text>
+
+    <!-- ================= CPU / SoC ================= -->
+    <rect x="69" y="42" width="34" height="34" rx="2"
+          fill="#252525" stroke="#555" stroke-width=".7"/>
+    <text x="86" y="56" text-anchor="middle" fill="#777"
+          font-size="3.4" font-family="monospace">BCM2712</text>
+    <text x="86" y="62" text-anchor="middle" fill="#666"
+          font-size="2.5" font-family="monospace">CPU</text>
+
+    <!-- ================= RP1 I/O CONTROLLER ================= -->
+    <rect x="112" y="41" width="23" height="23" rx="1.5"
+          fill="#292929" stroke="#555" stroke-width=".6"/>
+    <text x="123.5" y="54" text-anchor="middle" fill="#747474"
+          font-size="3" font-family="monospace">RP1</text>
+
+    <!-- ================= RAM ================= -->
+    <rect x="43" y="42" width="19" height="28" rx="1.5"
+          fill="#303030" stroke="#555" stroke-width=".6"/>
+    <text x="52.5" y="57" text-anchor="middle" fill="#777"
+          font-size="2.7" font-family="monospace">RAM</text>
+
+    <!-- ================= USB-C POWER ================= -->
+    <rect x="25" y="102" width="24" height="12" rx="3"
+          fill="url(#rpi5Metal)" stroke="#777" stroke-width=".7"/>
+    <rect x="28" y="105" width="18" height="6" rx="2.5" fill="#333"/>
+
+    <!-- ================= DUAL MICRO-HDMI ================= -->
+    <g>
+      <rect x="55" y="105" width="18" height="8" rx="1.2"
+            fill="url(#rpi5Metal)" stroke="#747474" stroke-width=".6"/>
+      <rect x="77" y="105" width="18" height="8" rx="1.2"
+            fill="url(#rpi5Metal)" stroke="#747474" stroke-width=".6"/>
+      <rect x="59" y="107" width="10" height="4" fill="#222"/>
+      <rect x="81" y="107" width="10" height="4" fill="#222"/>
+    </g>
+
+    <!-- ================= USB PORTS ================= -->
+    <g>
+      <rect x="144" y="30" width="26" height="17" rx="1"
+            fill="url(#rpi5Metal)" stroke="#666" stroke-width=".7"/>
+      <rect x="144" y="51" width="26" height="17" rx="1"
+            fill="url(#rpi5Metal)" stroke="#666" stroke-width=".7"/>
+
+      <rect x="148" y="33" width="18" height="11" rx=".8" fill="#2f2f2f"/>
+      <rect x="148" y="54" width="18" height="11" rx=".8" fill="#2f2f2f"/>
+    </g>
+
+    <!-- ================= ETHERNET ================= -->
+    <rect x="142" y="76" width="29" height="29" rx="2"
+          fill="url(#rpi5Metal)" stroke="#666" stroke-width=".8"/>
+    <rect x="147" y="82" width="19" height="18" rx="1" fill="#3e3e3e"/>
+
+    <!-- ================= CSI/DSI CONNECTORS ================= -->
+    <g fill="#eeeeee" stroke="#8f8f8f" stroke-width=".45">
+      <rect x="108" y="104" width="18" height="8" rx="1"/>
+      <rect x="129" y="104" width="18" height="8" rx="1"/>
+    </g>
+
+    <!-- ================= M.2 / PCIe FFC ================= -->
+    <rect x="17" y="51" width="10" height="34" rx="1.5"
+          fill="#212121" stroke="#555" stroke-width=".6"/>
+    <text x="22" y="70" transform="rotate(-90 22 70)" text-anchor="middle"
+          fill="#e5e5e5" font-size="2.6" font-family="monospace">PCIe</text>
+
+    <!-- ================= microSD SLOT ================= -->
+    <rect x="15" y="34" width="16" height="12" rx="1.5"
+          fill="#2e2e2e" stroke="#666" stroke-width=".6"/>
+    <rect x="17" y="36" width="12" height="8" rx=".8" fill="#111"/>
+    <text x="23" y="49" text-anchor="middle" fill="#fff"
+          font-size="2.3" font-family="monospace">microSD</text>
+
+    <!-- ================= FAN HEADER ================= -->
+    <rect x="133" y="29" width="8" height="8" rx="1"
+          fill="#f0f0f0" stroke="#a0a0a0" stroke-width=".4"/>
+    <g fill="#bbb">
+      <circle cx="135" cy="33" r=".8"/>
+      <circle cx="137" cy="33" r=".8"/>
+      <circle cx="139" cy="33" r=".8"/>
+    </g>
+
+    <!-- ================= RTC BATTERY HEADER ================= -->
+    <rect x="34" y="106" width="12" height="6" rx="1"
+          fill="#efefef" stroke="#999" stroke-width=".4"/>
+
+    <!-- ================= POWER BUTTON ================= -->
+    <circle cx="28" cy="91" r="4.2" fill="#d6d6d6" stroke="#777" stroke-width=".6"/>
+    <text x="28" y="98" text-anchor="middle" fill="#fff"
+          font-size="2.5" font-family="monospace">PWR</text>
+
+    <!-- ================= STATUS LED ================= -->
+    <circle cx="36" cy="91" r="1.8" fill="#e35f4c" stroke="#7b3027" stroke-width=".35"/>
+
+    <!-- ================= SMALL COMPONENTS ================= -->
+    <g fill="#d8d2a5" stroke="#666" stroke-width=".22">
+      <rect x="39" y="81" width="7" height="3" rx=".4"/>
+      <rect x="49" y="81" width="7" height="3" rx=".4"/>
+      <rect x="59" y="81" width="7" height="3" rx=".4"/>
+      <rect x="106" y="70" width="7" height="3" rx=".4"/>
+      <rect x="116" y="70" width="7" height="3" rx=".4"/>
+      <rect x="126" y="70" width="7" height="3" rx=".4"/>
+      <rect x="106" y="78" width="7" height="3" rx=".4"/>
+      <rect x="116" y="78" width="7" height="3" rx=".4"/>
+      <rect x="126" y="78" width="7" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= HDMI / BOARD MARKINGS ================= -->
+    <text x="74" y="97" text-anchor="middle" fill="#fff"
+          font-size="4" font-family="Arial, sans-serif" font-weight="bold">
+      HDMI
+    </text>
+
+    <text x="87" y="34" text-anchor="middle" fill="#d7ffe2"
+          font-size="3" font-family="Arial, sans-serif">
+      Raspberry Pi
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION HINTS ================= -->
+    <g fill="#cfcfcf" opacity=".95">
+      <!-- 40-pin logical breakout points placed above header -->
+      <circle cx="47" cy="0" r="1.3"/><circle cx="51" cy="0" r="1.3"/>
+      <circle cx="55" cy="0" r="1.3"/><circle cx="59" cy="0" r="1.3"/>
+      <circle cx="63" cy="0" r="1.3"/><circle cx="67" cy="0" r="1.3"/>
+      <circle cx="71" cy="0" r="1.3"/><circle cx="75" cy="0" r="1.3"/>
+      <circle cx="79" cy="0" r="1.3"/><circle cx="83" cy="0" r="1.3"/>
+      <circle cx="87" cy="0" r="1.3"/><circle cx="91" cy="0" r="1.3"/>
+      <circle cx="95" cy="0" r="1.3"/><circle cx="99" cy="0" r="1.3"/>
+      <circle cx="103" cy="0" r="1.3"/><circle cx="107" cy="0" r="1.3"/>
+      <circle cx="111" cy="0" r="1.3"/><circle cx="115" cy="0" r="1.3"/>
+      <circle cx="119" cy="0" r="1.3"/><circle cx="123" cy="0" r="1.3"/>
+    </g>
+  `,
+
+  pins: [
+    // Raspberry Pi 40-pin header — BCM numbering / power labels
+    { id:'3V3_1',   x:47,  y:0, type:'power',   label:'Pin 1 - 3.3V' },
+    { id:'5V_1',    x:51,  y:0, type:'power',   label:'Pin 2 - 5V' },
+    { id:'GPIO2',   x:55,  y:0, type:'digital', label:'Pin 3 - GPIO2 / SDA1' },
+    { id:'5V_2',    x:59,  y:0, type:'power',   label:'Pin 4 - 5V' },
+    { id:'GPIO3',   x:63,  y:0, type:'digital', label:'Pin 5 - GPIO3 / SCL1' },
+    { id:'GND1',    x:67,  y:0, type:'gnd',     label:'Pin 6 - GND' },
+    { id:'GPIO4',   x:71,  y:0, type:'digital', label:'Pin 7 - GPIO4' },
+    { id:'GPIO14',  x:75,  y:0, type:'digital', label:'Pin 8 - GPIO14 / TXD0' },
+    { id:'GND2',    x:79,  y:0, type:'gnd',     label:'Pin 9 - GND' },
+    { id:'GPIO15',  x:83,  y:0, type:'digital', label:'Pin 10 - GPIO15 / RXD0' },
+    { id:'GPIO17',  x:87,  y:0, type:'digital', label:'Pin 11 - GPIO17' },
+    { id:'GPIO18',  x:91,  y:0, type:'digital', label:'Pin 12 - GPIO18 / PWM0' },
+    { id:'GPIO27',  x:95,  y:0, type:'digital', label:'Pin 13 - GPIO27' },
+    { id:'GND3',    x:99,  y:0, type:'gnd',     label:'Pin 14 - GND' },
+    { id:'GPIO22',  x:103, y:0, type:'digital', label:'Pin 15 - GPIO22' },
+    { id:'GPIO23',  x:107, y:0, type:'digital', label:'Pin 16 - GPIO23' },
+    { id:'3V3_2',   x:111, y:0, type:'power',   label:'Pin 17 - 3.3V' },
+    { id:'GPIO24',  x:115, y:0, type:'digital', label:'Pin 18 - GPIO24' },
+    { id:'GPIO10',  x:119, y:0, type:'digital', label:'Pin 19 - GPIO10 / MOSI' },
+    { id:'GND4',    x:123, y:0, type:'gnd',     label:'Pin 20 - GND' },
+
+    { id:'GPIO9',   x:127, y:0, type:'digital', label:'Pin 21 - GPIO9 / MISO' },
+    { id:'GPIO25',  x:131, y:0, type:'digital', label:'Pin 22 - GPIO25' },
+    { id:'GPIO11',  x:135, y:0, type:'digital', label:'Pin 23 - GPIO11 / SCLK' },
+    { id:'GPIO8',   x:139, y:0, type:'digital', label:'Pin 24 - GPIO8 / CE0' },
+    { id:'GND5',    x:143, y:0, type:'gnd',     label:'Pin 25 - GND' },
+    { id:'GPIO7',   x:147, y:0, type:'digital', label:'Pin 26 - GPIO7 / CE1' },
+    { id:'GPIO0',   x:151, y:0, type:'digital', label:'Pin 27 - GPIO0 / ID_SD' },
+    { id:'GPIO1',   x:155, y:0, type:'digital', label:'Pin 28 - GPIO1 / ID_SC' },
+    { id:'GPIO5',   x:159, y:0, type:'digital', label:'Pin 29 - GPIO5' },
+    { id:'GND6',    x:163, y:0, type:'gnd',     label:'Pin 30 - GND' },
+    { id:'GPIO6',   x:167, y:0, type:'digital', label:'Pin 31 - GPIO6' },
+    { id:'GPIO12',  x:171, y:0, type:'digital', label:'Pin 32 - GPIO12 / PWM0' },
+    { id:'GPIO13',  x:175, y:0, type:'digital', label:'Pin 33 - GPIO13 / PWM1' },
+    { id:'GND7',    x:179, y:0, type:'gnd',     label:'Pin 34 - GND' },
+    { id:'GPIO19',  x:183, y:0, type:'digital', label:'Pin 35 - GPIO19 / PCM_FS' },
+    { id:'GPIO16',  x:187, y:0, type:'digital', label:'Pin 36 - GPIO16' },
+    { id:'GPIO26',  x:191, y:0, type:'digital', label:'Pin 37 - GPIO26' },
+    { id:'GPIO20',  x:195, y:0, type:'digital', label:'Pin 38 - GPIO20 / PCM_DIN' },
+    { id:'GND8',    x:199, y:0, type:'gnd',     label:'Pin 39 - GND' },
+    { id:'GPIO21',  x:203, y:0, type:'digital', label:'Pin 40 - GPIO21 / PCM_DOUT' }
+  ],
+
+  defaults: {
+    label: 'Raspberry Pi 5'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+  },
   
 
   /* ════════════════════════════
