@@ -928,16 +928,26 @@ body::after {
   justify-content: center;
   gap: 14px;
   color: var(--muted);
-  padding: 60px 0;
+  padding: 52px 28px;
   text-align: center;
+  background: linear-gradient(180deg, rgba(17, 20, 22, .72), rgba(11, 14, 17, .9));
+  border: 1px dashed rgba(110, 215, 230, .24);
+  border-radius: 16px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
 }
 
 .empty-state svg {
-  opacity: .3
+  opacity: .7;
+  color: var(--accent2);
 }
 
 .empty-state p {
-  font-size: 14px
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.empty-state strong {
+  color: var(--text);
 }
 
 .project-card {
@@ -1329,22 +1339,80 @@ body::after {
 
 .tab-panel#tab-virtuallab .page-header {
   border-bottom-color: rgba(110, 215, 230, .28);
-  background: linear-gradient(90deg, var(--surface), rgba(110, 215, 230, .045))
+  background: linear-gradient(90deg, var(--surface), rgba(110, 215, 230, .045));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title status"
+    "subtitle action";
+  align-items: start;
+  column-gap: 20px;
+  row-gap: 10px;
+  padding-bottom: 18px;
 }
 
 .tab-panel#tab-virtuallab .page-header h2 {
-  color: var(--accent2)
+  color: var(--accent2);
+  grid-area: title;
+  margin: 0;
+  padding-right: 140px;
+}
+
+.tab-panel#tab-virtuallab .page-header p {
+  grid-area: subtitle;
+  max-width: 780px;
 }
 
 .tab-panel#tab-virtuallab .page-header::before {
   content: "◈  SIMULATION DECK / ONLINE";
-  position: absolute;
-  right: 28px;
-  bottom: 12px;
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  grid-area: status;
   color: var(--accent2);
+  background: rgba(110, 215, 230, .08);
+  border: 1px solid rgba(110, 215, 230, .22);
+  border-radius: 999px;
+  padding: 6px 10px;
   font: 700 9px var(--font-mono);
   letter-spacing: 1px;
-  opacity: .72
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .02);
+}
+
+.tab-panel#tab-virtuallab .page-header .btn {
+  grid-area: action;
+  justify-self: end;
+  align-self: end;
+}
+
+#newLabProjectBtn {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid rgba(217, 139, 82, .44);
+  background: linear-gradient(180deg, rgba(26, 30, 32, 1), rgba(14, 18, 20, 1));
+  color: var(--text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    0 10px 20px rgba(0, 0, 0, .22),
+    0 0 0 1px rgba(217, 139, 82, .12);
+}
+
+#newLabProjectBtn:hover:not(:disabled),
+#newLabProjectBtn:focus-visible:not(:disabled) {
+  border-color: rgba(217, 139, 82, .7);
+  background: linear-gradient(180deg, rgba(32, 36, 38, 1), rgba(18, 22, 24, 1));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 12px 24px rgba(0, 0, 0, .28),
+    0 0 0 1px rgba(217, 139, 82, .2),
+    0 0 18px rgba(217, 139, 82, .12);
+  transform: translateY(-1px);
+}
+
+#newLabProjectBtn svg {
+  color: var(--accent);
 }
 
 .tab-panel#tab-virtuallab .page-header::after {
@@ -1352,7 +1420,8 @@ body::after {
 }
 
 .vlab-card {
-  background: var(--surface);
+  position: relative;
+  background: linear-gradient(180deg, rgba(18, 22, 27, 1), rgba(12, 15, 19, 1));
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
@@ -1360,12 +1429,21 @@ body::after {
   flex-direction: column;
   gap: 10px;
   cursor: pointer;
-  transition: border-color .18s, transform .18s;
+  transition: border-color .18s, transform .18s, box-shadow .18s;
   box-shadow: inset 0 1px rgba(255, 255, 255, .03), 0 14px 30px rgba(0, 0, 0, .24);
 }
 
+.vlab-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(110, 215, 230, .7), transparent);
+  border-radius: 12px 12px 0 0;
+}
+
 .vlab-card:hover {
-  border-color: var(--accent2);
+  border-color: rgba(110, 215, 230, .4);
   transform: translateY(-2px);
   box-shadow: 0 0 18px rgba(110, 215, 230, .09);
 }
@@ -1392,6 +1470,7 @@ body::after {
 .vlab-card h4 {
   font-size: 14px;
   font-weight: 600;
+  color: var(--text);
 }
 
 .vlab-card p {
@@ -1405,6 +1484,26 @@ body::after {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.vlab-card .tag {
+  background: rgba(110, 215, 230, .08);
+  border: 1px solid rgba(110, 215, 230, .18);
+  color: var(--accent2);
+  padding: 3px 8px;
+}
+
+.vlab-card .btn.primary,
+.vlab-card .vlab-open-btn {
+  background: linear-gradient(180deg, rgba(22, 28, 31, 1), rgba(16, 20, 22, 1));
+  border: 1px solid rgba(217, 139, 82, .4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 8px 18px rgba(0, 0, 0, .2);
+}
+
+.vlab-card .btn.primary:hover:not(:disabled),
+.vlab-card .vlab-open-btn:hover:not(:disabled) {
+  border-color: rgba(217, 139, 82, .64);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 10px 18px rgba(0, 0, 0, .24), 0 0 16px rgba(217, 139, 82, .08);
 }
 
 /* Mode Picker */
@@ -1524,9 +1623,25 @@ body::after {
     flex-basis: 100%
   }
 
+  .tab-panel#tab-virtuallab .page-header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "status"
+      "subtitle"
+      "action";
+  }
+
   .tab-panel#tab-virtuallab .page-header::before {
-    right: 18px;
-    font-size: 8px
+    justify-self: start;
+    font-size: 8px;
+    margin-top: 2px;
+  }
+
+  .tab-panel#tab-virtuallab .page-header h2,
+  .tab-panel#tab-virtuallab .page-header p,
+  .tab-panel#tab-virtuallab .page-header .btn {
+    justify-self: start;
   }
 
   .profile-layout,
