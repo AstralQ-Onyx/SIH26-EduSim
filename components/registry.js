@@ -736,6 +736,7 @@ const EDUSIM_COMPONENTS = {
       return {};
     }
   },
+  
 
   /* ════════════════════════════
      OUTPUTS
