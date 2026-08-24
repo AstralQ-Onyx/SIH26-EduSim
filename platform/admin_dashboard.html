@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduSim — Admin Dashboard</title>
+  <meta name="description" content="EduSim Admin Control Panel — Manage users, admins and virtual lab components."/>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css"/>
+
+  <style>
+    /* ── Admin-specific additions on top of dashboard.css ── */
+    .admin-badge {
+      display: inline-flex; align-items: center;
+      background: rgba(255,68,102,.15); color: #ff4466;
+      padding: 2px 7px; border-radius: 20px;
+      font-family: var(--font-ui); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      border: 1px solid rgba(255,68,102,.4);
+      margin-left: 8px; vertical-align: middle;
+    }
+    .brand-admin { border-bottom: 1px solid rgba(255,68,102,.25) !important; }
+
+    /* Stats cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+      transition: border-color .18s;
+    }
+    .stat-card:hover { border-color: var(--border-h); }
+    .stat-card-label {
+      font-family: var(--font-ui); font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; color: var(--muted); text-transform: uppercase;
+    }
+    .stat-card-value {
+      font-family: var(--font-logo); font-size: 32px;
+      font-weight: 700; color: var(--accent); line-height: 1;
+    }
+    .stat-card-icon {
+      width: 36px; height: 36px; border-radius: 8px; margin-bottom: 4px;
+      background: linear-gradient(135deg, rgba(0,212,255,.12), rgba(123,47,255,.12));
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+
+    /* Admin table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      padding: 10px 14px; text-align: left; font-family: var(--font-ui);
+      font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+      color: var(--muted); border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      font-size: 13px; vertical-align: middle;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(0,212,255,.03); }
+    .data-table code {
+      background: var(--surface2); padding: 2px 6px;
+      border-radius: 4px; font-family: var(--font-mono); font-size: 11px;
+      color: var(--accent);
+    }
+
+    /* User row avatar */
+    .row-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 12px; color: #fff; flex-shrink: 0;
+    }
+    .row-user { display: flex; align-items: center; gap: 10px; }
+    .row-user-name { font-weight: 600; font-size: 13px; }
+    .row-user-sub { font-size: 11px; color: var(--muted); }
+
+    /* Role tag */
+    .role-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-family: var(--font-ui); font-size: 10px; font-weight: 700; letter-spacing: .6px;
+      background: rgba(0,212,255,.1); color: var(--accent);
+    }
+    .role-tag.admin { background: rgba(255,68,102,.12); color: #ff4466; }
+
+    /* Danger button */
+    .btn.danger {
+      background: rgba(255,68,102,.1); color: #ff4466;
+      border-color: rgba(255,68,102,.35);
+    }
+    .btn.danger:hover:not(:disabled) {
+      background: #ff4466; color: #fff; border-color: #ff4466;
+    }
+
+    /* Upload area */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px; padding: 28px 20px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: var(--surface2);
+    }
+    .upload-zone:hover { border-color: var(--accent); background: rgba(0,212,255,.04); }
+    .upload-zone svg { color: var(--accent); }
+    .upload-zone p { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+    .upload-zone .file-name { color: var(--accent); font-weight: 600; }
+
+    /* Sections inside scroll area */
+    .section-title {
+      font-family: var(--font-ui); font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* form-row for 2-col grid in component form */
+    .form-row-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 640px) { .form-row-2 { grid-template-columns: 1fr; } }
+
+    /* empty state in tables */
+    .table-empty {
+      text-align: center; padding: 40px; color: var(--muted);
+      font-size: 13px; font-family: var(--font-ui);
+    }
+    .table-empty svg { opacity: .25; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     SIDEBAR
+════════════════════════════ -->
+<aside class="sidebar">
+  <div class="brand brand-admin">
+    <h1>EDU<span>SIM</span></h1>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+
+  <nav class="nav-menu">
+    <button class="nav-item active" data-tab="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="nav-item" data-tab="users">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      User Profiles
+    </button>
+    <button class="nav-item" data-tab="admins" id="navAdmins" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Manage Admins
+    </button>
+    <button class="nav-item" data-tab="components">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Lab Components
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="themeBtn" title="Toggle Theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      Toggle Theme
+    </button>
+    <div class="user-profile">
+      <div class="avatar" id="adminAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="adminName">Master Admin</div>
+        <div class="user-role" id="adminRole">System Administrator</div>
+      </div>
+      <button class="logout-btn" id="logoutBtn" title="Sign Out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════════════════
+     MAIN CONTENT
+════════════════════════════ -->
+<main class="main-content">
+
+  <!-- ─── OVERVIEW TAB ─── -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="page-header">
+      <h2>Admin Overview</h2>
+      <p>Platform-wide statistics and health summary</p>
+    </div>
+    <div class="tab-scroll">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-card-label">Total Users</div>
+          <div class="stat-card-value" id="statTotalUsers">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="stat-card-label">Total Admins</div>
+          <div class="stat-card-value" id="statTotalAdmins">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/></svg>
+          </div>
+          <div class="stat-card-label">Custom Components</div>
+          <div class="stat-card-value" id="statTotalComps">—</div>
+        </div>
+      </div>
+
+      <!-- Recent users preview -->
+      <p class="section-title">Recently Joined Users</p>
+      <div class="detail-section" style="overflow:hidden;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="recentUsersBody">
+            <tr><td colspan="4" class="table-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── USERS TAB ─── -->
+  <div class="tab-panel" id="tab-users">
+    <div class="page-header">
+      <h2>User Profiles</h2>
+      <p>All registered users on the EduSim platform</p>
+    </div>
+    <div class="tab-scroll">
+      <div class="detail-section" style="overflow:hidden;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Organization</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="allUsersBody">
+            <tr><td colspan="5" class="table-empty">Loading users…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ADMINS TAB (master only) ─── -->
+  <div class="tab-panel" id="tab-admins">
+    <div class="page-header">
+      <h2>Manage Admins</h2>
+      <p>Grant or revoke administrator privileges</p>
+      <button class="btn primary" id="addAdminBtn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Admin
+      </button>
+    </div>
+    <div class="tab-scroll">
+      <div class="detail-section" style="overflow:hidden;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User UID</th>
+              <th>Email</th>
+              <th>Added On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminsBody">
+            <tr><td colspan="4" class="table-empty">No secondary admins added yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── COMPONENTS TAB ─── -->
+  <div class="tab-panel" id="tab-components">
+    <div class="page-header">
+      <h2>Lab Components</h2>
+      <p>Upload new hardware components to the Virtual Lab component palette</p>
+    </div>
+    <div class="tab-scroll">
+      <form id="addComponentForm" onsubmit="handleAddComponent(event)">
+
+        <div class="form-row-2" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label>Component ID <span style="color:var(--muted)">(e.g. my_sensor)</span></label>
+            <input type="text" class="form-input" id="compId" placeholder="my_custom_sensor" required>
+          </div>
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" class="form-input" id="compName" placeholder="My Custom Sensor" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Category</label>
+          <select class="form-input" id="compCategory" required>
+            <option value="Sensors">Sensors</option>
+            <option value="Actuators">Actuators</option>
+            <option value="Controllers">Controllers</option>
+            <option value="Displays">Displays</option>
+            <option value="Passive">Passive Components</option>
+          </select>
+        </div>
+
+        <div class="form-row-2" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label>2D SVG Code <span style="color:var(--error)">*</span></label>
+            <textarea class="form-input" id="compSvg" rows="7"
+              placeholder="<rect width='100' height='60' fill='#1a2a4a' rx='4'/>"
+              required style="font-family:var(--font-mono); font-size:12px; resize:vertical;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>3D Model (.glb) <span style="color:var(--muted)">— Optional</span></label>
+            <div class="upload-zone" id="glbUploadArea" onclick="document.getElementById('glbFileInput').click()">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p id="glbFileName">Click to select .glb file</p>
+              <input type="file" id="glbFileInput" accept=".glb" style="display:none;" onchange="handleGlbSelect(event)">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="btn primary" id="btnSubmitComponent">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add to Registry
+          </button>
+        </div>
+      </form>
+
+      <!-- Existing custom components list -->
+      <div style="margin-top:36px;">
+        <p class="section-title">Custom Components in Registry</p>
+        <div class="detail-section" style="overflow:hidden;">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Category</th><th>3D Model</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="compsBody">
+              <tr><td colspan="5" class="table-empty">No custom components yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Add Admin Modal ── -->
+<div class="modal-overlay" id="addAdminModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add New Administrator</h3>
+      <button class="close-btn" id="closeAddAdminModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:4px;">The user must already be registered. Paste their Firebase UID below to grant admin privileges.</p>
+      <div class="form-group">
+        <label>User UID</label>
+        <input type="text" id="newAdminUid" class="form-input" placeholder="Paste Firebase UID here…">
+      </div>
+      <button class="btn primary" style="width:100%;margin-top:4px;" onclick="submitAddAdmin()">Grant Admin Access</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Admin Profile Modal ── -->
+<div class="modal-overlay" id="adminProfileModal">
+  <div class="modal-content" style="width:460px;">
+    <div class="modal-header">
+      <h3>Admin Profile</h3>
+      <button class="close-btn" id="closeAdminProfileModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div class="avatar" id="profileModalAvatar" style="width:56px;height:56px;font-size:22px;">A</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;" id="profileModalName">Master Admin</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;" id="profileModalRole">Master Administrator</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group">
+          <label>Email</label>
+          <div style="font-size:13px;font-weight:500;padding:4px 0;" id="profileModalEmail">—</div>
+        </div>
+        <div class="form-group">
+          <label>Access Level</label>
+          <div style="font-size:13px;font-weight:500;padding:4px 0;" id="profileModalAccess">—</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>Display Name</label>
+        <input type="text" id="profileModalDisplayName" class="form-input" placeholder="Your display name">
+      </div>
+      <button class="btn primary" style="width:100%;margin-top:8px;" onclick="saveAdminProfile()">Save Display Name</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div id="toast"></div>
+
+<!-- Scripts -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="../config/config.js"></script>
+<script src="../components/registry.js"></script>
+<script src="admin_dashboard.js"></script>
+</body>
+</html>

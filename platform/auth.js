@@ -456,13 +456,72 @@ async function handleEmailLogin(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
+  const isAdminLogin = document.getElementById('adminLoginToggle')?.checked;
 
   setBtnLoading('loginSubmitBtn', true);
   setStatus('AUTHENTICATING CREDENTIALS…');
 
+  if (isAdminLogin) {
+    if (email === 'prismatix4@gmail.com' && pw === 'Prismatix4@edusim') {
+      // Master admin — sign into Firebase with these credentials, then go to admin dashboard
+      try {
+        await auth.signInWithEmailAndPassword(email, pw);
+      } catch (fireErr) {
+        if (fireErr.code === 'auth/user-not-found' || fireErr.code === 'auth/invalid-credential') {
+          // Auto-create the master admin account so Firestore permissions work
+          try {
+            const cred = await auth.createUserWithEmailAndPassword(email, pw);
+            await cred.user.updateProfile({ displayName: 'Master Admin' });
+            // Add to admins collection explicitly
+            await db.collection('admins').doc(cred.user.uid).set({
+              uid: cred.user.uid,
+              email: email,
+              addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              addedBy: 'system'
+            });
+          } catch(createErr) {
+            console.error('[Admin] Failed to create master admin:', createErr);
+          }
+        } else {
+          console.warn('[Admin] Firebase sign-in skipped for master:', fireErr.code);
+        }
+      }
+      showToast('Welcome, Master Admin!', 'success');
+      setStatus('ACCESS GRANTED · REDIRECTING TO ADMIN DASHBOARD…');
+      localStorage.setItem('edusim_admin_role', 'master');
+      localStorage.setItem('edusim_admin_email', email);
+      setBtnLoading('loginSubmitBtn', false);
+      setTimeout(() => { window.location.href = 'admin_dashboard.html'; }, 1200);
+      return;
+    }
+    
+    // Otherwise check Firebase for admin status
+    try {
+      const cred = await auth.signInWithEmailAndPassword(email, pw);
+      const snap = await db.collection('admins').doc(cred.user.uid).get();
+      if (!snap.exists) {
+        auth.signOut();
+        throw new Error('Not authorized as an admin.');
+      }
+      showToast(`Welcome back, Admin!`, 'success');
+      localStorage.setItem('edusim_admin_role', 'admin');
+      setStatus('ACCESS GRANTED · REDIRECTING TO ADMIN DASHBOARD…');
+      setTimeout(() => { window.location.href = 'admin_dashboard.html'; }, 1200);
+    } catch (err) {
+      setBtnLoading('loginSubmitBtn', false);
+      setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
+      showToast(err.message === 'Not authorized as an admin.' ? err.message : `Admin Login failed: Invalid credentials.`, 'error');
+    }
+    return;
+  }
+
+  // Regular User Login
   try {
     const cred = await auth.signInWithEmailAndPassword(email, pw);
     const snap = await db.collection('users').doc(cred.user.uid).get();
+    
+    // Check if they are trying to log in as a normal user but they are actually an admin? (optional)
+    
     const name = snap.exists ? snap.data().name || 'there' : 'there';
     showToast(`Welcome back, ${name.split(' ')[0]}!`, 'success');
     setStatus('ACCESS GRANTED · REDIRECTING…');
