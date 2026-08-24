@@ -181,6 +181,26 @@ async function startServer() {
           res.end(JSON.stringify({ error: err.message }));
         }
       });
+    } else if (req.method === 'POST' && (req.url === '/api/ai/generate' || req.url === '/api/ai/chat')) {
+      let body = '';
+      req.on('data', d => body += d);
+      req.on('end', () => {
+        const targetUrl = req.url === '/api/ai/generate' ? 'http://127.0.0.1:11434/api/generate' : 'http://127.0.0.1:11434/api/chat';
+        const ollamaReq = http.request(targetUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        }, (ollamaRes) => {
+          res.writeHead(ollamaRes.statusCode, ollamaRes.headers);
+          ollamaRes.pipe(res);
+        });
+        ollamaReq.on('error', (err) => {
+          console.error('[Agent] Ollama proxy error:', err.message);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Failed to connect to local Ollama. Ensure Ollama is running on port 11434.' }));
+        });
+        ollamaReq.write(body);
+        ollamaReq.end();
+      });
     } else {
       res.writeHead(404); res.end('Not found');
     }
