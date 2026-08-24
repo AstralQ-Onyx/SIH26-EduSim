@@ -4964,7 +4964,276 @@ buzzerPassive: {
 
   /* ════════════════════════════
      INPUTS
+  ════════════════════════════ */
+irObstacleSensor: {
+  id: 'irObstacleSensor',
+  label: 'IR Obstacle Sensor',
+  category: 'Inputs',
+  desc: 'Infrared reflective obstacle detection module with IR transmitter, IR receiver, sensitivity potentiometer and LM393 comparator output',
+  w: 130,
+  h: 60,
 
+  svg: `
+    <defs>
+      <!-- PCB -->
+      <linearGradient id="irObsPcb" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2d78d4"/>
+        <stop offset="0.55" stop-color="#1761b6"/>
+        <stop offset="1" stop-color="#0d478e"/>
+      </linearGradient>
+
+      <!-- Clear IR LED -->
+      <linearGradient id="irObsEmitter" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".45" stop-color="#e9f6ff" stop-opacity=".75"/>
+        <stop offset="1" stop-color="#b7cbd8" stop-opacity=".55"/>
+      </linearGradient>
+
+      <!-- Black IR receiver -->
+      <linearGradient id="irObsReceiver" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#333"/>
+        <stop offset=".5" stop-color="#111"/>
+        <stop offset="1" stop-color="#020202"/>
+      </linearGradient>
+
+      <!-- Metal -->
+      <linearGradient id="irObsMetal" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#777"/>
+        <stop offset=".35" stop-color="#eeeeee"/>
+        <stop offset=".7" stop-color="#a5a5a5"/>
+        <stop offset="1" stop-color="#555"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ================= PCB ================= -->
+    <rect
+      x="8" y="6"
+      width="108" height="48"
+      rx="3"
+      fill="url(#irObsPcb)"
+      stroke="#0a3973"
+      stroke-width="1"
+    />
+
+    <!-- mounting / solder pads -->
+    <g fill="#d6d2a2" stroke="#7b7043" stroke-width=".25">
+      <circle cx="18" cy="14" r="2.2"/>
+      <circle cx="18" cy="46" r="2.2"/>
+      <circle cx="107" cy="14" r="2.2"/>
+      <circle cx="107" cy="46" r="2.2"/>
+    </g>
+
+    <!-- ================= IR RECEIVER (BLACK) ================= -->
+    <rect x="9" y="15" width="10" height="14" rx="4"
+          fill="url(#irObsReceiver)"
+          stroke="#222" stroke-width=".6"/>
+
+    <rect x="11" y="28" width="2" height="8"
+          fill="url(#irObsMetal)"/>
+    <rect x="15" y="28" width="2" height="8"
+          fill="url(#irObsMetal)"/>
+
+    <!-- ================= IR EMITTER (CLEAR) ================= -->
+    <rect x="9" y="33" width="10" height="14" rx="4"
+          fill="url(#irObsEmitter)"
+          stroke="#9caab3" stroke-width=".6"/>
+
+    <rect x="11" y="46" width="2" height="6"
+          fill="url(#irObsMetal)"/>
+    <rect x="15" y="46" width="2" height="6"
+          fill="url(#irObsMetal)"/>
+
+    <!-- ================= RESISTORS / PASSIVES ================= -->
+    <g fill="#d8d2a5" stroke="#666" stroke-width=".22">
+      <rect x="26" y="13" width="9" height="3" rx=".4"/>
+      <rect x="26" y="20" width="9" height="3" rx=".4"/>
+      <rect x="26" y="27" width="9" height="3" rx=".4"/>
+      <rect x="26" y="34" width="9" height="3" rx=".4"/>
+      <rect x="26" y="41" width="9" height="3" rx=".4"/>
+
+      <rect x="83" y="16" width="8" height="3" rx=".4"/>
+      <rect x="83" y="23" width="8" height="3" rx=".4"/>
+      <rect x="83" y="30" width="8" height="3" rx=".4"/>
+    </g>
+
+    <!-- ================= SENSITIVITY POTENTIOMETER ================= -->
+    <rect x="45" y="11" width="22" height="18" rx="2"
+          fill="#1b5da9" stroke="#0c3769" stroke-width=".6"/>
+
+    <circle cx="56" cy="20" r="6"
+            fill="#387bc0" stroke="#d0d0d0" stroke-width=".7"/>
+
+    <path d="M53 17 L59 23"
+          stroke="#5b5b5b" stroke-width="1.2"/>
+
+    <text x="56" y="34" text-anchor="middle"
+          fill="#e8f5ff" font-size="2.6" font-family="monospace">
+      SENS
+    </text>
+
+    <!-- ================= LM393 COMPARATOR ================= -->
+    <rect x="49" y="34" width="25" height="12" rx="1"
+          fill="#191919" stroke="#555" stroke-width=".5"/>
+
+    <g stroke="#bdbdbd" stroke-width=".3">
+      <path d="M52 34V31"/><path d="M57 34V31"/>
+      <path d="M62 34V31"/><path d="M67 34V31"/>
+      <path d="M52 46V49"/><path d="M57 46V49"/>
+      <path d="M62 46V49"/><path d="M67 46V49"/>
+    </g>
+
+    <text x="61.5" y="41.5"
+          text-anchor="middle"
+          fill="#777"
+          font-size="2.6"
+          font-family="monospace">
+      LM393
+    </text>
+
+    <!-- ================= STATUS LEDs ================= -->
+    <circle cx="79" cy="40" r="2"
+            fill="#e3d93c"
+            stroke="#8a8420"
+            stroke-width=".35"
+            data-indicator="power"/>
+
+    <circle cx="86" cy="40" r="2"
+            fill="#e84b4b"
+            stroke="#8b2525"
+            stroke-width=".35"
+            data-indicator="detect"/>
+
+    <!-- ================= 3-PIN HEADER ================= -->
+    <rect x="111" y="18" width="9" height="24" rx="1"
+          fill="#202020" stroke="#555" stroke-width=".5"/>
+
+    <g fill="#c7a85f">
+      <circle cx="115.5" cy="22" r="1.4"/>
+      <circle cx="115.5" cy="30" r="1.4"/>
+      <circle cx="115.5" cy="38" r="1.4"/>
+    </g>
+
+    <!-- metal header pins -->
+    <g stroke="url(#irObsMetal)" stroke-width="2" stroke-linecap="round">
+      <path d="M120 22 H128"/>
+      <path d="M120 30 H128"/>
+      <path d="M120 38 H128"/>
+    </g>
+
+    <!-- labels -->
+    <g fill="#ffffff" font-size="2.6" font-family="monospace">
+      <text x="108" y="23" text-anchor="end">OUT</text>
+      <text x="108" y="31" text-anchor="end">GND</text>
+      <text x="108" y="39" text-anchor="end">VCC</text>
+    </g>
+
+    <!-- ================= BOARD LABEL ================= -->
+    <text
+      x="94"
+      y="12"
+      text-anchor="middle"
+      fill="#e8f5ff"
+      font-size="2.8"
+      font-family="Arial, sans-serif"
+      font-weight="bold"
+    >
+      IR OBSTACLE
+    </text>
+
+    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
+    <circle cx="130" cy="22" r="2" fill="#cfcfcf" data-pin="OUT"/>
+    <circle cx="130" cy="30" r="2" fill="#cfcfcf" data-pin="GND"/>
+    <circle cx="130" cy="38" r="2" fill="#cfcfcf" data-pin="VCC"/>
+  `,
+
+  pins: [
+    {
+      id: 'OUT',
+      x: 130,
+      y: 22,
+      type: 'digital',
+      label: 'Digital Output'
+    },
+    {
+      id: 'GND',
+      x: 130,
+      y: 30,
+      type: 'gnd',
+      label: 'Ground'
+    },
+    {
+      id: 'VCC',
+      x: 130,
+      y: 38,
+      type: 'power',
+      label: 'VCC'
+    }
+  ],
+
+  defaults: {
+    label: 'IR Obstacle Sensor',
+    obstacle: false,
+    threshold: 50,
+    distance: 100
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    },
+    {
+      key: 'obstacle',
+      label: 'Obstacle Detected',
+      type: 'checkbox'
+    },
+    {
+      key: 'threshold',
+      label: 'Sensitivity',
+      type: 'number',
+      min: 0,
+      max: 100,
+      step: 1
+    },
+    {
+      key: 'distance',
+      label: 'Object Distance',
+      type: 'number',
+      min: 0,
+      max: 500,
+      step: 1
+    }
+  ],
+
+  simulate(state, inputs) {
+    /*
+      Common LM393 IR obstacle modules usually provide
+      a digital comparator output.
+
+      This simplified simulator treats the sensor as ACTIVE LOW:
+      obstacle detected -> OUT = 0
+      no obstacle       -> OUT = 1
+    */
+
+    const distance = Number(
+      inputs?.distance ?? state?.distance ?? 100
+    );
+
+    const threshold = Number(
+      state?.threshold ?? 50
+    );
+
+    const obstacle = distance <= threshold;
+
+    return {
+      obstacle,
+      detected: obstacle,
+      OUT: obstacle ? 0 : 1,
+      output: obstacle ? 0 : 1
+    };
+  }
+},
 
   /* ════════════════════════════
      PASSIVES
