@@ -417,26 +417,23 @@ async function handleGoogleSignIn() {
   }
 }
 
-// ── Google OAuth Sign-In (Popup — called synchronously from click) ──────────
-// KEY: signInWithPopup() is called FIRST — before any await/async delay —
-// so the browser recognizes it as a direct response to the user's click gesture
-// and allows the popup window to open.
-async function handleGoogleSignIn() {
+// ── Google OAuth Sign-In (Popup — strict synchronous execution) ────────────
+// The function itself must NOT be async. We use .then() to ensure the browser
+// does not inject any microtask delays before opening the popup.
+function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
 
-  // ↓ SYNCHRONOUS — must be the first call, no await before this
+  // Request popup instantly on click
   const popupPromise = auth.signInWithPopup(provider);
 
-  // Only set loading UI AFTER the popup has been opened
   setLoading(true);
   setStatus('AUTHENTICATING WITH GOOGLE…');
 
-  try {
-    const result = await popupPromise;
-    const user   = result.user;
-    const isNew  = result.additionalUserInfo?.isNewUser ?? false;
+  popupPromise.then(result => {
+    const user  = result.user;
+    const isNew = result.additionalUserInfo?.isNewUser ?? false;
 
     if (isNew) {
       const userData = {
@@ -449,16 +446,18 @@ async function handleGoogleSignIn() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
-      await db.collection('users').doc(user.uid).set(userData);
-      setLoading(false);
-      showToast('Google account linked! Please complete your profile.', 'success');
-      setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
+      return db.collection('users').doc(user.uid).set(userData)
+        .then(() => {
+          setLoading(false);
+          showToast('Google account linked! Please complete your profile.', 'success');
+          setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
+        });
     } else {
       setLoading(false);
       showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
     }
-  } catch (err) {
+  }).catch(err => {
     setLoading(false);
     setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
     const msgs = {
@@ -469,7 +468,7 @@ async function handleGoogleSignIn() {
       'auth/network-request-failed':       'Network error. Check your connection.',
     };
     showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
-  }
+  });
 }
 
 // ── Email Login ─────────────────────────────────────────────
