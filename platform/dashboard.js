@@ -578,6 +578,9 @@ document.querySelectorAll('.panel-tab').forEach(tab => {
 });
 
 // ── Agent Banner ─────────────────────────────────────────
+// GitHub Releases URL — update this after you publish the first release
+const AGENT_DOWNLOAD_URL = 'https://github.com/AstralQ-Onyx/SIH26-EduSim/releases/latest/download/EduSimAgent.exe';
+
 function showAgentBanner(online) {
   let banner = document.getElementById('agentBanner');
   if (!banner) {
@@ -585,32 +588,48 @@ function showAgentBanner(online) {
     banner.id = 'agentBanner';
     banner.style.cssText = `
       position:fixed; top:0; left:0; right:0; z-index:999;
-      padding:8px 16px; font-family:var(--font-ui); font-size:12px;
-      display:flex; align-items:center; justify-content:center; gap:12px;
+      padding:8px 20px; font-family:var(--font-ui); font-size:12px;
+      display:flex; align-items:center; justify-content:center; gap:16px;
+      letter-spacing:0.3px;
     `;
     document.body.appendChild(banner);
     // Push main content down
-    document.querySelector('.main-content').style.marginTop = '34px';
-    document.querySelector('.sidebar').style.marginTop = '34px';
+    document.querySelector('.main-content').style.marginTop = '38px';
+    document.querySelector('.sidebar').style.marginTop = '38px';
   }
   if (online) {
-    banner.style.background = 'rgba(0,255,136,0.12)';
+    banner.style.background = 'rgba(0,255,136,0.10)';
     banner.style.borderBottom = '1px solid rgba(0,255,136,0.3)';
     banner.style.color = 'var(--success)';
-    banner.innerHTML = '● EduSim Agent Connected — Real compile &amp; upload enabled';
+    banner.innerHTML = '● EduSim Agent Connected &mdash; Real compile &amp; upload enabled';
   } else {
-    banner.style.background = 'rgba(255,68,102,0.1)';
-    banner.style.borderBottom = '1px solid rgba(255,68,102,0.3)';
-    banner.style.color = 'var(--error)';
+    banner.style.background = 'rgba(255,170,0,0.10)';
+    banner.style.borderBottom = '1px solid rgba(255,170,0,0.35)';
+    banner.style.color = '#ffaa00';
     banner.innerHTML = `
-      ⚠ EduSim Agent not running — operating in simulation mode &nbsp;|&nbsp;
-      <strong>To enable real upload:</strong>
-      open a terminal in <code style="font-size:11px">EduSim/agent/</code>, run
-      <code style="font-size:11px">npm install</code> then
-      <code style="font-size:11px">node server.js</code>
+      <span>⚠ EduSim Agent not running &mdash; hardware features disabled (simulation mode)</span>
+      <span style="color:rgba(255,170,0,0.5)">|</span>
+      <span>To enable real upload &amp; serial monitor:</span>
+      <a href="${AGENT_DOWNLOAD_URL}"
+         download="EduSimAgent.exe"
+         style="
+           display:inline-flex; align-items:center; gap:6px;
+           background:rgba(255,170,0,0.15); border:1px solid rgba(255,170,0,0.5);
+           color:#ffaa00; padding:3px 12px; border-radius:20px;
+           font-size:11px; font-weight:700; letter-spacing:0.8px;
+           text-decoration:none; transition:background 0.2s;
+           white-space:nowrap;
+         "
+         onmouseover="this.style.background='rgba(255,170,0,0.30)'"
+         onmouseout="this.style.background='rgba(255,170,0,0.15)'"
+      >
+        ⬇ Download EduSim Agent (.exe)
+      </a>
+      <span style="font-size:11px; opacity:0.7">Run it, then refresh this page</span>
     `;
   }
 }
+
 
 // ── Connect to Agent ─────────────────────────────────────
 function connectAgent() {

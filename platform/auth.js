@@ -399,21 +399,36 @@ function setStatus(msg) {
   document.getElementById('statusText').textContent = msg;
 }
 
-// ── Google OAuth Sign-In ────────────────────────────────────
+// ── Google OAuth Sign-In (Redirect flow — popup-free for production) ──────
 async function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
-
   try {
     setLoading(true);
-    setStatus('INITIATING GOOGLE OAUTH…');
-    const result = await auth.signInWithPopup(provider);
+    setStatus('REDIRECTING TO GOOGLE…');
+    // signInWithRedirect avoids browser popup-blocking on HTTPS/production sites
+    await auth.signInWithRedirect(provider);
+    // Page will leave here — result is handled in handleGoogleRedirectResult() on load
+  } catch (err) {
+    setLoading(false);
+    setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
+    showToast(`Authentication failed: ${err.message}`, 'error');
+  }
+}
+
+// ── Handle Google Redirect Result (called on page load) ──────────────────
+async function handleGoogleRedirectResult() {
+  try {
+    const result = await auth.getRedirectResult();
+    if (!result || !result.user) return; // No redirect happened, normal page load
+
     const user = result.user;
     const isNew = result.additionalUserInfo.isNewUser;
+    setLoading(true);
+    setStatus('VERIFYING IDENTITY…');
 
     if (isNew) {
-      // New Google user — save basic profile, redirect to complete registration
       const userData = {
         uid: user.uid,
         name: user.displayName || '',
@@ -432,7 +447,6 @@ async function handleGoogleSignIn() {
       await db.collection('users').doc(user.uid).set(userData);
       setLoading(false);
       showToast('Google account linked! Please complete your profile.', 'success');
-      // Redirect to complete profile page (or dashboard with a "complete profile" prompt)
       setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
     } else {
       setLoading(false);
@@ -443,8 +457,7 @@ async function handleGoogleSignIn() {
     setLoading(false);
     setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
     const msgs = {
-      'auth/popup-closed-by-user': 'Sign-in popup was closed.',
-      'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+      'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method.',
       'auth/network-request-failed': 'Network error. Check your connection.',
     };
     showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
@@ -676,3 +689,7 @@ auth.onAuthStateChanged(user => {
     }
   }
 });
+
+// ── Handle Google Redirect on Page Load ─────────────────────
+// This catches the result when Google redirects back to this page.
+handleGoogleRedirectResult();
