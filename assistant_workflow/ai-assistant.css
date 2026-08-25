@@ -43,40 +43,6 @@
   pointer-events: none;
 }
 
-/* ── Floating Trigger Tab ────────────────────────────────────── */
-#aiPanelTrigger {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 9999;
-  writing-mode: vertical-rl;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 9px;
-  background: linear-gradient(180deg, var(--accent2), var(--accent));
-  color: #fff;
-  font-family: var(--font-logo);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  border: none;
-  border-radius: 10px 0 0 10px;
-  cursor: pointer;
-  box-shadow: -4px 0 18px rgba(0,212,255,0.2);
-  transition: padding 0.2s, box-shadow 0.2s, opacity 0.2s;
-}
-#aiPanelTrigger:hover {
-  padding: 16px 13px;
-  box-shadow: -6px 0 28px rgba(0,212,255,0.4);
-}
-/* Hide trigger when panel is open */
-body:has(#aiPanel.open) #aiPanelTrigger {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* ── Header ──────────────────────────────────────────────────── */
 .ai-header {
   padding: 15px 16px 12px;
