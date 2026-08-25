@@ -429,7 +429,7 @@ function handleGoogleSignIn() {
   const popupPromise = auth.signInWithPopup(provider);
 
   setLoading(true);
-  setStatus('AUTHENTICATING WITH GOOGLE…');
+  setStatus('AUTHENTICATING WITH GOOGLE...');
 
   popupPromise.then(result => {
     const user  = result.user;
