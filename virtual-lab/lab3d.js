@@ -17,13 +17,16 @@ let gltfLoader     = null;
 
 // Map component defIds to GLB file paths under assets/models/
 const MODEL_PATHS = {
-  'uno':   '../assets/models/arduino_uno.glb',
-  'nano':  '../assets/models/arduino_nano.glb',
-  'esp32': '../assets/models/esp32.glb',
-  'buzzer': '../assets/models/buzzer.glb',
-  'led_red': '../assets/models/led.glb',
-  'led_green': '../assets/models/led.glb',
-  'led_blue': '../assets/models/led.glb',
+  'uno':          '../assets/models/arduino_uno.glb',
+  'nano':         '../assets/models/arduino_nano.glb',
+  'esp32':        '../assets/models/esp32.glb',
+  'buzzer':       '../assets/models/buzzerPassive.glb',
+  'buzzerPassive':'../assets/models/buzzerPassive.glb',
+  'ledRed5mm':    '../assets/models/ledRed5mm.glb',
+  'ledWhite5mm':  '../assets/models/ledRed5mm.glb',
+  'ledBlue5mm':   '../assets/models/ledRed5mm.glb',
+  'ledGreen5mm':  '../assets/models/ledRed5mm.glb',
+  'ledRgb5mm':    '../assets/models/ledRed5mm.glb',
 };
 // LEDs keep procedural materials so emissive glow works at runtime.
 
@@ -318,7 +321,7 @@ function build3DScene() {
           mesh.add(pinMesh);
         });
 
-      } else if (comp.defId && comp.defId.startsWith('led_')) {
+      } else if (comp.defId && (comp.defId.startsWith('led_') || comp.defId.toLowerCase().startsWith('led'))) {
         const colorHex = parseInt((comp.props?.color || '#ff0044').replace('#', ''), 16);
         const geo = new THREE.CapsuleGeometry(7, 10, 6, 12);
         const mat = new THREE.MeshStandardMaterial({

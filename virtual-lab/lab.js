@@ -21,25 +21,14 @@ try {
     if (parsed.name) PROJECT.name = parsed.name;
     if (parsed.desc) PROJECT.desc = parsed.desc;
     if (parsed.controller) PROJECT.controller = parsed.controller;
+    // URL takes precedence, otherwise use saved mode
+    if (parsed.mode && !params.has('mode')) PROJECT.mode = parsed.mode;
   }
 } catch(e) {}
 
 const titleEl = document.getElementById('labProjectTitleText');
 if (titleEl) titleEl.textContent = PROJECT.name;
 
-// ── Mode toggle button label ────────────────────────────────
-(function() {
-  const btn = document.getElementById('toggleModeBtn');
-  if (!btn) return;
-  const is3d = PROJECT.mode === '3d';
-  btn.textContent = is3d ? '⬡ 2D' : '⬡ 3D';
-  btn.title = is3d ? 'Switch to 2D view' : 'Switch to 3D view';
-  if (is3d) {
-    btn.style.background = 'linear-gradient(135deg,var(--accent2),var(--accent))';
-    btn.style.color = '#fff';
-    btn.style.border = '1px solid var(--accent)';
-  }
-})();
 
 document.getElementById('backBtn').addEventListener('click', () => {
   if (document.referrer && document.referrer !== location.href) {
@@ -997,6 +986,7 @@ function saveProject() {
     name: PROJECT.name,
     desc: PROJECT.desc || '',
     controller: PROJECT.controller,
+    mode: PROJECT.mode,
     code: labEditor ? labEditor.getValue() : '',
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
     wires: wires.map(w => ({ id:w.id, from:w.from, to:w.to, color:w.color })),

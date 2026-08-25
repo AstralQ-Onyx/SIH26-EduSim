@@ -74,15 +74,6 @@
         Stop
       </button>
       <div class="lab-sep"></div>
-      <!-- 2D / 3D Mode Toggle -->
-      <button class="lab-btn" id="toggleModeBtn" title="Switch between 2D and 3D view" onclick="(function(){
-        const p = new URLSearchParams(window.location.search);
-        const is3d = p.get('mode') === '3d';
-        p.set('mode', is3d ? '2d' : '3d');
-        window.location.search = p.toString();
-      })()" style="font-family:var(--font-logo);font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;">
-      </button>
-      <div class="lab-sep"></div>
       <button class="lab-btn" id="themeBtn" title="Toggle Light/Dark Theme">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
