@@ -590,3 +590,175 @@ body.light-theme .canvas-container {
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-h);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ═════════════════════════════════════════════════════════════
+   X-RAY INTERNAL RAILS VIEW & ELECTRICITY FLOW ANIMATION
+   ═════════════════════════════════════════════════════════════ */
+
+/* Header Toolbar Active Button Style for X-Ray */
+#xrayBtn.active {
+  background: rgba(0, 243, 255, 0.18) !important;
+  border-color: #00f3ff !important;
+  color: #00f3ff !important;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.35);
+}
+
+/* X-Ray Canvas Environment Transformation */
+.lab-canvas.xray-mode {
+  background-color: #080c14 !important;
+  background-image: radial-gradient(rgba(0, 243, 255, 0.18) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  transition: background-color 0.4s ease;
+}
+
+/* Breadboard & Component Casing Wireframe Blueprint styling */
+.lab-canvas.xray-mode .casing-body {
+  fill: rgba(13, 22, 38, 0.82) !important;
+  stroke: #00f3ff !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4 2 !important;
+  filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.3));
+  transition: all 0.3s ease;
+}
+
+/* Reveal internal metal rails layer */
+.lab-canvas.xray-mode .xray-layer {
+  opacity: 1 !important;
+}
+
+/* Hovered / Active Electrical Net Rail Highlight */
+.lab-canvas.xray-mode .xray-strip.active-net,
+.lab-canvas.xray-mode .xray-rail.active-net {
+  fill: rgba(255, 215, 0, 0.55) !important;
+  stroke: #ffd700 !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 12px #ffd700) !important;
+  transition: all 0.2s ease;
+}
+
+/* ── ELECTRICITY / ELECTRON FLOW ANIMATION ── */
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flow-pulse-glow {
+  0% {
+    filter: drop-shadow(0 0 2px #00f3ff);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #00f3ff) drop-shadow(0 0 14px #00e1ff);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #00f3ff);
+  }
+}
+
+@keyframes flow-pulse-glow-vcc {
+  0% {
+    filter: drop-shadow(0 0 3px #ff3366);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px #ff3366) drop-shadow(0 0 16px #ff6699);
+  }
+  100% {
+    filter: drop-shadow(0 0 3px #ff3366);
+  }
+}
+
+/* Active flowing SVG wires */
+.wire-path.wire-flowing,
+.lab-wire.wire-flowing {
+  stroke-dasharray: 8 6 !important;
+  animation: dash-flow 0.6s linear infinite, flow-pulse-glow 1.5s ease-in-out infinite !important;
+  stroke-linecap: round !important;
+}
+
+/* High Voltage / VCC Current Flow (Red/Orange Pulse) */
+.wire-path.wire-flowing.flow-vcc,
+.lab-wire.wire-flowing.flow-vcc {
+  stroke: #ff3366 !important;
+  animation: dash-flow 0.5s linear infinite, flow-pulse-glow-vcc 1.2s ease-in-out infinite !important;
+}
+
+/* Ground / Return Flow (Blue Pulse) */
+.wire-path.wire-flowing.flow-gnd,
+.lab-wire.wire-flowing.flow-gnd {
+  stroke: #00d4ff !important;
+  animation: dash-flow 0.7s linear infinite;
+}
+
+/* ─── DRC DIAGNOSTICS TAB BADGE ─────────────────────────────────── */
+.drc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  margin-left: 5px;
+  vertical-align: middle;
+  transition: background 0.2s, color 0.2s;
+}
+.drc-badge.ok  { background: rgba(0, 212, 100, 0.2); color: #00d464; }
+.drc-badge.err { background: rgba(255, 50, 50, 0.25); color: #ff4444; animation: badge-pulse 1s ease-in-out infinite; }
+.drc-badge.warn { background: rgba(255, 180, 0, 0.25); color: #ffb400; }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ─── BLOWN / DAMAGED COMPONENT VISUALS ────────────────────────── */
+@keyframes smoke-puff {
+  0%   { opacity: 0.8; transform: translate(-50%, 0) scale(0.4); }
+  60%  { opacity: 0.4; transform: translate(-50%, -20px) scale(1.2); }
+  100% { opacity: 0;   transform: translate(-50%, -35px) scale(1.6); }
+}
+
+.comp-blown {
+  filter: brightness(0.25) saturate(0) contrast(1.4) !important;
+  transition: filter 0.35s ease;
+}
+
+.comp-blown::after {
+  content: '💨';
+  position: absolute;
+  font-size: 18px;
+  left: 50%;
+  top: 0;
+  pointer-events: none;
+  animation: smoke-puff 0.9s ease-out infinite;
+}
+
+/* Fault-severity console row tinting inside diagnosticsBody */
+#diagnosticsBody .clog.err {
+  background: rgba(255, 40, 40, 0.08);
+  border-left: 3px solid #ff3333;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}
+#diagnosticsBody .clog.warn {
+  background: rgba(255, 180, 0, 0.08);
+  border-left: 3px solid #ffb400;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}
+#diagnosticsBody .clog.ok {
+  background: rgba(0, 212, 100, 0.06);
+  border-left: 3px solid #00d464;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}

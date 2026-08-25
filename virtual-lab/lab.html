@@ -66,6 +66,14 @@
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
         Stop
       </button>
+      <button class="lab-btn" id="xrayBtn" title="Toggle X-Ray Internal Rails View (Press 'X')">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v18M3 12h18"/>
+          <circle cx="12" cy="12" r="4" stroke-dasharray="2 2"/>
+        </svg>
+        X-Ray
+      </button>
       <div class="lab-sep"></div>
       <button class="lab-btn" id="themeBtn" title="Toggle Light/Dark Theme">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -243,6 +251,9 @@
     <div class="console-tabs">
       <button class="console-tab active" data-ctab="console">Console</button>
       <button class="console-tab" data-ctab="serial">Serial</button>
+      <button class="console-tab" data-ctab="diagnostics" id="diagnosticsTabBtn">
+        Diagnostics & Faults <span class="drc-badge ok" id="faultCountBadge">0</span>
+      </button>
       <div style="flex:1"></div>
       <button class="lab-btn" id="toggleConsoleBtn" title="Toggle Console Height">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -253,6 +264,9 @@
       <div class="clog sys">[ EduSim Virtual Lab Ready ]</div>
     </div>
     <div class="console-body" id="serialBody" style="display:none;"></div>
+    <div class="console-body" id="diagnosticsBody" style="display:none;">
+      <div class="clog ok">[ DRC Engine ] No electrical rule violations detected. All circuits nominal.</div>
+    </div>
     
     <div class="console-input-row">
       <input type="text" class="console-input" id="consoleInput" placeholder="Send to serial…" disabled/>
@@ -280,6 +294,10 @@
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
   <script src="../components/registry.js"></script>
   <script src="../core-engine/simulator.js"></script>
+  <script src="xray-engine.js"></script>
+  <script src="current-flow-engine.js"></script>
+  <script src="effects-engine.js"></script>
+  <script src="circuit-drc-engine.js"></script>
   <script src="lab.js"></script>
 </body>
 </html>

@@ -41,6 +41,8 @@ let wireStart     = null;   // { compId, pinId, x, y }
 
 let components    = [];     // { id, defId, x, y, props, element }
 let wires         = [];     // { id, from:{compId,pinId}, to:{compId,pinId}, element }
+window.components = components;
+window.wires      = wires;
 let nextId        = 1;
 
 const SNAP = 10;
@@ -273,6 +275,11 @@ function addComponent(defId, x, y) {
   const comp = { id, defId, x, y, rotation: 0, props, element:g, labelEl:lbl, def };
   components.push(comp);
 
+  // Trigger modern drop/placement ripple animation
+  if (window.effectsEngine) {
+    window.effectsEngine.spawnDropRipple(x, y, def.w, def.h);
+  }
+
   clog(`Added: ${def.label}`, 'sys');
   selectComponent(comp);
   return comp;
@@ -325,6 +332,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'w' || e.key === 'W') { wireBtn.click(); }
   if (e.key === 'Escape')             { cancelWire(); if(wireMode) wireBtn.click(); }
   
+  // X-Ray Mode Toggle (X key)
+  if ((e.key === 'x' || e.key === 'X') && !e.target.matches('input, textarea')) {
+    if (window.xrayEngine) window.xrayEngine.toggle();
+  }
+
   // Undo / Redo
   if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
     e.preventDefault();
@@ -366,10 +378,17 @@ function onPinHover(e) {
   pinTooltip.style.left = (e.clientX + 15) + 'px';
   pinTooltip.style.top = (e.clientY + 15) + 'px';
   pinTooltip.style.display = 'block';
+
+  if (window.xrayEngine) {
+    window.xrayEngine.highlightNetForPin(compId, pinId, components, wires);
+  }
 }
 
 function onPinOut() {
   pinTooltip.style.display = 'none';
+  if (window.xrayEngine) {
+    window.xrayEngine.clearHighlights();
+  }
 }
 
 function onPinMouseDown(e) {
@@ -442,6 +461,20 @@ function drawWire(from, to, color = '#00d4ff') {
   wiresLayer.appendChild(line);
   updateWirePath(wire);
   clog(`Wire: ${from.compId}.${from.pinId} → ${to.compId}.${to.pinId}`, 'sys');
+
+  // Trigger electric connection snap spark at target pin
+  if (window.effectsEngine) {
+    const tc = components.find(c => c.id === to.compId);
+    const tp = tc?.def?.pins?.find(p => p.id === to.pinId);
+    if (tc && tp) {
+      window.effectsEngine.spawnConnectionSpark(tc.x + tp.x, tc.y + tp.y, color);
+    }
+  }
+
+  // Run DRC analysis after every new wire connection
+  if (window.circuitDRCEngine) {
+    setTimeout(() => window.circuitDRCEngine.analyze(components, wires), 50);
+  }
 }
 
 function updateWirePath(wire) {
@@ -515,8 +548,14 @@ function deleteSelected() {
   if (selectedWire) {
     selectedWire.element.remove();
     wires = wires.filter(w => w !== selectedWire);
+    window.wires = wires;
     selectedWire = null;
   } else if (selectedComp) {
+    // Stop smoke if any and emit deletion disintegration particles
+    if (window.effectsEngine) {
+      window.effectsEngine.stopComponentSmoke(selectedComp);
+      window.effectsEngine.spawnDeleteBurst(selectedComp.x, selectedComp.y, selectedComp.def.w, selectedComp.def.h);
+    }
     // Remove connected wires
     wires = wires.filter(w => {
       if (w.from.compId === selectedComp.id || w.to.compId === selectedComp.id) {
@@ -524,11 +563,18 @@ function deleteSelected() {
       }
       return true;
     });
+    window.wires = wires;
     selectedComp.element.remove();
     components = components.filter(c => c !== selectedComp);
+    window.components = components;
     selectedComp = null;
     clearSelection();
     populateDeviceSelect();
+  }
+
+  // Re-run DRC after deletion to clear stale faults
+  if (window.circuitDRCEngine) {
+    setTimeout(() => window.circuitDRCEngine.analyze(components, wires), 50);
   }
 }
 
@@ -692,6 +738,24 @@ function setSimUI(running) {
   document.getElementById('simStatusText').textContent = running ? 'Running' : 'Ready';
   document.getElementById('runBtn').disabled  = running;
   document.getElementById('stopBtn').disabled = !running;
+
+  if (window.currentFlowEngine) {
+    if (running) window.currentFlowEngine.start();
+    else window.currentFlowEngine.stop();
+  }
+
+  // Run DRC at simulation start to catch circuit errors before damage
+  if (running && window.circuitDRCEngine) {
+    setTimeout(() => {
+      const faults = window.circuitDRCEngine.analyze(components, wires);
+      if (faults.length > 0) {
+        clog(`[DRC] ⚠ ${faults.length} circuit fault(s) detected! Click "Diagnostics & Faults" tab.`, 'warn');
+        // Auto-expand console to show warning
+        const labConsole = document.getElementById('labConsole');
+        if (labConsole) labConsole.classList.add('expanded');
+      }
+    }, 100);
+  }
 }
 
 function startSim() {
@@ -703,6 +767,9 @@ function stopSim() {
   EduSimulator.stopSimulation();
   setSimUI(false);
   resetVisuals();
+  if (window.currentFlowEngine) {
+    window.currentFlowEngine.stop();
+  }
   clog('[Simulator] Stopped.', 'warn');
 }
 
@@ -783,6 +850,9 @@ async function runUpload() {
         }
 
         if (matches) {
+          if (window.currentFlowEngine) {
+            window.currentFlowEngine.setPinState(cPinId, isHigh ? 1 : 0);
+          }
           if (w.from.compId === ctrlComp.id) {
             const toComp = components.find(c => c.id === w.to.compId);
             if (toComp) driveComponent(toComp, w.to.pinId, isHigh);
@@ -886,6 +956,11 @@ document.querySelectorAll('.console-tab').forEach(tab => {
     tab.classList.add('active');
     document.querySelectorAll('.console-body').forEach(b => b.style.display = 'none');
     document.getElementById(tab.dataset.ctab + 'Body').style.display = 'block';
+
+    // Refresh DRC analysis when user opens Diagnostics tab
+    if (tab.dataset.ctab === 'diagnostics' && window.circuitDRCEngine) {
+      window.circuitDRCEngine.analyze(components, wires);
+    }
   });
 });
 
@@ -1330,4 +1405,12 @@ applyTransform();
 loadProject();
 SerialPlotter.init();
 MemoryMeter.update({}, PROJECT.controller || 'arduino_uno_r3');
+
+if (window.xrayEngine) {
+  window.xrayEngine.init(svg, document.getElementById('xrayBtn'));
+  const xrayBtn = document.getElementById('xrayBtn');
+  if (xrayBtn) {
+    xrayBtn.addEventListener('click', () => window.xrayEngine.toggle());
+  }
+}
 
