@@ -33,6 +33,7 @@ let wireMode      = false;
 let wireStart     = null;   // { compId, pinId, x, y }
 
 let components    = [];     // { id, defId, x, y, props, element }
+window.components = components;
 let wires         = [];     // { id, from:{compId,pinId}, to:{compId,pinId}, element }
 let nextId        = 1;
 
