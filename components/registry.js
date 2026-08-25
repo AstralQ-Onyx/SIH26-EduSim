@@ -5518,8 +5518,263 @@ ultrasonicHCSR04: {
   }
 },
   /* ════════════════════════════
+     POWER SUPPLIES
+  ════════════════════════════ */
+
+  battery_9v: {
+    id:'battery_9v', label:'9V Battery', category:'Power',
+    desc:'Standard 9V alkaline battery',
+    w:40, h:70,
+    svg:`
+      <rect x="8" y="5" width="24" height="60" rx="3" fill="#222" stroke="#555" stroke-width="1"/>
+      <rect x="13" y="2" width="8" height="6" rx="1" fill="#888"/>
+      <rect x="21" y="2" width="5" height="6" rx="1" fill="#888"/>
+      <text x="20" y="40" text-anchor="middle" fill="#aaa" font-size="6" font-family="sans-serif">9V</text>
+      <line x1="14" y1="65" x2="14" y2="72" stroke="#aaa" stroke-width="2"/>
+      <line x1="26" y1="65" x2="26" y2="72" stroke="#aaa" stroke-width="2"/>
+    `,
+    pins:[
+      { id:'pos', x:14, y:72, type:'power', label:'+' },
+      { id:'neg', x:26, y:72, type:'gnd',   label:'-' },
+    ],
+    defaults:{ voltage:9 },
+    props:[{ key:'voltage', label:'Voltage (V)', type:'number', min:1, max:12 }],
+    simulate(state, inputs) { return { voltage: state.voltage }; }
+  },
+
+  battery_aa_pack: {
+    id:'battery_aa_pack', label:'AA Battery Pack', category:'Power',
+    desc:'4x AA battery pack (6V)',
+    w:60, h:40,
+    svg:`
+      <rect x="3" y="5" width="54" height="30" rx="3" fill="#333" stroke="#555" stroke-width="1"/>
+      <rect x="7"  y="9" width="10" height="22" rx="2" fill="#444"/>
+      <rect x="20" y="9" width="10" height="22" rx="2" fill="#444"/>
+      <rect x="33" y="9" width="10" height="22" rx="2" fill="#444"/>
+      <rect x="46" y="9" width="10" height="22" rx="2" fill="#444"/>
+      <text x="30" y="22" text-anchor="middle" fill="#aaa" font-size="5" font-family="sans-serif">6V AA</text>
+      <line x1="10" y1="35" x2="10" y2="42" stroke="#aaa" stroke-width="2"/>
+      <line x1="50" y1="35" x2="50" y2="42" stroke="#aaa" stroke-width="2"/>
+    `,
+    pins:[
+      { id:'pos', x:10, y:42, type:'power', label:'+' },
+      { id:'neg', x:50, y:42, type:'gnd',   label:'-' },
+    ],
+    defaults:{ voltage:6 },
+    props:[],
+    simulate(state, inputs) { return { voltage: 6 }; }
+  },
+
+  /* ════════════════════════════
+     SIMPLE OUTPUTS (Nikil)
+  ════════════════════════════ */
+
+  led_red: {
+    id:'led_red', label:'LED (Red)', category:'Outputs',
+    desc:'Red LED, ~2.0V forward voltage',
+    w:30, h:50,
+    svg:`
+      <ellipse cx="15" cy="20" rx="10" ry="14" fill="#cc1100" stroke="#ff3300" stroke-width="1"/>
+      <line x1="5" y1="28" x2="25" y2="28" stroke="#ff3300" stroke-width="1"/>
+      <ellipse cx="11" cy="13" rx="4" ry="3" fill="rgba(255,255,255,0.25)"/>
+      <line x1="10" y1="34" x2="10" y2="50" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="20" y1="34" x2="20" y2="50" stroke="#aaa" stroke-width="1.5"/>
+    `,
+    pins:[
+      { id:'anode',   x:10, y:50, type:'digital', label:'Anode (+)'  },
+      { id:'cathode', x:20, y:50, type:'gnd',     label:'Cathode (-)'},
+    ],
+    defaults:{ color:'#cc1100' },
+    props:[{ key:'color', label:'LED Color', type:'color' }],
+    simulate(state, inputs) { return { on: inputs.anode && !inputs.cathode }; }
+  },
+
+  led_green: {
+    id:'led_green', label:'LED (Green)', category:'Outputs',
+    desc:'Green LED, ~2.1V forward voltage',
+    w:30, h:50,
+    svg:`
+      <ellipse cx="15" cy="20" rx="10" ry="14" fill="#00aa33" stroke="#00ff55" stroke-width="1"/>
+      <line x1="5" y1="28" x2="25" y2="28" stroke="#00ff55" stroke-width="1"/>
+      <ellipse cx="11" cy="13" rx="4" ry="3" fill="rgba(255,255,255,0.25)"/>
+      <line x1="10" y1="34" x2="10" y2="50" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="20" y1="34" x2="20" y2="50" stroke="#aaa" stroke-width="1.5"/>
+    `,
+    pins:[
+      { id:'anode',   x:10, y:50, type:'digital', label:'Anode (+)'  },
+      { id:'cathode', x:20, y:50, type:'gnd',     label:'Cathode (-) '},
+    ],
+    defaults:{ color:'#00aa33' },
+    props:[{ key:'color', label:'LED Color', type:'color' }],
+    simulate(state, inputs) { return { on: inputs.anode && !inputs.cathode }; }
+  },
+
+  led_blue: {
+    id:'led_blue', label:'LED (Blue)', category:'Outputs',
+    desc:'Blue LED, ~3.2V forward voltage',
+    w:30, h:50,
+    svg:`
+      <ellipse cx="15" cy="20" rx="10" ry="14" fill="#0044cc" stroke="#2266ff" stroke-width="1"/>
+      <line x1="5" y1="28" x2="25" y2="28" stroke="#2266ff" stroke-width="1"/>
+      <ellipse cx="11" cy="13" rx="4" ry="3" fill="rgba(255,255,255,0.25)"/>
+      <line x1="10" y1="34" x2="10" y2="50" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="20" y1="34" x2="20" y2="50" stroke="#aaa" stroke-width="1.5"/>
+    `,
+    pins:[
+      { id:'anode',   x:10, y:50, type:'digital', label:'Anode (+'  },
+      { id:'cathode', x:20, y:50, type:'gnd',     label:'Cathode (-)'},
+    ],
+    defaults:{ color:'#0044cc' },
+    props:[{ key:'color', label:'LED Color', type:'color' }],
+    simulate(state, inputs) { return { on: inputs.anode && !inputs.cathode }; }
+  },
+
+  buzzer: {
+    id:'buzzer', label:'Buzzer', category:'Outputs',
+    desc:'Passive piezo buzzer',
+    w:40, h:40,
+    svg:`
+      <circle cx="20" cy="20" r="16" fill="#333" stroke="#555" stroke-width="1"/>
+      <circle cx="20" cy="20" r="10" fill="#222"/>
+      <circle cx="20" cy="20" r="4"  fill="#444"/>
+      <text x="20" y="24" text-anchor="middle" fill="#888" font-size="7" font-family="sans-serif">BUZZ</text>
+      <line x1="10" y1="36" x2="10" y2="44" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="30" y1="36" x2="30" y2="44" stroke="#aaa" stroke-width="1.5"/>
+    `,
+    pins:[
+      { id:'vcc', x:10, y:44, type:'power',  label:'+' },
+      { id:'gnd', x:30, y:44, type:'gnd',    label:'-' },
+    ],
+    defaults:{ frequency:1000 },
+    props:[{ key:'frequency', label:'Frequency (Hz)', type:'number', min:20, max:20000 }],
+    simulate(state, inputs) { return { tone: inputs.vcc ? state.frequency : 0 }; }
+  },
+
+  /* ════════════════════════════
+     SIMPLE INPUTS (Nikil)
+  ════════════════════════════ */
+
+  push_button: {
+    id:'push_button', label:'Push Button', category:'Inputs',
+    desc:'Tactile momentary push button',
+    w:40, h:40,
+    svg:`
+      <!-- PCB pads -->
+      <rect x="2"  y="2"  width="12" height="12" rx="1" fill="#1a6e1a"/>
+      <rect x="26" y="2"  width="12" height="12" rx="1" fill="#1a6e1a"/>
+      <rect x="2"  y="26" width="12" height="12" rx="1" fill="#1a6e1a"/>
+      <rect x="26" y="26" width="12" height="12" rx="1" fill="#1a6e1a"/>
+      <!-- Body -->
+      <rect x="10" y="10" width="20" height="20" rx="2" fill="#555" stroke="#666" stroke-width="0.5"/>
+      <!-- Button cap -->
+      <circle cx="20" cy="20" r="7" fill="#cc3300" stroke="#dd4400" stroke-width="0.5"/>
+      <!-- Legs -->
+      <line x1="8"  y1="8"  x2="2"  y2="2"  stroke="#aaa" stroke-width="1"/>
+      <line x1="32" y1="8"  x2="38" y2="2"  stroke="#aaa" stroke-width="1"/>
+      <line x1="8"  y1="32" x2="2"  y2="38" stroke="#aaa" stroke-width="1"/>
+      <line x1="32" y1="32" x2="38" y2="38" stroke="#aaa" stroke-width="1"/>
+    `,
+    pins:[
+      { id:'A', x:0, y:0,  type:'digital', label:'A' },
+      { id:'B', x:40, y:0, type:'digital', label:'B' },
+    ],
+    defaults:{ label:'BTN', pullup:true },
+    props:[
+      { key:'label',  label:'Label',   type:'text'   },
+      { key:'pullup', label:'Pull-up', type:'select', options:['true','false'] },
+    ],
+    simulate(state, inputs) {
+      return { pressed: !!state._pressed };
+    }
+  },
+
+  potentiometer: {
+    id:'potentiometer', label:'Potentiometer', category:'Inputs',
+    desc:'Variable resistor 0–10kΩ',
+    w:50, h:55,
+    svg:`
+      <rect x="5"  y="10" width="40" height="35" rx="3" fill="#555" stroke="#666" stroke-width="0.5"/>
+      <circle cx="25" cy="27" r="12" fill="#333" stroke="#444" stroke-width="0.5"/>
+      <circle cx="25" cy="27" r="6"  fill="#222"/>
+      <line x1="25" y1="15" x2="25" y2="21" stroke="#aaa" stroke-width="2"/>
+      <!-- Leads -->
+      <line x1="10" y1="45" x2="10" y2="55" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="25" y1="45" x2="25" y2="55" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="40" y1="45" x2="40" y2="55" stroke="#aaa" stroke-width="1.5"/>
+    `,
+    pins:[
+      { id:'vcc',  x:10, y:55, type:'power',  label:'VCC'    },
+      { id:'wiper',x:25, y:55, type:'analog', label:'Wiper'  },
+      { id:'gnd',  x:40, y:55, type:'gnd',    label:'GND'    },
+    ],
+    defaults:{ resistance:5000, maxR:10000 },
+    props:[
+      { key:'resistance', label:'Position (Ω)', type:'number', min:0, max:10000 },
+    ],
+    simulate(state, inputs) {
+      const v = (state.resistance / state.maxR) * 5.0;
+      return { voltage: v, raw: Math.round((v / 5.0) * 1023) };
+    }
+  },
+
+  /* ════════════════════════════
      PASSIVES
   ════════════════════════════ */
+
+  resistor: {
+    id:'resistor', label:'Resistor', category:'Passives',
+    desc:'Fixed value resistor',
+    w:60, h:18,
+    svg:`
+      <!-- Leads -->
+      <line x1="0"  y1="9" x2="12" y2="9" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="48" y1="9" x2="60" y2="9" stroke="#aaa" stroke-width="1.5"/>
+      <!-- Body -->
+      <rect x="12" y="3" width="36" height="12" rx="4" fill="#e8c88a" stroke="#c9a060" stroke-width="0.5"/>
+      <!-- Bands (220Ω: red red brown gold) -->
+      <rect x="18" y="3" width="3" height="12" fill="#cc0000" opacity="0.85"/>
+      <rect x="23" y="3" width="3" height="12" fill="#cc0000" opacity="0.85"/>
+      <rect x="28" y="3" width="3" height="12" fill="#663300" opacity="0.85"/>
+      <rect x="38" y="3" width="3" height="12" fill="#ffcc00" opacity="0.85"/>
+    `,
+    pins:[
+      { id:'p1', x:0,  y:9, type:'digital', label:'Pin 1' },
+      { id:'p2', x:60, y:9, type:'digital', label:'Pin 2' },
+    ],
+    defaults:{ resistance:220 },
+    props:[
+      { key:'resistance', label:'Resistance (Ω)', type:'number', min:1, max:10000000 },
+    ],
+    simulate(state, inputs) { return {}; }
+  },
+
+  capacitor: {
+    id:'capacitor', label:'Capacitor', category:'Passives',
+    desc:'Electrolytic or ceramic capacitor',
+    w:30, h:50,
+    svg:`
+      <!-- Leads -->
+      <line x1="10" y1="0"  x2="10" y2="18" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="20" y1="0"  x2="20" y2="18" stroke="#aaa" stroke-width="1.5"/>
+      <!-- Plates -->
+      <line x1="4"  y1="18" x2="16" y2="18" stroke="#aaa" stroke-width="2"/>
+      <line x1="14" y1="22" x2="26" y2="22" stroke="#aaa" stroke-width="2"/>
+      <line x1="14" y1="22" x2="14" y2="50" stroke="#aaa" stroke-width="1.5"/>
+      <line x1="4"  y1="18" x2="4"  y2="50" stroke="#aaa" stroke-width="1.5"/>
+      <!-- + symbol -->
+      <text x="3" y="15" fill="#aaa" font-size="8">+</text>
+    `,
+    pins:[
+      { id:'pos', x:4,  y:50, type:'power', label:'+' },
+      { id:'neg', x:14, y:50, type:'gnd',   label:'-' },
+    ],
+    defaults:{ capacitance:100, unit:'µF' },
+    props:[
+      { key:'capacitance', label:'Capacitance', type:'number', min:1, max:100000 },
+      { key:'unit', label:'Unit', type:'select', options:['pF','nF','µF'] },
+    ],
+    simulate(state, inputs) { return {}; }
+  },
 
 };
 

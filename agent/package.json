@@ -6,6 +6,7 @@
   "bin": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "node server.js",
     "build": "pkg server.js --targets node18-win-x64 --output dist/EduSimAgent"
   },
   "pkg": {
@@ -15,7 +16,9 @@
   },
   "dependencies": {
     "serialport": "^12.0.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "pkg": "^5.8.1"

@@ -17,7 +17,7 @@
   --warning:  #ffd700;
   --header-h: 48px;
   --palette-w:220px;
-  --props-w:  240px;
+  --props-w:  300px;
   --console-h:160px;
   --font:     'Inter', sans-serif;
   --font-ui:  'Rajdhani', sans-serif;
@@ -244,36 +244,64 @@ body.light-theme .canvas-container {
 }
 .pin-tooltip strong { color: var(--accent); font-size: 12px; }
 
-/* ── PROPERTIES PANEL ── */
+/* ── PROPERTIES & TELEMETRY PANEL ── */
 .props-panel {
   width: var(--props-w);
   background: var(--surface);
   border-left: 1px solid var(--border);
   display:flex; flex-direction:column;
   flex-shrink:0;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s;
   overflow: hidden;
 }
-/* Collapsed state — only the header tab width remains */
-.props-panel.collapsed {
-  width: 32px;
-  min-width: 32px;
+.side-panel-tabs {
+  display: flex;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.props-panel.collapsed .props-body { display: none; }
-.props-panel.collapsed .props-header h3 { display: none; }
+.side-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.side-tab:hover {
+  color: var(--text);
+  background: rgba(0, 212, 255, 0.04);
+}
+.side-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--surface);
+}
+
+.side-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .props-header {
-  padding:12px 10px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:6px; flex-shrink:0;
-  min-height: 42px;
+  padding:12px 14px; border-bottom:1px solid var(--border);
 }
 .props-header h3 {
   font-size:10px; font-family:var(--font-ui); text-transform:uppercase; letter-spacing:1px; color:var(--muted);
-  white-space: nowrap;
 }
-.props-toggle-btn { color: var(--muted); transition: color .15s, transform .25s; }
-.props-toggle-btn:hover { color: var(--accent); }
-.props-panel.collapsed .props-toggle-btn svg { transform: rotate(180deg); }
-.props-body { flex:1; overflow-y:auto; padding:12px; min-width: var(--props-w); }
+.props-body { flex:1; overflow-y:auto; padding:12px; }
 .props-empty {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:10px; color:var(--muted); padding:40px 10px; text-align:center;
@@ -291,6 +319,223 @@ body.light-theme .canvas-container {
 .prop-input:focus { border-color:var(--border-h); }
 .prop-select { appearance:none; cursor:pointer; }
 .prop-color { padding:2px 4px; height:32px; cursor:pointer; }
+
+/* ── TELEMETRY & MONITOR PANEL ── */
+.telemetry-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.telemetry-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sec-label {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.board-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Memory Cards */
+.mem-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.mem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mem-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+}
+.mem-val {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.mem-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.mem-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background 0.3s;
+}
+.flash-bar {
+  background: linear-gradient(90deg, #00d4ff, #00ff88);
+}
+.sram-bar {
+  background: linear-gradient(90deg, #7b2fff, #00d4ff);
+}
+.mem-bar.warn {
+  background: linear-gradient(90deg, #ffd700, #ff8c00) !important;
+}
+.mem-bar.danger {
+  background: linear-gradient(90deg, #ff4466, #ff1744) !important;
+}
+.mem-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.mem-state {
+  color: var(--success);
+  font-weight: 600;
+}
+.mem-state.warn { color: var(--warning); }
+.mem-state.danger { color: var(--error); }
+
+/* Serial Plotter */
+.plotter-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--success);
+}
+.p-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse 1.2s infinite;
+}
+.plotter-channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 20px;
+}
+.no-stream-msg {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+.channel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.ch-color-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.plotter-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #030710;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+#serialPlotterCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.plotter-axis-labels {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.35);
+}
+.plotter-controls {
+  display: flex;
+  gap: 6px;
+}
+.plot-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.plot-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border-h);
+}
+.plot-btn.active {
+  background: rgba(0, 212, 255, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.plot-btn.demo-btn {
+  background: rgba(123, 47, 255, 0.15);
+  border-color: rgba(123, 47, 255, 0.35);
+  color: #c499ff;
+}
+.plot-btn.demo-btn:hover {
+  background: rgba(123, 47, 255, 0.25);
+  color: #ffffff;
+}
 
 /* ── CONSOLE ── */
 .lab-console {
@@ -346,32 +591,174 @@ body.light-theme .canvas-container {
 ::-webkit-scrollbar-thumb{background:var(--border-h);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
-/* Modals */
-.modal-overlay {
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
-  display:none; align-items:center; justify-content:center; z-index:10000;
-}
-.modal-overlay.active { display:flex; }
-.modal-content {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:14px; width:440px; max-width:92%;
-  box-shadow:0 20px 60px rgba(0,0,0,.5); overflow:hidden;
-}
-.modal-header {
-  padding:16px 20px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-}
-.modal-header h3 { font-family:var(--font-logo); font-size:14px; color:var(--accent); }
-.close-btn { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; line-height:1; }
-.close-btn:hover { color:var(--error); }
-.modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
-.form-group { display:flex; flex-direction:column; gap:5px; }
-.form-group label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; font-family:var(--font-ui); }
-.form-input {
-  background:var(--surface2); border:1px solid var(--border);
-  color:var(--text); font-family:var(--font); font-size:13px;
-  padding:8px 12px; border-radius:8px; outline:none; transition:border .15s; resize:vertical;
-}
-.form-input:focus { border-color:var(--border-h); }
+/* ═════════════════════════════════════════════════════════════
+   X-RAY INTERNAL RAILS VIEW & ELECTRICITY FLOW ANIMATION
+   ═════════════════════════════════════════════════════════════ */
 
+/* Header Toolbar Active Button Style for X-Ray */
+#xrayBtn.active {
+  background: rgba(0, 243, 255, 0.18) !important;
+  border-color: #00f3ff !important;
+  color: #00f3ff !important;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.35);
+}
+
+/* X-Ray Canvas Environment Transformation */
+.lab-canvas.xray-mode {
+  background-color: #080c14 !important;
+  background-image: radial-gradient(rgba(0, 243, 255, 0.18) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  transition: background-color 0.4s ease;
+}
+
+/* Breadboard & Component Casing Wireframe Blueprint styling */
+.lab-canvas.xray-mode .casing-body {
+  fill: rgba(13, 22, 38, 0.82) !important;
+  stroke: #00f3ff !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4 2 !important;
+  filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.3));
+  transition: all 0.3s ease;
+}
+
+/* Reveal internal metal rails layer */
+.lab-canvas.xray-mode .xray-layer {
+  opacity: 1 !important;
+}
+
+/* Hovered / Active Electrical Net Rail Highlight */
+.lab-canvas.xray-mode .xray-strip.active-net,
+.lab-canvas.xray-mode .xray-rail.active-net {
+  fill: rgba(255, 215, 0, 0.55) !important;
+  stroke: #ffd700 !important;
+  stroke-width: 1.8px !important;
+  filter: drop-shadow(0 0 12px #ffd700) !important;
+  transition: all 0.2s ease;
+}
+
+/* ── ELECTRICITY / ELECTRON FLOW ANIMATION ── */
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flow-pulse-glow {
+  0% {
+    filter: drop-shadow(0 0 2px #00f3ff);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #00f3ff) drop-shadow(0 0 14px #00e1ff);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #00f3ff);
+  }
+}
+
+@keyframes flow-pulse-glow-vcc {
+  0% {
+    filter: drop-shadow(0 0 3px #ff3366);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px #ff3366) drop-shadow(0 0 16px #ff6699);
+  }
+  100% {
+    filter: drop-shadow(0 0 3px #ff3366);
+  }
+}
+
+/* Active flowing SVG wires */
+.wire-path.wire-flowing,
+.lab-wire.wire-flowing {
+  stroke-dasharray: 8 6 !important;
+  animation: dash-flow 0.6s linear infinite, flow-pulse-glow 1.5s ease-in-out infinite !important;
+  stroke-linecap: round !important;
+}
+
+/* High Voltage / VCC Current Flow (Red/Orange Pulse) */
+.wire-path.wire-flowing.flow-vcc,
+.lab-wire.wire-flowing.flow-vcc {
+  stroke: #ff3366 !important;
+  animation: dash-flow 0.5s linear infinite, flow-pulse-glow-vcc 1.2s ease-in-out infinite !important;
+}
+
+/* Ground / Return Flow (Blue Pulse) */
+.wire-path.wire-flowing.flow-gnd,
+.lab-wire.wire-flowing.flow-gnd {
+  stroke: #00d4ff !important;
+  animation: dash-flow 0.7s linear infinite;
+}
+
+/* ─── DRC DIAGNOSTICS TAB BADGE ─────────────────────────────────── */
+.drc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  margin-left: 5px;
+  vertical-align: middle;
+  transition: background 0.2s, color 0.2s;
+}
+.drc-badge.ok  { background: rgba(0, 212, 100, 0.2); color: #00d464; }
+.drc-badge.err { background: rgba(255, 50, 50, 0.25); color: #ff4444; animation: badge-pulse 1s ease-in-out infinite; }
+.drc-badge.warn { background: rgba(255, 180, 0, 0.25); color: #ffb400; }
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ─── BLOWN / DAMAGED COMPONENT VISUALS ────────────────────────── */
+@keyframes smoke-puff {
+  0%   { opacity: 0.8; transform: translate(-50%, 0) scale(0.4); }
+  60%  { opacity: 0.4; transform: translate(-50%, -20px) scale(1.2); }
+  100% { opacity: 0;   transform: translate(-50%, -35px) scale(1.6); }
+}
+
+.comp-blown {
+  filter: brightness(0.25) saturate(0) contrast(1.4) !important;
+  transition: filter 0.35s ease;
+}
+
+.comp-blown::after {
+  content: '💨';
+  position: absolute;
+  font-size: 18px;
+  left: 50%;
+  top: 0;
+  pointer-events: none;
+  animation: smoke-puff 0.9s ease-out infinite;
+}
+
+/* Fault-severity console row tinting inside diagnosticsBody */
+#diagnosticsBody .clog.err {
+  background: rgba(255, 40, 40, 0.08);
+  border-left: 3px solid #ff3333;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}
+#diagnosticsBody .clog.warn {
+  background: rgba(255, 180, 0, 0.08);
+  border-left: 3px solid #ffb400;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}
+#diagnosticsBody .clog.ok {
+  background: rgba(0, 212, 100, 0.06);
+  border-left: 3px solid #00d464;
+  padding-left: 8px;
+  margin: 2px 0;
+  border-radius: 0 4px 4px 0;
+}

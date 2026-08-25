@@ -96,19 +96,6 @@
 
         <!-- Email Login Form -->
         <form id="loginForm" onsubmit="handleEmailLogin(event)">
-          <div class="admin-toggle-row" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
-            <label class="field-label" style="margin: 0; margin-right: 8px; font-size: 11px; cursor: pointer;" for="adminLoginToggle">Admin Login</label>
-            <label class="switch" style="position: relative; display: inline-block; width: 34px; height: 20px;">
-              <input type="checkbox" id="adminLoginToggle" style="opacity: 0; width: 0; height: 0;">
-              <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--c-surface-hover); border-radius: 34px; transition: .4s;">
-                <span class="slider-ball" style="position: absolute; content: ''; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--c-text); border-radius: 50%; transition: .4s;"></span>
-              </span>
-            </label>
-            <style>
-              #adminLoginToggle:checked + .slider { background-color: var(--c-accent1); }
-              #adminLoginToggle:checked + .slider .slider-ball { transform: translateX(14px); background-color: #fff; }
-            </style>
-          </div>
           <div class="field-group">
             <label class="field-label" for="loginEmail">Email Address</label>
             <div class="input-wrap">

@@ -260,7 +260,6 @@ async function loadProjects(uid) {
         </div>
         <div class="project-actions">
           <button class="btn open-proj-btn" data-id="${doc.id}" data-code="${encodeURIComponent(d.code || '')}">Open IDE</button>
-          <button class="btn edit-proj-btn" data-id="${doc.id}" data-name="${escHtml(d.name)}" data-board="${escHtml(d.board || 'esp32')}" data-desc="${escHtml(d.desc || '')}">Edit</button>
           <button class="btn delete-proj-btn" data-id="${doc.id}" style="color:var(--error)">Delete</button>
         </div>`;
       grid.appendChild(card);
@@ -274,17 +273,6 @@ async function loadProjects(uid) {
         // Switch to IDE tab
         document.querySelector('[data-tab="ide"]').click();
         showToast('Project loaded in IDE', 'success');
-      });
-    });
-
-    // Edit Project
-    grid.querySelectorAll('.edit-proj-btn').forEach(b => {
-      b.addEventListener('click', () => {
-        document.getElementById('editProjIdInput').value = b.dataset.id;
-        document.getElementById('editProjNameInput').value = b.dataset.name;
-        document.getElementById('editProjBoardInput').value = b.dataset.board;
-        document.getElementById('editProjDescInput').value = b.dataset.desc;
-        document.getElementById('editProjectModal').classList.add('active');
       });
     });
 
@@ -302,47 +290,6 @@ async function loadProjects(uid) {
     console.error('Projects load error:', err);
     grid.innerHTML = '<div class="empty-state"><p>Failed to load projects. Check Firestore rules.</p></div>';
   }
-}
-
-// Edit Project Modal handlers
-const editProjectModal = document.getElementById('editProjectModal');
-const closeEditProjectModal = document.getElementById('closeEditProjectModal');
-const saveEditProjectBtn = document.getElementById('saveEditProjectBtn');
-
-if (closeEditProjectModal) {
-  closeEditProjectModal.addEventListener('click', () => editProjectModal.classList.remove('active'));
-}
-if (editProjectModal) {
-  editProjectModal.addEventListener('click', e => { if (e.target === editProjectModal) editProjectModal.classList.remove('active'); });
-}
-
-if (saveEditProjectBtn) {
-  saveEditProjectBtn.addEventListener('click', async () => {
-    if (!currentUser) return;
-    const id    = document.getElementById('editProjIdInput').value;
-    const name  = document.getElementById('editProjNameInput').value.trim();
-    const board = document.getElementById('editProjBoardInput').value;
-    const desc  = document.getElementById('editProjDescInput').value.trim();
-
-    if (!name) { showToast('Project name is required', 'error'); return; }
-
-    try {
-      saveEditProjectBtn.textContent = 'Saving…';
-      saveEditProjectBtn.disabled = true;
-      await db.collection('users').doc(currentUser.uid).collection('projects').doc(id).update({
-        name, board, desc,
-        lang: board === 'rp2040' ? 'MicroPython' : 'C++'
-      });
-      editProjectModal.classList.remove('active');
-      showToast('Project updated!', 'success');
-      loadProjects(currentUser.uid);
-    } catch (err) {
-      showToast('Failed to update project: ' + err.message, 'error');
-    } finally {
-      saveEditProjectBtn.textContent = 'Save Changes';
-      saveEditProjectBtn.disabled = false;
-    }
-  });
 }
 
 createProjectBtn.addEventListener('click', async () => {
@@ -484,10 +431,17 @@ async function initMonaco() {
       renderLineHighlight: 'gutter',
     });
 
-    // Mark unsaved on edit
+    // Mark unsaved on edit & sync with AI Context
     window._monacoEditor.onDidChangeModelContent(() => {
       document.getElementById('unsavedDot').classList.add('show');
+      if (window.EduSimContext) {
+        window.EduSimContext.setSketch(window._monacoEditor.getValue());
+      }
     });
+
+    if (window.EduSimContext) {
+      window.EduSimContext.setSketch(STARTER_CODE.cpp);
+    }
 
     console.log('Monaco loaded via unpkg.');
   } catch (err) {
@@ -578,9 +532,6 @@ document.querySelectorAll('.panel-tab').forEach(tab => {
 });
 
 // ── Agent Banner ─────────────────────────────────────────
-// GitHub Releases URL — update this after you publish the first release
-const AGENT_DOWNLOAD_URL = 'https://github.com/AstralQ-Onyx/SIH26-EduSim/releases/latest/download/EduSimAgent.exe';
-
 function showAgentBanner(online) {
   let banner = document.getElementById('agentBanner');
   if (!banner) {
@@ -588,48 +539,32 @@ function showAgentBanner(online) {
     banner.id = 'agentBanner';
     banner.style.cssText = `
       position:fixed; top:0; left:0; right:0; z-index:999;
-      padding:8px 20px; font-family:var(--font-ui); font-size:12px;
-      display:flex; align-items:center; justify-content:center; gap:16px;
-      letter-spacing:0.3px;
+      padding:8px 16px; font-family:var(--font-ui); font-size:12px;
+      display:flex; align-items:center; justify-content:center; gap:12px;
     `;
     document.body.appendChild(banner);
     // Push main content down
-    document.querySelector('.main-content').style.marginTop = '38px';
-    document.querySelector('.sidebar').style.marginTop = '38px';
+    document.querySelector('.main-content').style.marginTop = '34px';
+    document.querySelector('.sidebar').style.marginTop = '34px';
   }
   if (online) {
-    banner.style.background = 'rgba(0,255,136,0.10)';
+    banner.style.background = 'rgba(0,255,136,0.12)';
     banner.style.borderBottom = '1px solid rgba(0,255,136,0.3)';
     banner.style.color = 'var(--success)';
-    banner.innerHTML = '● EduSim Agent Connected &mdash; Real compile &amp; upload enabled';
+    banner.innerHTML = '● EduSim Agent Connected — Real compile &amp; upload enabled';
   } else {
-    banner.style.background = 'rgba(255,170,0,0.10)';
-    banner.style.borderBottom = '1px solid rgba(255,170,0,0.35)';
-    banner.style.color = '#ffaa00';
+    banner.style.background = 'rgba(255,68,102,0.1)';
+    banner.style.borderBottom = '1px solid rgba(255,68,102,0.3)';
+    banner.style.color = 'var(--error)';
     banner.innerHTML = `
-      <span>⚠ EduSim Agent not running &mdash; hardware features disabled (simulation mode)</span>
-      <span style="color:rgba(255,170,0,0.5)">|</span>
-      <span>To enable real upload &amp; serial monitor:</span>
-      <a href="${AGENT_DOWNLOAD_URL}"
-         download="EduSimAgent.exe"
-         style="
-           display:inline-flex; align-items:center; gap:6px;
-           background:rgba(255,170,0,0.15); border:1px solid rgba(255,170,0,0.5);
-           color:#ffaa00; padding:3px 12px; border-radius:20px;
-           font-size:11px; font-weight:700; letter-spacing:0.8px;
-           text-decoration:none; transition:background 0.2s;
-           white-space:nowrap;
-         "
-         onmouseover="this.style.background='rgba(255,170,0,0.30)'"
-         onmouseout="this.style.background='rgba(255,170,0,0.15)'"
-      >
-        ⬇ Download EduSim Agent (.exe)
-      </a>
-      <span style="font-size:11px; opacity:0.7">Run it, then refresh this page</span>
+      ⚠ EduSim Agent not running — operating in simulation mode &nbsp;|&nbsp;
+      <strong>To enable real upload:</strong>
+      open a terminal in <code style="font-size:11px">EduSim/agent/</code>, run
+      <code style="font-size:11px">npm install</code> then
+      <code style="font-size:11px">node server.js</code>
     `;
   }
 }
-
 
 // ── Connect to Agent ─────────────────────────────────────
 function connectAgent() {
@@ -722,12 +657,29 @@ function handleAgentMessage(msg) {
     case 'compiled':
       uploadBtn.disabled = false;
       buildLog('[EduSim] Ready to upload ↑', 'sys');
+      if (window.EduSimContext) window.EduSimContext.setCompileOutput({ success: true, rawLog: '' });
       break;
 
     case 'compile_error':
       uploadBtn.disabled = false;
       document.getElementById('compileBtn').disabled = false;
       showToast('Compilation failed — check Build Output', 'error');
+      if (window.EduSimContext) window.EduSimContext.setCompileOutput({ success: false, rawLog: msg.message || '' });
+      buildLog('[AI Assistant] Need help resolving this error?', 'warn');
+      const debugPromptBtn = document.createElement('button');
+      debugPromptBtn.className = 'btn ai-toggle-btn';
+      debugPromptBtn.style.cssText = 'margin: 6px 0; display: inline-flex;';
+      debugPromptBtn.innerHTML = '✨ Debug with AI';
+      debugPromptBtn.onclick = () => window.AIAssistantInstance?.triggerDebug(msg.message || '');
+      document.getElementById('buildOutput').appendChild(debugPromptBtn);
+      break;
+
+    case 'ai_message_response':
+      window.AIAssistantInstance?.onAgentResponse(msg);
+      break;
+
+    case 'ai_debug_result':
+      window.AIAssistantInstance?.onDebugResult(msg);
       break;
 
     case 'upload_done':
@@ -1060,17 +1012,11 @@ modeOptions.forEach(opt => {
 
 if (createLabProjectBtn) {
   createLabProjectBtn.addEventListener('click', () => {
-    const name = document.getElementById('labProjName').value.trim() || 'Untitled Lab';
+    const name = document.getElementById('labProjName').value || 'Untitled Lab';
     const controller = document.getElementById('labController').value;
-    const desc = document.getElementById('labProjDesc') ? document.getElementById('labProjDesc').value.trim() : '';
-    const mode = document.querySelector('input[name="labMode"]:checked')?.value || '2d';
+    const mode = document.querySelector('input[name="labMode"]:checked').value;
     
-    // Save stub to localStorage so it appears in the grid after returning
     const id = 'vlab_' + Date.now();
-    const stub = { id, name, controller, desc, mode, components: [], wires: [], createdAt: Date.now() };
-    localStorage.setItem('edusim_vlab_' + id, JSON.stringify(stub));
-    
-    // Navigate — platform/ is one level up from virtual-lab/
     const url = `../virtual-lab/lab.html?id=${id}&name=${encodeURIComponent(name)}&controller=${encodeURIComponent(controller)}&mode=${mode}`;
     window.location.href = url;
   });
@@ -1109,6 +1055,9 @@ function loadVirtualLabs() {
   labs.forEach(lab => {
     const card = document.createElement('div');
     card.className = 'vlab-card';
+    card.onclick = () => {
+      window.location.href = `../virtual-lab/lab.html?id=${lab.id}&name=${encodeURIComponent(lab.name)}&controller=${encodeURIComponent(lab.controller)}`;
+    };
     card.innerHTML = `
       <div class="vlab-card-header">
         <div class="vlab-card-icon">
@@ -1116,114 +1065,16 @@ function loadVirtualLabs() {
             <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
           </svg>
         </div>
-        <div style="flex:1; min-width:0">
+        <div>
           <h4>${escHtml(lab.name)}</h4>
-          <div class="vlab-card-meta" style="margin-top:4px">
-            <span class="tag">${lab.controller === 'none' ? 'No Controller' : escHtml(lab.controller)}</span>
-            <span class="tag" style="background:var(--accent);color:#fff">${lab.mode === '3d' ? '3D View' : '2D View'}</span>
+          <div class="vlab-card-meta">
+            <span class="tag">${lab.controller === 'none' ? 'No Controller' : lab.controller}</span>
           </div>
         </div>
       </div>
-      <p style="margin-top:4px">${escHtml(lab.desc || 'No description.')}</p>
-      <p style="font-size:11px; color:var(--muted)">Components: ${lab.components ? lab.components.length : 0} | Wires: ${lab.wires ? lab.wires.length : 0}</p>
-      <div class="project-actions" style="margin-top:8px">
-        <button class="btn primary vlab-open-btn" style="padding:4px 10px; font-size:11px">Open Lab</button>
-        <button class="btn vlab-edit-btn" style="padding:4px 10px; font-size:11px">Edit</button>
-        <button class="btn vlab-delete-btn" style="padding:4px 10px; font-size:11px; color:var(--error)">Delete</button>
-      </div>
+      <p>Components: ${lab.components ? lab.components.length : 0} | Wires: ${lab.wires ? lab.wires.length : 0}</p>
     `;
-
-    // Open Lab
-    card.querySelector('.vlab-open-btn').onclick = (e) => {
-      e.stopPropagation();
-      const m = lab.mode || '2d';
-      window.location.href = `../virtual-lab/lab.html?id=${lab.id}&name=${encodeURIComponent(lab.name)}&controller=${encodeURIComponent(lab.controller)}&mode=${m}`;
-    };
-
-    // Edit Lab Project
-    card.querySelector('.vlab-edit-btn').onclick = (e) => {
-      e.stopPropagation();
-      document.getElementById('editLabIdInput').value = lab.id;
-      document.getElementById('editLabNameInput').value = lab.name;
-      document.getElementById('editLabControllerInput').value = lab.controller || 'arduino_uno';
-      document.getElementById('editLabDescInput').value = lab.desc || '';
-      
-      const is3d = (lab.mode === '3d');
-      document.getElementById('editMode2dRadio').checked = !is3d;
-      document.getElementById('editMode3dRadio').checked = is3d;
-      document.getElementById('editMode2dOpt').classList.toggle('selected', !is3d);
-      document.getElementById('editMode3dOpt').classList.toggle('selected', is3d);
-
-      document.getElementById('editLabModal').classList.add('active');
-    };
-
-    // Delete Lab Project
-    card.querySelector('.vlab-delete-btn').onclick = (e) => {
-      e.stopPropagation();
-      if (!confirm(`Delete lab project "${lab.name}"?`)) return;
-      localStorage.removeItem('edusim_vlab_' + lab.id);
-      showToast('Lab project deleted');
-      loadVirtualLabs();
-    };
-
-    card.onclick = () => {
-      const m = lab.mode || '2d';
-      window.location.href = `../virtual-lab/lab.html?id=${lab.id}&name=${encodeURIComponent(lab.name)}&controller=${encodeURIComponent(lab.controller)}&mode=${m}`;
-    };
-
     grid.appendChild(card);
-  });
-}
-
-// Edit Lab Modal Handlers
-const editLabModal = document.getElementById('editLabModal');
-const closeEditLabModal = document.getElementById('closeEditLabModal');
-const saveEditLabProjectBtn = document.getElementById('saveEditLabProjectBtn');
-
-if (closeEditLabModal) {
-  closeEditLabModal.addEventListener('click', () => editLabModal.classList.remove('active'));
-}
-if (editLabModal) {
-  editLabModal.addEventListener('click', e => { if (e.target === editLabModal) editLabModal.classList.remove('active'); });
-}
-
-// Edit lab mode picker listeners
-document.getElementById('editMode2dOpt')?.addEventListener('click', function() {
-  document.getElementById('editMode2dOpt').classList.add('selected');
-  document.getElementById('editMode3dOpt').classList.remove('selected');
-  document.getElementById('editMode2dRadio').checked = true;
-});
-document.getElementById('editMode3dOpt')?.addEventListener('click', function() {
-  document.getElementById('editMode3dOpt').classList.add('selected');
-  document.getElementById('editMode2dOpt').classList.remove('selected');
-  document.getElementById('editMode3dRadio').checked = true;
-});
-
-if (saveEditLabProjectBtn) {
-  saveEditLabProjectBtn.addEventListener('click', () => {
-    const id = document.getElementById('editLabIdInput').value;
-    const name = document.getElementById('editLabNameInput').value.trim() || 'Untitled Lab';
-    const controller = document.getElementById('editLabControllerInput').value;
-    const desc = document.getElementById('editLabDescInput').value.trim();
-    const mode = document.querySelector('input[name="editLabMode"]:checked')?.value || '2d';
-
-    const key = 'edusim_vlab_' + id;
-    let existing = {};
-    try { existing = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
-
-    const updated = {
-      ...existing,
-      id,
-      name,
-      controller,
-      desc,
-      mode
-    };
-    localStorage.setItem(key, JSON.stringify(updated));
-
-    editLabModal.classList.remove('active');
-    showToast('Lab project updated!', 'success');
-    loadVirtualLabs();
   });
 }
 
@@ -1236,3 +1087,24 @@ connectAgent();
 // Also show offline banner immediately (before WS connects)
 showAgentBanner(false);
 
+// ── AI Assistant Button Listener ──────────────────────────
+const aiBtn = document.getElementById('aiAssistantBtn');
+if (aiBtn) {
+  aiBtn.addEventListener('click', () => {
+    window.AIAssistantInstance?.toggle();
+  });
+}
+
+// ── Sync Board to AI Context ──────────────────────────────
+const bSelect = document.getElementById('boardSelect');
+if (bSelect) {
+  bSelect.addEventListener('change', function() {
+    if (window.EduSimContext) {
+      window.EduSimContext.setBoard(this.value, getBoardProfile().fqbn);
+    }
+  });
+  // Initial sync
+  if (window.EduSimContext) {
+    window.EduSimContext.setBoard(bSelect.value, getBoardProfile().fqbn);
+  }
+}

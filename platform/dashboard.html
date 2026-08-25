@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css"/>
-  <link rel="stylesheet" href="../assistant_workflow/ai-assistant.css"/>
 </head>
 <body>
 
@@ -123,15 +122,14 @@
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save
       </button>
-      <button class="btn" id="btnAiToggle">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M21.18 8.02c-1-2.3-2.85-4.17-5.16-5.18"/></svg>
-        AI Tutor
+      <button class="btn ai-toggle-btn" id="aiAssistantBtn" title="Open AI Tutor & Debugger">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        AI Assistant
       </button>
     </header>
 
-    <!-- Wrapper for Editor + Terminal + AI Mentor Panel -->
-    <div class="ide-body-wrapper">
-      <div class="ide-body">
+    <!-- Editor + Terminal -->
+    <div class="ide-body">
       <!-- File tabs bar -->
       <div class="file-tabs">
         <div class="file-tab active" id="currentFileTab">
@@ -196,131 +194,7 @@
         </div>
       </div>
     </div>
-
-    <!-- MENTOR Slide-in Panel -->
-    <div id="aiPanel" role="dialog" aria-label="EduSim MENTOR">
-
-      <!-- Header -->
-      <div class="ai-header">
-        <div class="ai-header-title">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-          EduSim MENTOR
-          <span class="ai-header-badge">CODE AI</span>
-        </div>
-
-        <!-- Mode toggle: Assist | Review | Explain | Optimise -->
-        <div class="ai-mode-toggle" id="aiModeToggle">
-          <div class="ai-mode-indicator"></div>
-          <button class="ai-mode-btn active" data-mode="assist">Assist</button>
-          <button class="ai-mode-btn" data-mode="review">Review</button>
-          <button class="ai-mode-btn" data-mode="explain">Explain</button>
-          <button class="ai-mode-btn" data-mode="optimise">Optimise</button>
-        </div>
-
-        <button class="ai-close-btn" id="btnAiClose" aria-label="Close MENTOR">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Board/language context bar -->
-      <div class="mentor-ctx" id="mentorCtxBar">
-        <span class="mentor-ctx-chip" id="mentorBoardChip">
-          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5M10 7V4M14 7V5M18 7V4"/></svg>
-          esp32
-        </span>
-        <span class="mentor-ctx-chip" id="mentorLangChip">
-          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          cpp
-        </span>
-        <button class="mentor-quick-action" id="btnMentorReview" title="Auto-review current sketch">
-          ⚡ Quick Review
-        </button>
-      </div>
-
-      <!-- Quick prompts -->
-      <div class="mentor-quick-row">
-        <button class="mentor-pill" data-prompt="Review my current sketch for bugs and anti-patterns.">Review code</button>
-        <button class="mentor-pill" data-prompt="Explain how interrupts work on my current board.">Interrupts</button>
-        <button class="mentor-pill" data-prompt="How can I reduce power consumption in my sketch?">Save power</button>
-        <button class="mentor-pill" data-prompt="Replace all delay() calls with non-blocking millis() logic.">Fix delays</button>
-      </div>
-
-      <!-- Per-mode isolated chat panels -->
-      <div class="ai-chat-panels">
-
-        <!-- ASSIST chat -->
-        <div class="ai-chat-area active" id="chat-assist">
-          <div class="chat-mode-badge">Assist</div>
-          <div class="ai-message bot">
-            <div class="ai-bubble">
-              👋 <strong>Assist mode</strong> — Ask me anything about your code, concepts, or embedded architecture. I answer like a senior engineer and always give concrete examples.
-            </div>
-          </div>
-        </div>
-
-        <!-- REVIEW chat -->
-        <div class="ai-chat-area" id="chat-review">
-          <div class="chat-mode-badge">Review</div>
-          <div class="ai-message bot">
-            <div class="ai-bubble">
-              🔍 <strong>Review mode</strong> — I’ll audit your current sketch like a senior engineer doing a code review. I’ll flag bugs, anti-patterns, and risks with exact line numbers.
-            </div>
-          </div>
-        </div>
-
-        <!-- EXPLAIN chat -->
-        <div class="ai-chat-area" id="chat-explain">
-          <div class="chat-mode-badge">Explain</div>
-          <div class="ai-message bot">
-            <div class="ai-bubble">
-              📚 <strong>Explain mode</strong> — Ask me any embedded concept (timers, ISRs, SPI, MQTT…). I’ll break it down from first principles using analogies, then show how it applies to your board.
-            </div>
-          </div>
-        </div>
-
-        <!-- OPTIMISE chat -->
-        <div class="ai-chat-area" id="chat-optimise">
-          <div class="chat-mode-badge">Optimise</div>
-          <div class="ai-message bot">
-            <div class="ai-bubble">
-              ⚡ <strong>Optimise mode</strong> — I’ll analyse your sketch for memory leaks, blocking delays, power waste, and timing issues — with concrete fixes for each.
-            </div>
-          </div>
-        </div>
-
-      </div><!-- end .ai-chat-panels -->
-
-      <!-- Input -->
-      <div class="ai-input-area">
-        <div class="ai-input-wrapper">
-          <textarea class="ai-input" id="aiInput"
-            placeholder="Ask MENTOR about your code or concept…"
-            rows="1"></textarea>
-          <button class="ai-send-btn" id="btnAiSend" title="Send (Enter)">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
-        </div>
-      </div><!-- end ai-input-area -->
-    </div><!-- end #aiPanel -->
-
-  </div><!-- end .ide-body-wrapper -->
-
-  <!-- Floating AI Trigger Tab (always visible on right edge) -->
-  <button id="aiPanelTrigger" onclick="document.getElementById('btnAiToggle').click()" title="Open AI Tutor">
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-    <span>AI</span>
-  </button>
-
-  </div><!-- end #tab-ide -->
+  </div>
 
   <!-- ─── PROFILE TAB ──────────────────────── -->
   <div class="tab-panel" id="tab-profile">
@@ -443,38 +317,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Edit Project Modal -->
-    <div class="modal-overlay" id="editProjectModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Edit Project</h3>
-          <button class="close-btn" id="closeEditProjectModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="editProjIdInput"/>
-          <div class="form-group">
-            <label>Project Name</label>
-            <input type="text" class="form-input" id="editProjNameInput" placeholder="Project Name"/>
-          </div>
-          <div class="form-group">
-            <label>Target Board</label>
-            <select class="form-input" id="editProjBoardInput">
-              <option value="esp32">ESP32</option>
-              <option value="esp8266">ESP8266</option>
-              <option value="uno">Arduino Uno</option>
-              <option value="nano">Arduino Nano</option>
-              <option value="rp2040">Raspberry Pi Pico</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <textarea class="form-input" id="editProjDescInput" rows="3" placeholder="Description…"></textarea>
-          </div>
-          <button class="btn primary" style="width:100%" id="saveEditProjectBtn">Save Changes</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- ─── SIMULATIONS TAB ──────────────────── -->
@@ -594,13 +436,14 @@
                 <span class="mode-label">2D Schematic</span>
                 <span class="mode-sub">Drag &amp; wire components on a flat canvas</span>
               </label>
-            <label class="mode-option" id="mode3d">
+              <label class="mode-option" id="mode3d">
                 <input type="radio" name="labMode" value="3d" hidden/>
                 <div class="mode-icon">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </div>
                 <span class="mode-label">3D Breadboard</span>
-                <span class="mode-sub">Realistic 3D WebGL view with GLB models</span>
+                <span class="mode-sub">Coming soon — realistic 3D view</span>
+                <span class="mode-badge">Soon</span>
               </label>
             </div>
           </div>
@@ -608,73 +451,6 @@
           <button class="btn primary" style="width:100%; margin-top:4px" id="createLabProjectBtn">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Launch Lab
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Edit Lab Project Modal ── -->
-    <div class="modal-overlay" id="editLabModal">
-      <div class="modal-content" style="width:520px">
-        <div class="modal-header">
-          <h3>Edit Lab Project</h3>
-          <button class="close-btn" id="closeEditLabModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="editLabIdInput"/>
-          <div class="form-group">
-            <label>Project Name</label>
-            <input type="text" class="form-input" id="editLabNameInput" placeholder="e.g. LED Blink Circuit"/>
-          </div>
-
-          <div class="form-group">
-            <label>Controller / Microcontroller</label>
-            <select class="form-input" id="editLabControllerInput">
-              <optgroup label="Arduino">
-                <option value="arduino_uno">Arduino Uno</option>
-                <option value="arduino_nano">Arduino Nano</option>
-                <option value="arduino_mega">Arduino Mega 2560</option>
-              </optgroup>
-              <optgroup label="ESP">
-                <option value="esp32">ESP32 Dev Module</option>
-                <option value="esp8266">NodeMCU (ESP8266)</option>
-              </optgroup>
-              <optgroup label="Raspberry Pi">
-                <option value="rp2040">Raspberry Pi Pico</option>
-              </optgroup>
-              <option value="none">No Microcontroller (Basic Circuit)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Description</label>
-            <textarea class="form-input" id="editLabDescInput" rows="2" placeholder="Brief lab description…"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Lab Mode</label>
-            <div class="mode-picker">
-              <label class="mode-option selected" id="editMode2dOpt">
-                <input type="radio" name="editLabMode" value="2d" id="editMode2dRadio" checked hidden/>
-                <div class="mode-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 12h10M12 7v10"/></svg>
-                </div>
-                <span class="mode-label">2D Schematic</span>
-                <span class="mode-sub">Flat canvas</span>
-              </label>
-              <label class="mode-option" id="editMode3dOpt">
-                <input type="radio" name="editLabMode" value="3d" id="editMode3dRadio" hidden/>
-                <div class="mode-icon">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                </div>
-                <span class="mode-label">3D View</span>
-                <span class="mode-sub">3D WebGL View</span>
-              </label>
-            </div>
-          </div>
-
-          <button class="btn primary" style="width:100%; margin-top:4px" id="saveEditLabProjectBtn">
-            Save Changes
           </button>
         </div>
       </div>
@@ -733,27 +509,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <!-- Config -->
 <script src="../config/config.js"></script>
+<!-- AI Assistant & Context (Layer 1-4) -->
+<script src="../ai/frontend/ai-context.js"></script>
+<script src="../ai/frontend/ai-assistant.js"></script>
 <!-- Dashboard Logic -->
 <script src="dashboard.js"></script>
-<!-- ════════════════════════════════════════════════════════════
-     EduSim MENTOR — Code Teaching AI
-     FAB + slide-in panel. Completely separate from CircuitMind.
-     Identity: Senior engineer doing a code review / teaching session
-     Modes: Assist | Review | Explain | Optimise
-════════════════════════════════════════════════════════════ -->
-
-<!-- MENTOR FAB (bottom-right) -->
-<button id="btnAiToggle" aria-label="Open EduSim MENTOR">
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    <line x1="9" y1="10" x2="15" y2="10"/>
-    <line x1="12" y1="7" x2="12" y2="13"/>
-  </svg>
-</button>
-
-
-
-<!-- AI Assistant Logic (EduSim MENTOR) -->
-<script src="../assistant_workflow/ai-assistant.js"></script>
 </body>
 </html>

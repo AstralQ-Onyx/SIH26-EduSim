@@ -12,74 +12,15 @@ const PROJECT = {
   controller: params.get('controller')|| 'none',
   mode:       params.get('mode')      || '2d',
 };
-
-// Check if project exists in localStorage to get saved name/desc
-try {
-  const stored = localStorage.getItem('edusim_vlab_' + PROJECT.id);
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    if (parsed.name) PROJECT.name = parsed.name;
-    if (parsed.desc) PROJECT.desc = parsed.desc;
-    if (parsed.controller) PROJECT.controller = parsed.controller;
-    if (parsed.mode) PROJECT.mode = parsed.mode;
-  }
-} catch(e) {}
-
-const titleEl = document.getElementById('labProjectTitleText');
-if (titleEl) titleEl.textContent = PROJECT.name;
-
+document.getElementById('labProjectName').textContent = PROJECT.name;
 document.getElementById('backBtn').addEventListener('click', () => {
+  // Navigate back to dashboard; fall back to root if no history
   if (document.referrer && document.referrer !== location.href) {
     history.back();
   } else {
     location.href = '../platform/dashboard.html';
   }
 });
-
-// Manage Project Modal in Virtual Lab
-const editLabTitleBtn       = document.getElementById('editLabTitleBtn');
-const manageLabModal         = document.getElementById('manageLabModal');
-const closeManageLabModal    = document.getElementById('closeManageLabModal');
-const saveManageLabBtn       = document.getElementById('saveManageLabBtn');
-const deleteLabFromEditorBtn = document.getElementById('deleteLabFromEditorBtn');
-
-function openManageLabModal() {
-  if (!manageLabModal) return;
-  document.getElementById('manageLabNameInput').value = PROJECT.name;
-  document.getElementById('manageLabDescInput').value = PROJECT.desc || '';
-  manageLabModal.classList.add('active');
-}
-
-if (editLabTitleBtn) editLabTitleBtn.addEventListener('click', openManageLabModal);
-if (closeManageLabModal) closeManageLabModal.addEventListener('click', () => manageLabModal.classList.remove('active'));
-if (manageLabModal) {
-  manageLabModal.addEventListener('click', e => { if (e.target === manageLabModal) manageLabModal.classList.remove('active'); });
-}
-
-if (saveManageLabBtn) {
-  saveManageLabBtn.addEventListener('click', () => {
-    const newName = document.getElementById('manageLabNameInput').value.trim() || 'Untitled Lab';
-    const newDesc = document.getElementById('manageLabDescInput').value.trim();
-    
-    PROJECT.name = newName;
-    PROJECT.desc = newDesc;
-
-    if (titleEl) titleEl.textContent = PROJECT.name;
-    document.title = `${PROJECT.name} — EduSim Virtual Lab`;
-
-    saveProject();
-    manageLabModal.classList.remove('active');
-    if (window.clog) window.clog(`[Lab] Project renamed to "${PROJECT.name}" ✓`, 'ok');
-  });
-}
-
-if (deleteLabFromEditorBtn) {
-  deleteLabFromEditorBtn.addEventListener('click', () => {
-    if (!confirm(`Are you sure you want to delete "${PROJECT.name}"? This action cannot be undone.`)) return;
-    localStorage.removeItem('edusim_vlab_' + PROJECT.id);
-    location.href = '../platform/dashboard.html';
-  });
-}
 
 // ── SVG canvas state ──────────────────────────────────────
 const svg            = document.getElementById('labSvg');
@@ -100,6 +41,8 @@ let wireStart     = null;   // { compId, pinId, x, y }
 
 let components    = [];     // { id, defId, x, y, props, element }
 let wires         = [];     // { id, from:{compId,pinId}, to:{compId,pinId}, element }
+window.components = components;
+window.wires      = wires;
 let nextId        = 1;
 
 const SNAP = 10;
@@ -272,19 +215,11 @@ const container = document.getElementById('canvasContainer');
 container.addEventListener('dragover', e => e.preventDefault());
 container.addEventListener('drop', e => {
   e.preventDefault();
+  pushHistory();
   const defId = e.dataTransfer.getData('defId');
   if (!defId || !LAB_COMPONENTS[defId]) return;
-  const pt = (PROJECT.mode === '3d' && window.get3DDropPoint) 
-             ? window.get3DDropPoint(e.clientX, e.clientY) 
-             : svgPoint(e.clientX, e.clientY);
-  if (!pt) return;
-  pushHistory();         // snapshot before adding
+  const pt = svgPoint(e.clientX, e.clientY);
   addComponent(defId, snap(pt.x), snap(pt.y));
-  // In 3D mode trigger explicit rebuild so the new mesh appears immediately
-  if (PROJECT.mode === '3d' && typeof window.build3DScene === 'function') {
-    clearTimeout(window._3dRebuildTimer);
-    window._3dRebuildTimer = setTimeout(window.build3DScene, 50);
-  }
 });
 
 // ── Add Component to Canvas ───────────────────────────────
@@ -340,27 +275,14 @@ function addComponent(defId, x, y) {
   const comp = { id, defId, x, y, rotation: 0, props, element:g, labelEl:lbl, def };
   components.push(comp);
 
+  // Trigger modern drop/placement ripple animation
+  if (window.effectsEngine) {
+    window.effectsEngine.spawnDropRipple(x, y, def.w, def.h);
+  }
+
   clog(`Added: ${def.label}`, 'sys');
   selectComponent(comp);
   return comp;
-}
-window.addComponent    = addComponent;
-window.LAB_COMPONENTS  = LAB_COMPONENTS;
-window.components      = components;
-window.wires           = wires;
-window.pushHistory     = pushHistory;
-window.deleteSelected  = deleteSelected;
-window.selectComponent = selectComponent;
-window.clearSelection  = clearSelection;
-
-// ── Props Panel Collapse Toggle ──────────────────────────
-const propsPanel     = document.getElementById('propsPanel');
-const togglePropsBtn = document.getElementById('togglePropsBtn');
-if (togglePropsBtn) {
-  togglePropsBtn.addEventListener('click', () => {
-    const collapsed = propsPanel.classList.toggle('collapsed');
-    togglePropsBtn.title = collapsed ? 'Show Properties Panel' : 'Hide Properties Panel';
-  });
 }
 
 // ── Make component draggable ──────────────────────────────
@@ -410,6 +332,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'w' || e.key === 'W') { wireBtn.click(); }
   if (e.key === 'Escape')             { cancelWire(); if(wireMode) wireBtn.click(); }
   
+  // X-Ray Mode Toggle (X key)
+  if ((e.key === 'x' || e.key === 'X') && !e.target.matches('input, textarea')) {
+    if (window.xrayEngine) window.xrayEngine.toggle();
+  }
+
   // Undo / Redo
   if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
     e.preventDefault();
@@ -447,15 +374,21 @@ function onPinHover(e) {
   const pin = comp?.def.pins.find(p => p.id === pinId);
   if (!pin) return;
 
-  const labelText = pin._customLabel || pin.label;
-  pinTooltip.innerHTML = `<strong>${pin.id}</strong><br/>${labelText}`;
+  pinTooltip.innerHTML = `<strong>${pin.id}</strong><br/>${pin.label}`;
   pinTooltip.style.left = (e.clientX + 15) + 'px';
   pinTooltip.style.top = (e.clientY + 15) + 'px';
   pinTooltip.style.display = 'block';
+
+  if (window.xrayEngine) {
+    window.xrayEngine.highlightNetForPin(compId, pinId, components, wires);
+  }
 }
 
 function onPinOut() {
   pinTooltip.style.display = 'none';
+  if (window.xrayEngine) {
+    window.xrayEngine.clearHighlights();
+  }
 }
 
 function onPinMouseDown(e) {
@@ -528,6 +461,20 @@ function drawWire(from, to, color = '#00d4ff') {
   wiresLayer.appendChild(line);
   updateWirePath(wire);
   clog(`Wire: ${from.compId}.${from.pinId} → ${to.compId}.${to.pinId}`, 'sys');
+
+  // Trigger electric connection snap spark at target pin
+  if (window.effectsEngine) {
+    const tc = components.find(c => c.id === to.compId);
+    const tp = tc?.def?.pins?.find(p => p.id === to.pinId);
+    if (tc && tp) {
+      window.effectsEngine.spawnConnectionSpark(tc.x + tp.x, tc.y + tp.y, color);
+    }
+  }
+
+  // Run DRC analysis after every new wire connection
+  if (window.circuitDRCEngine) {
+    setTimeout(() => window.circuitDRCEngine.analyze(components, wires), 50);
+  }
 }
 
 function updateWirePath(wire) {
@@ -601,9 +548,14 @@ function deleteSelected() {
   if (selectedWire) {
     selectedWire.element.remove();
     wires = wires.filter(w => w !== selectedWire);
-    window.wires = wires; // update global ref
+    window.wires = wires;
     selectedWire = null;
   } else if (selectedComp) {
+    // Stop smoke if any and emit deletion disintegration particles
+    if (window.effectsEngine) {
+      window.effectsEngine.stopComponentSmoke(selectedComp);
+      window.effectsEngine.spawnDeleteBurst(selectedComp.x, selectedComp.y, selectedComp.def.w, selectedComp.def.h);
+    }
     // Remove connected wires
     wires = wires.filter(w => {
       if (w.from.compId === selectedComp.id || w.to.compId === selectedComp.id) {
@@ -611,13 +563,18 @@ function deleteSelected() {
       }
       return true;
     });
-    window.wires = wires; // update global ref
+    window.wires = wires;
     selectedComp.element.remove();
     components = components.filter(c => c !== selectedComp);
-    window.components = components; // update global ref
+    window.components = components;
     selectedComp = null;
     clearSelection();
     populateDeviceSelect();
+  }
+
+  // Re-run DRC after deletion to clear stale faults
+  if (window.circuitDRCEngine) {
+    setTimeout(() => window.circuitDRCEngine.analyze(components, wires), 50);
   }
 }
 
@@ -693,128 +650,19 @@ function renderProps(comp) {
     body.appendChild(grp);
   });
 
-  // Pin table — with edit capability for controllers
+  // Pin table
   const tbl = document.createElement('div');
   tbl.innerHTML = `<span class="prop-label" style="margin-top:10px;display:block">Pins</span>`;
-
-  const isController = ['esp32','arduino_uno','arduino_nano','arduino_mega','esp8266','rp2040'].includes(comp.defId);
-
-  if (isController) {
-    // Editable pin config for controllers
-    const pinConfigSection = document.createElement('div');
-    pinConfigSection.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span class="prop-label" style="margin:0">Pin Configuration</span>
-        <button id="editPinsToggleBtn" class="lab-btn" style="font-size:10px;padding:2px 6px;">Edit Pins</button>
-      </div>
-      <div id="pinConfigTable" style="max-height:260px;overflow-y:auto;"></div>
-    `;
-    body.appendChild(pinConfigSection);
-
-    // Store pin overrides in comp.props._pinOverrides
-    if (!comp.props._pinOverrides) comp.props._pinOverrides = {};
-
-    let editMode = false;
-    const pinTable = pinConfigSection.querySelector('#pinConfigTable');
-    const editBtn  = pinConfigSection.querySelector('#editPinsToggleBtn');
-
-    function renderPinTable() {
-      pinTable.innerHTML = '';
-
-      if (editMode) {
-        // Editable rows
-        comp.def.pins.forEach(pin => {
-          const override = comp.props._pinOverrides[pin.id] || {};
-          const row = document.createElement('div');
-          row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 60px;gap:4px;margin:3px 0;align-items:center;';
-          row.innerHTML = `
-            <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);padding:2px 4px;background:var(--surface2);border-radius:4px;" title="Pin ID">${pin.id}</div>
-            <input class="pin-label-input prop-input" style="padding:2px 5px;font-size:10px;font-family:var(--font-mono)" placeholder="Label" value="${override.label || pin.label}" data-pin-id="${pin.id}" data-field="label"/>
-            <span style="font-size:9px;color:var(--muted);text-align:center;padding:2px;">${pin.type}</span>
-          `;
-          pinTable.appendChild(row);
-
-          row.querySelector('.pin-label-input').addEventListener('change', function() {
-            if (!comp.props._pinOverrides[pin.id]) comp.props._pinOverrides[pin.id] = {};
-            comp.props._pinOverrides[pin.id].label = this.value;
-          });
-        });
-
-        // Save/Cancel buttons
-        const btnRow = document.createElement('div');
-        btnRow.style.cssText = 'display:flex;gap:6px;margin-top:8px;';
-        btnRow.innerHTML = `
-          <button id="savePinConfig" class="prop-input" style="background:var(--accent);color:#000;border:none;cursor:pointer;flex:1;padding:5px;border-radius:5px;font-weight:600;">Save</button>
-          <button id="cancelPinConfig" class="prop-input" style="cursor:pointer;flex:1;padding:5px;border-radius:5px;">Cancel</button>
-        `;
-        pinTable.appendChild(btnRow);
-
-        btnRow.querySelector('#savePinConfig').onclick = () => {
-          pushHistory();
-          editMode = false;
-          editBtn.textContent = 'Edit Pins';
-          // Apply overrides to the component's live def pins (visual labels on canvas)
-          comp.def.pins.forEach(pin => {
-            const ov = comp.props._pinOverrides[pin.id];
-            if (ov && ov.label) {
-              pin._customLabel = ov.label;
-              // Update tooltip data on SVG pin circles
-              const circle = comp.element.querySelector(`.pin-circle[data-pin-id="${pin.id}"]`);
-              if (circle) circle.dataset.pinLabel = ov.label;
-            }
-          });
-          renderPinTable();
-        };
-        btnRow.querySelector('#cancelPinConfig').onclick = () => {
-          editMode = false;
-          editBtn.textContent = 'Edit Pins';
-          renderPinTable();
-        };
-
-      } else {
-        // Read-only rows with type color dots
-        comp.def.pins.forEach(pin => {
-          const override = comp.props._pinOverrides[pin.id] || {};
-          const label = override.label || pin._customLabel || pin.label;
-          pinTable.innerHTML += `
-            <div style="display:flex;align-items:center;gap:8px;margin:3px 0;padding:3px 4px;border-radius:5px;transition:background .12s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
-              <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${
-                pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#00d4ff'}"></div>
-              <span style="font-size:11px;font-family:var(--font-mono);font-weight:600;color:var(--accent);min-width:38px">${pin.id}</span>
-              <span style="font-size:10px;color:var(--text)">${label}</span>
-              <span style="font-size:9px;color:var(--muted);margin-left:auto">${pin.type}</span>
-            </div>`;
-        });
-
-        // Info note if any overrides exist
-        const hasOverrides = Object.keys(comp.props._pinOverrides).length > 0;
-        if (hasOverrides) {
-          pinTable.innerHTML += `<div style="font-size:9px;color:var(--accent);margin-top:6px;">&#x2713; Custom pin labels applied</div>`;
-        }
-      }
-    }
-
-    editBtn.addEventListener('click', () => {
-      editMode = !editMode;
-      editBtn.textContent = editMode ? 'Cancel' : 'Edit Pins';
-      renderPinTable();
-    });
-
-    renderPinTable();
-
-  } else {
-    // Non-controller: simple read-only pin list
-    comp.def.pins.forEach(pin => {
-      tbl.innerHTML += `
-        <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-          <div style="width:8px;height:8px;border-radius:50%;background:${
-            pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#00d4ff'}"></div>
-          <span style="font-size:11px;font-weight:600">${pin.id}</span>
-          <span style="font-size:10px;color:var(--muted)">${pin.label}</span>
-        </div>`;
-    });
-    body.appendChild(tbl);
-  }
+  comp.def.pins.forEach(pin => {
+    tbl.innerHTML += `
+      <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${
+          pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#00d4ff'}"></div>
+        <span style="font-size:11px;font-weight:600">${pin.id}</span>
+        <span style="font-size:10px;color:var(--muted)">${pin.label}</span>
+      </div>`;
+  });
+  body.appendChild(tbl);
 }
 
 // ── Simulation ────────────────────────────────────────────
@@ -836,8 +684,6 @@ let audioCtx = null;
 const activeOscillators = {};
 
 function driveComponent(comp, pinId, isHigh) {
-  if (window.update3DComponentState) window.update3DComponentState(comp.id, isHigh);
-
   if (comp.defId.startsWith('led_')) {
     const ellipse = comp.element.querySelector('ellipse');
     if (ellipse) {
@@ -874,7 +720,6 @@ function driveComponent(comp, pinId, isHigh) {
 
 function resetVisuals() {
   components.forEach(comp => {
-    if (window.update3DComponentState) window.update3DComponentState(comp.id, false);
     if (comp.defId.startsWith('led_')) {
       const ellipse = comp.element.querySelector('ellipse');
       if (ellipse) ellipse.style.filter = '';
@@ -893,6 +738,24 @@ function setSimUI(running) {
   document.getElementById('simStatusText').textContent = running ? 'Running' : 'Ready';
   document.getElementById('runBtn').disabled  = running;
   document.getElementById('stopBtn').disabled = !running;
+
+  if (window.currentFlowEngine) {
+    if (running) window.currentFlowEngine.start();
+    else window.currentFlowEngine.stop();
+  }
+
+  // Run DRC at simulation start to catch circuit errors before damage
+  if (running && window.circuitDRCEngine) {
+    setTimeout(() => {
+      const faults = window.circuitDRCEngine.analyze(components, wires);
+      if (faults.length > 0) {
+        clog(`[DRC] ⚠ ${faults.length} circuit fault(s) detected! Click "Diagnostics & Faults" tab.`, 'warn');
+        // Auto-expand console to show warning
+        const labConsole = document.getElementById('labConsole');
+        if (labConsole) labConsole.classList.add('expanded');
+      }
+    }, 100);
+  }
 }
 
 function startSim() {
@@ -904,6 +767,9 @@ function stopSim() {
   EduSimulator.stopSimulation();
   setSimUI(false);
   resetVisuals();
+  if (window.currentFlowEngine) {
+    window.currentFlowEngine.stop();
+  }
   clog('[Simulator] Stopped.', 'warn');
 }
 
@@ -928,10 +794,33 @@ async function runUpload() {
   setSimUI(false);
   resetVisuals();
 
+  // Enable console input during sim
+  const cInput = document.getElementById('consoleInput');
+  const cSend  = document.getElementById('consoleSend');
+  if (cInput) cInput.disabled = false;
+  if (cSend)  cSend.disabled  = false;
+
   const ok = await EduSimulator.compileAndSimulate(code, defId, {
-    onLog:  (msg, type) => clog(msg, type),
-    onError:(msg)       => clog(msg, 'err'),
-    onReady: ()         => setSimUI(true),
+    onLog: (msg, type) => {
+      clog(msg, type);
+      if (type !== 'err') SerialPlotter.pushData(msg);
+    },
+    onError: (msg) => clog(msg, 'err'),
+    onReady: () => setSimUI(true),
+    onSerial: (line) => {
+      SerialPlotter.pushData(line);
+      const sBody = document.getElementById('serialBody');
+      if (sBody) {
+        const d = document.createElement('div');
+        d.className = 'clog';
+        d.textContent = line;
+        sBody.appendChild(d);
+        sBody.scrollTop = 9999;
+      }
+    },
+    onMemory: (stats, fqbn) => {
+      MemoryMeter.update(stats, defId);
+    },
     onPin: (portName, bit, pinState) => {
       const isHigh = (pinState === 1 || pinState === true);
 
@@ -961,6 +850,9 @@ async function runUpload() {
         }
 
         if (matches) {
+          if (window.currentFlowEngine) {
+            window.currentFlowEngine.setPinState(cPinId, isHigh ? 1 : 0);
+          }
           if (w.from.compId === ctrlComp.id) {
             const toComp = components.find(c => c.id === w.to.compId);
             if (toComp) driveComponent(toComp, w.to.pinId, isHigh);
@@ -973,7 +865,11 @@ async function runUpload() {
     },
   });
 
-  if (!ok) setSimUI(false);
+  if (!ok) {
+    setSimUI(false);
+    if (cInput) cInput.disabled = true;
+    if (cSend)  cSend.disabled  = true;
+  }
 }
 
 // ── Save ──────────────────────────────────────────────────
@@ -982,9 +878,7 @@ function saveProject() {
   const data = {
     id: PROJECT.id,
     name: PROJECT.name,
-    desc: PROJECT.desc || '',
     controller: PROJECT.controller,
-    mode: PROJECT.mode,
     code: labEditor ? labEditor.getValue() : '',
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
     wires: wires.map(w => ({ id:w.id, from:w.from, to:w.to, color:w.color })),
@@ -1002,7 +896,6 @@ function loadProject() {
       addComponent(PROJECT.controller, 150, 100);
     }
     populateDeviceSelect();
-    window.dispatchEvent(new Event('edusim-project-loaded')); // boot 3D if mode=3d
     return;
   }
   const data = JSON.parse(raw);
@@ -1018,19 +911,6 @@ function loadProject() {
     comp.rotation = c.rotation || 0;
     Object.assign(comp.props, c.props);
     if (c.props.label) comp.labelEl.textContent = c.props.label;
-    
-    // Apply any pin overrides
-    if (comp.props._pinOverrides) {
-      comp.def.pins.forEach(pin => {
-        const ov = comp.props._pinOverrides[pin.id];
-        if (ov && ov.label) {
-          pin._customLabel = ov.label;
-          const circle = comp.element.querySelector(`.pin-circle[data-pin-id="${pin.id}"]`);
-          if (circle) circle.dataset.pinLabel = ov.label;
-        }
-      });
-    }
-
     comp.element.setAttribute('transform',
       `translate(${comp.x},${comp.y}) rotate(${comp.rotation} ${comp.def.w/2} ${comp.def.h/2})`);
   });
@@ -1049,7 +929,6 @@ function loadProject() {
 
   populateDeviceSelect();
   clog('[Lab] Project loaded ✓', 'ok');
-  window.dispatchEvent(new Event('edusim-project-loaded'));
 }
 
 // ── Console helpers ───────────────────────────────────────
@@ -1077,6 +956,11 @@ document.querySelectorAll('.console-tab').forEach(tab => {
     tab.classList.add('active');
     document.querySelectorAll('.console-body').forEach(b => b.style.display = 'none');
     document.getElementById(tab.dataset.ctab + 'Body').style.display = 'block';
+
+    // Refresh DRC analysis when user opens Diagnostics tab
+    if (tab.dataset.ctab === 'diagnostics' && window.circuitDRCEngine) {
+      window.circuitDRCEngine.analyze(components, wires);
+    }
   });
 });
 
@@ -1101,6 +985,16 @@ function populateDeviceSelect() {
 
 document.getElementById('codeDeviceSelect').addEventListener('focus', populateDeviceSelect);
 document.getElementById('codeDeviceSelect').addEventListener('mousedown', populateDeviceSelect);
+document.getElementById('codeDeviceSelect').addEventListener('change', (e) => {
+  const deviceId = e.target.value;
+  const comp = components.find(c => c.id === deviceId);
+  const defId = comp?.defId || 'arduino_uno_r3';
+  if (labEditor) {
+    MemoryMeter.update(EduSimulator.estimateMemory(labEditor.getValue(), defId), defId);
+  } else {
+    MemoryMeter.update({}, defId);
+  }
+});
 
 document.getElementById('toggleCodeBtn').addEventListener('click', () => {
   const isOpening = codePanel.style.display === 'none';
@@ -1165,11 +1059,358 @@ if (typeof require !== 'undefined') {
   });
 }
 
+// ── Memory Meter Module ────────────────────────────────────
+const MemoryMeter = {
+  profiles: {
+    arduino_uno_r3:   { name: 'ATmega328P', flashTotal: 32256, ramTotal: 2048 },
+    arduino_nano:     { name: 'ATmega328P', flashTotal: 32256, ramTotal: 2048 },
+    esp32_dev_module: { name: 'ESP32 (WROOM)', flashTotal: 1310720, ramTotal: 524288 },
+    esp32:            { name: 'ESP32', flashTotal: 1310720, ramTotal: 524288 },
+    raspberry_pi_pico:{ name: 'RP2040', flashTotal: 2097152, ramTotal: 270336 }
+  },
+
+  formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+  },
+
+  update(stats = {}, boardKey = 'arduino_uno_r3') {
+    const profile = this.profiles[boardKey] || this.profiles.arduino_uno_r3;
+    const badge = document.getElementById('memBoardBadge');
+    if (badge) badge.textContent = profile.name;
+
+    const flashUsed = stats.flashUsed || 0;
+    const flashTotal = stats.flashTotal || profile.flashTotal;
+    const flashPct = Math.min(100, stats.flashPercent !== undefined ? stats.flashPercent : ((flashUsed / flashTotal) * 100));
+
+    const ramUsed = stats.ramUsed || 0;
+    const ramTotal = stats.ramTotal || profile.ramTotal;
+    const ramPct = Math.min(100, stats.ramPercent !== undefined ? stats.ramPercent : ((ramUsed / ramTotal) * 100));
+
+    // Flash UI
+    const flashValEl = document.getElementById('flashUsageVal');
+    const flashBarEl = document.getElementById('flashProgressBar');
+    const flashFreeEl = document.getElementById('flashFreeVal');
+    const flashStateEl = document.getElementById('flashState');
+
+    if (flashValEl) flashValEl.textContent = `${this.formatBytes(flashUsed)} / ${this.formatBytes(flashTotal)} (${flashPct.toFixed(1)}%)`;
+    if (flashBarEl) {
+      flashBarEl.style.width = `${Math.max(1, flashPct)}%`;
+      flashBarEl.className = 'mem-bar flash-bar' + (flashPct > 90 ? ' danger' : flashPct > 75 ? ' warn' : '');
+    }
+    if (flashFreeEl) flashFreeEl.textContent = `${this.formatBytes(Math.max(0, flashTotal - flashUsed))} Free`;
+    if (flashStateEl) {
+      flashStateEl.textContent = flashPct > 90 ? 'Critical' : flashPct > 75 ? 'Warning' : 'Optimal';
+      flashStateEl.className = 'mem-state' + (flashPct > 90 ? ' danger' : flashPct > 75 ? ' warn' : '');
+    }
+
+    // SRAM UI
+    const sramValEl = document.getElementById('sramUsageVal');
+    const sramBarEl = document.getElementById('sramProgressBar');
+    const sramFreeEl = document.getElementById('sramFreeVal');
+    const sramStateEl = document.getElementById('sramState');
+
+    if (sramValEl) sramValEl.textContent = `${this.formatBytes(ramUsed)} / ${this.formatBytes(ramTotal)} (${ramPct.toFixed(1)}%)`;
+    if (sramBarEl) {
+      sramBarEl.style.width = `${Math.max(1, ramPct)}%`;
+      sramBarEl.className = 'mem-bar sram-bar' + (ramPct > 90 ? ' danger' : ramPct > 75 ? ' warn' : '');
+    }
+    if (sramFreeEl) sramFreeEl.textContent = `${this.formatBytes(Math.max(0, ramTotal - ramUsed))} Free`;
+    if (sramStateEl) {
+      sramStateEl.textContent = ramPct > 90 ? 'Critical' : ramPct > 75 ? 'Warning' : 'Optimal';
+      sramStateEl.className = 'mem-state' + (ramPct > 90 ? ' danger' : ramPct > 75 ? ' warn' : '');
+    }
+  }
+};
+
+// ── Real-Time Serial Plotter Engine ────────────────────────
+const SerialPlotter = {
+  canvas: null,
+  ctx: null,
+  channels: new Map(), // name -> { color, data: [], latest }
+  maxPoints: 75,
+  palette: ['#00d4ff', '#b34eff', '#00ff88', '#ffd700', '#ff4466', '#ff8c00', '#2de2e6'],
+  isPaused: false,
+  demoTimer: null,
+  demoAngle: 0,
+  animationId: null,
+
+  init() {
+    this.canvas = document.getElementById('serialPlotterCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+
+    this.handleResize();
+    window.addEventListener('resize', () => this.handleResize());
+
+    const pauseBtn = document.getElementById('plotPauseBtn');
+    if (pauseBtn) pauseBtn.addEventListener('click', () => this.togglePause());
+
+    const clearBtn = document.getElementById('plotClearBtn');
+    if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
+
+    const demoBtn = document.getElementById('plotDemoBtn');
+    if (demoBtn) demoBtn.addEventListener('click', () => this.toggleDemo());
+
+    this.renderLoop();
+  },
+
+  handleResize() {
+    if (!this.canvas) return;
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      this.canvas.width = Math.floor(rect.width * (window.devicePixelRatio || 1));
+      this.canvas.height = Math.floor(rect.height * (window.devicePixelRatio || 1));
+    }
+  },
+
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    const pauseText = document.getElementById('plotPauseText');
+    const pauseBtn = document.getElementById('plotPauseBtn');
+    if (pauseText) pauseText.textContent = this.isPaused ? 'Resume' : 'Pause';
+    if (pauseBtn) pauseBtn.classList.toggle('active', this.isPaused);
+  },
+
+  clear() {
+    this.channels.clear();
+    this.updateChannelTags();
+  },
+
+  toggleDemo() {
+    const demoBtn = document.getElementById('plotDemoBtn');
+    if (this.demoTimer) {
+      clearInterval(this.demoTimer);
+      this.demoTimer = null;
+      if (demoBtn) demoBtn.classList.remove('active');
+    } else {
+      if (demoBtn) demoBtn.classList.add('active');
+      this.demoTimer = setInterval(() => {
+        this.demoAngle += 0.12;
+        const sinVal = Math.sin(this.demoAngle) * 50 + 50;
+        const cosVal = Math.cos(this.demoAngle * 0.7) * 30 + 40;
+        const noise  = Math.sin(this.demoAngle * 2.3) * 15 + Math.random() * 8 + 25;
+        this.pushData(`sine:${sinVal.toFixed(1)}, cos:${cosVal.toFixed(1)}, sensor:${noise.toFixed(1)}`);
+      }, 50);
+    }
+  },
+
+  pushData(rawLine) {
+    if (this.isPaused || !rawLine) return;
+    const trimmed = String(rawLine).trim();
+    if (!trimmed || trimmed.startsWith('[') || trimmed.startsWith('>')) return;
+
+    // Pattern 1: key:val, key2:val2 OR CSV: 12.3, 45.6
+    if (trimmed.includes(':') || trimmed.includes(',')) {
+      const parts = trimmed.split(',');
+      let matchedAny = false;
+
+      parts.forEach((p, idx) => {
+        const seg = p.trim();
+        if (seg.includes(':')) {
+          const [key, valStr] = seg.split(':');
+          const num = parseFloat(valStr);
+          if (!isNaN(num)) {
+            this.addPoint(key.trim(), num);
+            matchedAny = true;
+          }
+        } else {
+          const num = parseFloat(seg);
+          if (!isNaN(num)) {
+            this.addPoint(`Ch ${idx + 1}`, num);
+            matchedAny = true;
+          }
+        }
+      });
+
+      if (matchedAny) {
+        this.updateChannelTags();
+        return;
+      }
+    }
+
+    // Pattern 2: Single number
+    const singleNum = parseFloat(trimmed);
+    if (!isNaN(singleNum)) {
+      this.addPoint('Value', singleNum);
+      this.updateChannelTags();
+    }
+  },
+
+  addPoint(channelName, value) {
+    if (!this.channels.has(channelName)) {
+      const color = this.palette[this.channels.size % this.palette.length];
+      this.channels.set(channelName, { color, data: [], latest: value });
+    }
+    const ch = this.channels.get(channelName);
+    ch.latest = value;
+    ch.data.push(value);
+    if (ch.data.length > this.maxPoints) {
+      ch.data.shift();
+    }
+  },
+
+  updateChannelTags() {
+    const wrap = document.getElementById('plotterChannels');
+    if (!wrap) return;
+    if (this.channels.size === 0) {
+      wrap.innerHTML = '<span class="no-stream-msg">Waiting for serial stream data…</span>';
+      return;
+    }
+    wrap.innerHTML = '';
+    this.channels.forEach((ch, name) => {
+      const tag = document.createElement('div');
+      tag.className = 'channel-tag';
+      tag.innerHTML = `
+        <span class="ch-color-dot" style="background: ${ch.color};"></span>
+        <span>${name}:</span>
+        <strong style="color: ${ch.color};">${typeof ch.latest === 'number' ? ch.latest.toFixed(1) : ch.latest}</strong>
+      `;
+      wrap.appendChild(tag);
+    });
+  },
+
+  renderLoop() {
+    this.render();
+    this.animationId = requestAnimationFrame(() => this.renderLoop());
+  },
+
+  render() {
+    if (!this.ctx || !this.canvas) return;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    if (w === 0 || h === 0) return;
+
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, w, h);
+
+    // Compute min / max range
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+
+    this.channels.forEach(ch => {
+      ch.data.forEach(val => {
+        if (val < minVal) minVal = val;
+        if (val > maxVal) maxVal = val;
+      });
+    });
+
+    if (minVal === Infinity || maxVal === -Infinity) {
+      minVal = 0;
+      maxVal = 100;
+    } else if (minVal === maxVal) {
+      minVal -= 5;
+      maxVal += 5;
+    } else {
+      const pad = (maxVal - minVal) * 0.12;
+      minVal -= pad;
+      maxVal += pad;
+    }
+
+    // Update Y-Axis labels
+    const maxEl = document.getElementById('plotterYMax');
+    const midEl = document.getElementById('plotterYMid');
+    const minEl = document.getElementById('plotterYMin');
+    if (maxEl) maxEl.textContent = maxVal > 1000 ? (maxVal/1000).toFixed(1)+'k' : maxVal.toFixed(0);
+    if (midEl) midEl.textContent = ((maxVal + minVal) / 2).toFixed(0);
+    if (minEl) minEl.textContent = minVal < -1000 ? (minVal/1000).toFixed(1)+'k' : minVal.toFixed(0);
+
+    // Grid lines
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const y = (h / gridLines) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // Zero-line if spanned
+    if (minVal < 0 && maxVal > 0) {
+      const zeroY = h - ((0 - minVal) / (maxVal - minVal)) * h;
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, zeroY);
+      ctx.lineTo(w, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw lines
+    const range = maxVal - minVal;
+    this.channels.forEach(ch => {
+      if (ch.data.length < 1) return;
+      ctx.beginPath();
+      ctx.strokeStyle = ch.color;
+      ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+
+      const step = w / Math.max(1, this.maxPoints - 1);
+      const startOffset = (this.maxPoints - ch.data.length) * step;
+
+      ch.data.forEach((val, idx) => {
+        const x = startOffset + idx * step;
+        const norm = (val - minVal) / range;
+        const y = Math.max(2, Math.min(h - 2, h - norm * h));
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+  }
+};
+
+// ── Side Panel Tabs ────────────────────────────────────────
+document.querySelectorAll('.side-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tabName = tab.dataset.stab;
+    const propsTab = document.getElementById('sideTabProps');
+    const telemTab = document.getElementById('sideTabTelemetry');
+    if (propsTab) propsTab.style.display = tabName === 'props' ? 'flex' : 'none';
+    if (telemTab) telemTab.style.display = tabName === 'telemetry' ? 'flex' : 'none';
+    if (tabName === 'telemetry') {
+      setTimeout(() => SerialPlotter.handleResize(), 30);
+    }
+  });
+});
+
+// ── Console Serial Send ────────────────────────────────────
+const consoleSendBtn = document.getElementById('consoleSend');
+const consoleInputEl = document.getElementById('consoleInput');
+if (consoleSendBtn && consoleInputEl) {
+  const sendAction = () => {
+    const val = consoleInputEl.value.trim();
+    if (!val) return;
+    clog('> ' + val, 'sys');
+    SerialPlotter.pushData(val);
+    consoleInputEl.value = '';
+  };
+  consoleSendBtn.addEventListener('click', sendAction);
+  consoleInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendAction(); });
+}
+
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('contextmenu', e => {
   if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
 });
-setTimeout(() => {
-  applyTransform();
-  loadProject();
-}, 0);
+applyTransform();
+loadProject();
+SerialPlotter.init();
+MemoryMeter.update({}, PROJECT.controller || 'arduino_uno_r3');
+
+if (window.xrayEngine) {
+  window.xrayEngine.init(svg, document.getElementById('xrayBtn'));
+  const xrayBtn = document.getElementById('xrayBtn');
+  if (xrayBtn) {
+    xrayBtn.addEventListener('click', () => window.xrayEngine.toggle());
+  }
+}
+

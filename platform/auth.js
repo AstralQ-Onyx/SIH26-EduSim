@@ -399,76 +399,56 @@ function setStatus(msg) {
   document.getElementById('statusText').textContent = msg;
 }
 
-// ── Google OAuth Sign-In (Redirect flow — popup-free for production) ──────
+// ── Google OAuth Sign-In ────────────────────────────────────
 async function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
+
   try {
     setLoading(true);
-    setStatus('REDIRECTING TO GOOGLE…');
-    // signInWithRedirect avoids browser popup-blocking on HTTPS/production sites
-    await auth.signInWithRedirect(provider);
-    // Page will leave here — result is handled in handleGoogleRedirectResult() on load
-  } catch (err) {
-    setLoading(false);
-    setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
-    showToast(`Authentication failed: ${err.message}`, 'error');
-  }
-}
-
-// ── Google OAuth Sign-In (Popup — strict synchronous execution) ────────────
-// The function itself must NOT be async. We use .then() to ensure the browser
-// does not inject any microtask delays before opening the popup.
-function handleGoogleSignIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.addScope('profile');
-  provider.addScope('email');
-
-  // Request popup instantly on click
-  const popupPromise = auth.signInWithPopup(provider);
-
-  setLoading(true);
-  setStatus('AUTHENTICATING WITH GOOGLE...');
-
-  popupPromise.then(result => {
-    const user  = result.user;
-    const isNew = result.additionalUserInfo?.isNewUser ?? false;
+    setStatus('INITIATING GOOGLE OAUTH…');
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    const isNew = result.additionalUserInfo.isNewUser;
 
     if (isNew) {
+      // New Google user — save basic profile, redirect to complete registration
       const userData = {
         uid: user.uid,
         name: user.displayName || '',
         email: user.email,
         photoURL: user.photoURL || '',
         authMethod: 'google',
-        role: '', username: '', org: '', dept: '', year: '', contactMail: '',
+        role: '',
+        username: '',
+        org: '',
+        dept: '',
+        year: '',
+        contactMail: '',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       };
-      return db.collection('users').doc(user.uid).set(userData)
-        .then(() => {
-          setLoading(false);
-          showToast('Google account linked! Please complete your profile.', 'success');
-          setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
-        });
+      await db.collection('users').doc(user.uid).set(userData);
+      setLoading(false);
+      showToast('Google account linked! Please complete your profile.', 'success');
+      // Redirect to complete profile page (or dashboard with a "complete profile" prompt)
+      setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
     } else {
       setLoading(false);
       showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
     }
-  }).catch(err => {
+  } catch (err) {
     setLoading(false);
     setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
     const msgs = {
-      'auth/popup-blocked':                'Please allow popups for this site in your browser settings, then try again.',
-      'auth/popup-closed-by-user':         'Sign-in was cancelled.',
-      'auth/cancelled-popup-request':      'Only one sign-in window at a time.',
-      'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method.',
-      'auth/network-request-failed':       'Network error. Check your connection.',
+      'auth/popup-closed-by-user': 'Sign-in popup was closed.',
+      'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
     };
     showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
-  });
+  }
 }
 
 // ── Email Login ─────────────────────────────────────────────
@@ -476,72 +456,13 @@ async function handleEmailLogin(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
-  const isAdminLogin = document.getElementById('adminLoginToggle')?.checked;
 
   setBtnLoading('loginSubmitBtn', true);
   setStatus('AUTHENTICATING CREDENTIALS…');
 
-  if (isAdminLogin) {
-    if (email === 'prismatix4@gmail.com' && pw === 'Prismatix4@edusim') {
-      // Master admin — sign into Firebase with these credentials, then go to admin dashboard
-      try {
-        await auth.signInWithEmailAndPassword(email, pw);
-      } catch (fireErr) {
-        if (fireErr.code === 'auth/user-not-found' || fireErr.code === 'auth/invalid-credential') {
-          // Auto-create the master admin account so Firestore permissions work
-          try {
-            const cred = await auth.createUserWithEmailAndPassword(email, pw);
-            await cred.user.updateProfile({ displayName: 'Master Admin' });
-            // Add to admins collection explicitly
-            await db.collection('admins').doc(cred.user.uid).set({
-              uid: cred.user.uid,
-              email: email,
-              addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-              addedBy: 'system'
-            });
-          } catch(createErr) {
-            console.error('[Admin] Failed to create master admin:', createErr);
-          }
-        } else {
-          console.warn('[Admin] Firebase sign-in skipped for master:', fireErr.code);
-        }
-      }
-      showToast('Welcome, Master Admin!', 'success');
-      setStatus('ACCESS GRANTED · REDIRECTING TO ADMIN DASHBOARD…');
-      localStorage.setItem('edusim_admin_role', 'master');
-      localStorage.setItem('edusim_admin_email', email);
-      setBtnLoading('loginSubmitBtn', false);
-      setTimeout(() => { window.location.href = 'admin_dashboard.html'; }, 1200);
-      return;
-    }
-    
-    // Otherwise check Firebase for admin status
-    try {
-      const cred = await auth.signInWithEmailAndPassword(email, pw);
-      const snap = await db.collection('admins').doc(cred.user.uid).get();
-      if (!snap.exists) {
-        auth.signOut();
-        throw new Error('Not authorized as an admin.');
-      }
-      showToast(`Welcome back, Admin!`, 'success');
-      localStorage.setItem('edusim_admin_role', 'admin');
-      setStatus('ACCESS GRANTED · REDIRECTING TO ADMIN DASHBOARD…');
-      setTimeout(() => { window.location.href = 'admin_dashboard.html'; }, 1200);
-    } catch (err) {
-      setBtnLoading('loginSubmitBtn', false);
-      setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
-      showToast(err.message === 'Not authorized as an admin.' ? err.message : `Admin Login failed: Invalid credentials.`, 'error');
-    }
-    return;
-  }
-
-  // Regular User Login
   try {
     const cred = await auth.signInWithEmailAndPassword(email, pw);
     const snap = await db.collection('users').doc(cred.user.uid).get();
-    
-    // Check if they are trying to log in as a normal user but they are actually an admin? (optional)
-    
     const name = snap.exists ? snap.data().name || 'there' : 'there';
     showToast(`Welcome back, ${name.split(' ')[0]}!`, 'success');
     setStatus('ACCESS GRANTED · REDIRECTING…');
@@ -687,9 +608,9 @@ async function showForgotPassword(e) {
 }
 
 // ── Auth State Observer ─────────────────────────────────────
-// Redirects any already-logged-in user to the dashboard automatically.
 auth.onAuthStateChanged(user => {
   if (user) {
+    // Already logged in — redirect if not on a setup page
     const params = new URLSearchParams(window.location.search);
     if (!params.has('setup')) {
       window.location.href = 'dashboard.html';
