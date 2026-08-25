@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 agent/bin/arduino-cli.exe
+.env
