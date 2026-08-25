@@ -888,6 +888,81 @@ const EDUSIM_COMPONENTS = {
   }
 },
 
+  breadboard_half: (function() {
+    const w = 320, h = 180;
+    let xrayStrips = '';
+    xrayStrips += `<rect class="xray-rail power-rail" x="15" y="10" width="290" height="7" rx="2" fill="rgba(255, 50, 50, 0.3)" stroke="#ff3232" stroke-width="1.2"/>`;
+    xrayStrips += `<rect class="xray-rail gnd-rail" x="15" y="20" width="290" height="7" rx="2" fill="rgba(50, 150, 255, 0.3)" stroke="#3296ff" stroke-width="1.2"/>`;
+    xrayStrips += `<rect class="xray-rail gnd-rail" x="15" y="153" width="290" height="7" rx="2" fill="rgba(50, 150, 255, 0.3)" stroke="#3296ff" stroke-width="1.2"/>`;
+    xrayStrips += `<rect class="xray-rail power-rail" x="15" y="163" width="290" height="7" rx="2" fill="rgba(255, 50, 50, 0.3)" stroke="#ff3232" stroke-width="1.2"/>`;
+
+    for (let c = 0; c < 30; c++) {
+      const cx = 20 + c * 9.5;
+      xrayStrips += `<rect class="xray-strip" data-rail="top-${c+1}" x="${cx - 3.5}" y="36" width="7" height="48" rx="2" fill="rgba(0, 243, 255, 0.25)" stroke="#00f3ff" stroke-width="0.8"/>`;
+      xrayStrips += `<rect class="xray-strip" data-rail="bot-${c+1}" x="${cx - 3.5}" y="96" width="7" height="48" rx="2" fill="rgba(0, 243, 255, 0.25)" stroke="#00f3ff" stroke-width="0.8"/>`;
+    }
+
+    let holes = '';
+    for (let c = 0; c < 30; c++) {
+      const cx = 20 + c * 9.5;
+      holes += `<circle cx="${cx}" cy="13.5" r="2" fill="#222" stroke="#666" stroke-width="0.5"/>`;
+      holes += `<circle cx="${cx}" cy="23.5" r="2" fill="#222" stroke="#666" stroke-width="0.5"/>`;
+      for (let r = 0; r < 5; r++) {
+        holes += `<circle cx="${cx}" cy="${40 + r*10}" r="2" fill="#222" stroke="#555" stroke-width="0.5"/>`;
+      }
+      for (let r = 0; r < 5; r++) {
+        holes += `<circle cx="${cx}" cy="${100 + r*10}" r="2" fill="#222" stroke="#555" stroke-width="0.5"/>`;
+      }
+      holes += `<circle cx="${cx}" cy="156.5" r="2" fill="#222" stroke="#666" stroke-width="0.5"/>`;
+      holes += `<circle cx="${cx}" cy="166.5" r="2" fill="#222" stroke="#666" stroke-width="0.5"/>`;
+    }
+
+    const svg = `
+      <rect class="casing-body" x="4" y="4" width="312" height="172" rx="6" fill="#f5f5f0" stroke="#d0d0c8" stroke-width="2"/>
+      <rect x="8" y="8" width="304" height="164" rx="4" fill="#fafaf5" stroke="#e0e0d8" stroke-width="1"/>
+      <rect x="8" y="89" width="304" height="4" fill="#dcdcd0"/>
+      <line x1="15" y1="9" x2="305" y2="9" stroke="#e53935" stroke-width="1.5"/>
+      <line x1="15" y1="28" x2="305" y2="28" stroke="#1e88e5" stroke-width="1.5"/>
+      <line x1="15" y1="152" x2="305" y2="152" stroke="#1e88e5" stroke-width="1.5"/>
+      <line x1="15" y1="171" x2="305" y2="171" stroke="#e53935" stroke-width="1.5"/>
+      ${holes}
+      <g class="xray-layer" style="opacity:0; pointer-events:none; transition: opacity 0.3s ease;">
+        ${xrayStrips}
+      </g>
+    `;
+
+    const pins = [];
+    const rowNamesTop = ['A','B','C','D','E'];
+    const rowNamesBot = ['F','G','H','I','J'];
+    for (let c = 0; c < 30; c++) {
+      const colNum = c + 1;
+      const cx = 20 + c * 9.5;
+      pins.push({ id: `PWR_TOP_${colNum}`, x: cx, y: 13.5, type: 'power', label: `+ (Col ${colNum})` });
+      pins.push({ id: `GND_TOP_${colNum}`, x: cx, y: 23.5, type: 'gnd',   label: `- (Col ${colNum})` });
+      for (let r = 0; r < 5; r++) {
+        pins.push({ id: `${rowNamesTop[r]}${colNum}`, x: cx, y: 40 + r * 10, type: 'digital', label: `${rowNamesTop[r]}${colNum}` });
+      }
+      for (let r = 0; r < 5; r++) {
+        pins.push({ id: `${rowNamesBot[r]}${colNum}`, x: cx, y: 100 + r * 10, type: 'digital', label: `${rowNamesBot[r]}${colNum}` });
+      }
+      pins.push({ id: `GND_BOT_${colNum}`, x: cx, y: 156.5, type: 'gnd',   label: `- (Col ${colNum})` });
+      pins.push({ id: `PWR_BOT_${colNum}`, x: cx, y: 166.5, type: 'power', label: `+ (Col ${colNum})` });
+    }
+
+    return {
+      id: 'breadboard_half',
+      label: 'Half Breadboard',
+      category: 'Passives',
+      desc: 'Half-size breadboard with 30 columns, dual power rails & X-Ray metal strips',
+      w, h,
+      svg,
+      pins,
+      defaults: { label: 'Breadboard' },
+      props: [{ key: 'label', label: 'Label', type: 'text' }],
+      simulate() { return {}; }
+    };
+  })(),
+
   arduino_nano: {
   id: 'arduino_nano',
   label: 'Arduino Nano',
@@ -1730,6 +1805,73 @@ const EDUSIM_COMPONENTS = {
     return {};
   }
 },
+
+  /* ════════════════════════════
+     POWER SUPPLIES
+  ════════════════════════════ */
+  battery_9v: {
+    id: 'battery_9v',
+    label: '9V Battery',
+    category: 'Power Supplies',
+    desc: '9V DC Transistor Power Supply',
+    w: 60,
+    h: 90,
+    svg: `
+      <rect x="5" y="18" width="50" height="68" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+      <rect x="5" y="14" width="50" height="6" fill="#888" stroke="#666" stroke-width="0.5"/>
+      <rect x="8" y="24" width="44" height="42" rx="2" fill="#d97706" stroke="#b45309" stroke-width="0.5"/>
+      <text x="30" y="44" text-anchor="middle" fill="#ffffff" font-size="12" font-family="Rajdhani, sans-serif" font-weight="700">9V</text>
+      <text x="30" y="56" text-anchor="middle" fill="#fef3c7" font-size="6" font-family="Inter, sans-serif" font-weight="600">POWER SUPPLY</text>
+      <rect x="12" y="4" width="12" height="10" rx="2" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+      <text x="18" y="12" text-anchor="middle" fill="#000" font-size="7" font-weight="bold">+</text>
+      <rect x="36" y="4" width="12" height="10" rx="6" fill="#a0a0a0" stroke="#777" stroke-width="1"/>
+      <text x="42" y="12" text-anchor="middle" fill="#000" font-size="7" font-weight="bold">-</text>
+    `,
+    pins: [
+      { id: 'vcc', x: 18, y: 4, type: 'power', label: '+ 9V VCC', voltage: 9 },
+      { id: 'gnd', x: 42, y: 4, type: 'gnd',   label: '- GND',    voltage: 0 },
+    ],
+    defaults: { voltage: 9, label: '9V Battery' },
+    props: [
+      { key: 'voltage', label: 'Voltage (V)', type: 'number', min: 1.5, max: 24 },
+      { key: 'label',   label: 'Label',       type: 'text' }
+    ],
+    simulate(state, inputs) {
+      return { vcc: state.voltage || 9, gnd: 0 };
+    }
+  },
+
+  battery_aa_pack: {
+    id: 'battery_aa_pack',
+    label: 'AA Battery Pack',
+    category: 'Power Supplies',
+    desc: '2x AA Cell Battery Holder (3V DC)',
+    w: 80,
+    h: 55,
+    svg: `
+      <rect x="5" y="5" width="70" height="45" rx="3" fill="#262626" stroke="#404040" stroke-width="1.5"/>
+      <rect x="9" y="9" width="62" height="16" rx="2" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.5"/>
+      <rect x="65" y="11" width="4" height="12" rx="1" fill="#93c5fd"/>
+      <text x="38" y="21" text-anchor="middle" fill="#ffffff" font-size="7" font-family="Inter, sans-serif" font-weight="bold">AA 1.5V</text>
+      <rect x="9" y="29" width="62" height="16" rx="2" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.5"/>
+      <rect x="65" y="31" width="4" height="12" rx="1" fill="#93c5fd"/>
+      <text x="38" y="41" text-anchor="middle" fill="#ffffff" font-size="7" font-family="Inter, sans-serif" font-weight="bold">AA 1.5V</text>
+      <path d="M 75 17 Q 80 17 80 10" fill="none" stroke="#ef4444" stroke-width="2"/>
+      <path d="M 75 37 Q 80 37 80 45" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    `,
+    pins: [
+      { id: 'vcc', x: 80, y: 10, type: 'power', label: '+ 3V VCC', voltage: 3 },
+      { id: 'gnd', x: 80, y: 45, type: 'gnd',   label: '- GND',    voltage: 0 },
+    ],
+    defaults: { voltage: 3, label: 'AA Battery Pack' },
+    props: [
+      { key: 'voltage', label: 'Output Voltage (V)', type: 'number', min: 1.5, max: 12 },
+      { key: 'label',   label: 'Label',              type: 'text' }
+    ],
+    simulate(state, inputs) {
+      return { vcc: state.voltage || 3, gnd: 0 };
+    }
+  },
 
   /* ════════════════════════════
      OUTPUTS
