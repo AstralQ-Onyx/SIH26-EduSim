@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css"/>
-  <link rel="stylesheet" href="ai-assistant.css"/>
+  <link rel="stylesheet" href="../assistant_workflow/ai-assistant.css"/>
 </head>
 <body>
 
@@ -207,7 +207,7 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
           EduSim MENTOR
-          <span style="font-size:9px;background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.3);padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif;letter-spacing:0.5px;color:rgba(0,229,255,0.9)">CODE AI</span>
+          <span class="ai-header-badge">CODE AI</span>
         </div>
 
         <!-- Mode toggle: Assist | Review | Explain | Optimise -->
@@ -307,11 +307,20 @@
             </svg>
           </button>
         </div>
-      </div>
-    </div>
-    <!-- End MENTOR Panel -->
-    </div>
-  </div>
+      </div><!-- end ai-input-area -->
+    </div><!-- end #aiPanel -->
+
+  </div><!-- end .ide-body-wrapper -->
+
+  <!-- Floating AI Trigger Tab (always visible on right edge) -->
+  <button id="aiPanelTrigger" onclick="document.getElementById('btnAiToggle').click()" title="Open AI Tutor">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>AI</span>
+  </button>
+
+  </div><!-- end #tab-ide -->
 
   <!-- ─── PROFILE TAB ──────────────────────── -->
   <div class="tab-panel" id="tab-profile">
@@ -745,6 +754,6 @@
 
 
 <!-- AI Assistant Logic (EduSim MENTOR) -->
-<script src="ai-assistant.js"></script>
+<script src="../assistant_workflow/ai-assistant.js"></script>
 </body>
 </html>

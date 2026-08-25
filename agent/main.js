@@ -20,12 +20,13 @@ function createWindow() {
 
   // Load the Vercel URL
   // Replace this with your actual Vercel deployment URL
-  mainWindow.loadURL('https://sih-26-edu-sim.vercel.app/'); 
+  mainWindow.loadURL('https://sih-26-edu-sim.vercel.app/');
 
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
 }
+      
 
 app.whenReady().then(() => {
   createWindow();
