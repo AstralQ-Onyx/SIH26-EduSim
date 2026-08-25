@@ -483,3 +483,141 @@ body.light-theme .canvas-container {
   .pwr-inputs-row { grid-template-columns: 1fr; }
 }
 
+/* ═══ PRINT/EXPORT PDF WORKSHEET STYLES ═══ */
+.print-container {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+  
+  /* Hide all app UI elements */
+  .lab-header, .comp-palette, .props-panel, .code-panel, 
+  .lab-console, .modal-overlay, .lab-workspace {
+    display: none !important;
+  }
+  
+  body, html {
+    background: white !important;
+    color: black !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .print-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+  .print-brand {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .print-student-info {
+    font-size: 12px;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .print-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+
+  .print-section {
+    margin-bottom: 30px;
+  }
+
+  .print-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+  }
+
+  .print-svg-wrapper {
+    width: 100%;
+    height: 350px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+    overflow: hidden;
+  }
+
+  .print-svg {
+    max-width: 100%;
+    max-height: 100%;
+    /* Ensure B&W printing for wires and generic strokes */
+    stroke: #000 !important;
+  }
+  
+  .print-svg .lab-wire {
+    stroke: #000 !important;
+    stroke-width: 2 !important;
+  }
+  
+  .print-svg text {
+    fill: #000 !important;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .print-table th, .print-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  .print-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+  }
+
+  .print-notes-area {
+    width: 100%;
+    height: 150px;
+    border: 1px solid #ddd;
+    background-image: linear-gradient(#eee 1px, transparent 1px);
+    background-size: 100% 25px;
+  }
+
+  .print-footer {
+    margin-top: auto;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+}
+
