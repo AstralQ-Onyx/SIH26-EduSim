@@ -185,6 +185,85 @@ async function startServer() {
           res.end(JSON.stringify({ error: err.message }));
         }
       });
+    } else if (req.method === 'POST' && (req.url === '/api/ai/generate' || req.url === '/api/ai/chat')) {
+      let body = '';
+      req.on('data', d => body += d);
+      req.on('end', () => {
+        const geminiKey = process.env.GEMINI_API_KEY;
+        
+        if (geminiKey) {
+          // --- Route to Google Gemini 1.5 Flash ---
+          try {
+            const parsed = JSON.parse(body);
+            const messages = parsed.messages || [];
+            
+            // Map chat messages to Gemini's format: { role: "user"|"model", parts: [{ text: "..." }] }
+            const contents = messages.map(msg => {
+              const role = msg.role === 'assistant' ? 'model' : 'user';
+              return {
+                role: role,
+                parts: [{ text: msg.content }]
+              };
+            });
+
+            const geminiPayload = JSON.stringify({ contents });
+            const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+            
+            const geminiReq = https.request(targetUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            }, (geminiRes) => {
+              let resData = '';
+              geminiRes.on('data', d => resData += d);
+              geminiRes.on('end', () => {
+                try {
+                  const data = JSON.parse(resData);
+                  const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || '(empty response)';
+                  
+                  // Send back in the exact format the frontend expects
+                  res.writeHead(200, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({
+                    message: { role: 'assistant', content: replyText }
+                  }));
+                } catch (e) {
+                  res.writeHead(500, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Failed parsing Gemini response', raw: resData }));
+                }
+              });
+            });
+            
+            geminiReq.on('error', (err) => {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Gemini request error', details: err.message }));
+            });
+            
+            geminiReq.write(geminiPayload);
+            geminiReq.end();
+            
+          } catch (e) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid payload JSON structure' }));
+          }
+          
+        } else {
+          // --- Default: Route to Local Ollama ---
+          const targetUrl = req.url === '/api/ai/generate' ? 'http://127.0.0.1:11434/api/generate' : 'http://127.0.0.1:11434/api/chat';
+          const ollamaReq = http.request(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          }, (ollamaRes) => {
+            res.writeHead(ollamaRes.statusCode, ollamaRes.headers);
+            ollamaRes.pipe(res);
+          });
+          ollamaReq.on('error', (err) => {
+            console.error('[Agent] Ollama proxy error:', err.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Failed to connect to local Ollama. Ensure Ollama is running on port 11434.' }));
+          });
+          ollamaReq.write(body);
+          ollamaReq.end();
+        }
+      });
     } else {
       res.writeHead(404); res.end('Not found');
     }

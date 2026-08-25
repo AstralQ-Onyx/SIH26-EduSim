@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="lab.css"/>
+  <link rel="stylesheet" href="../assistant_workflow/lab-ai.css"/>
 </head>
 <body>
   <!-- Top Toolbar -->
@@ -233,5 +234,138 @@
   <script src="../core-engine/simulator.js"></script>
   <script src="lab.js"></script>
   <script src="lab3d.js"></script>
+
+  <!-- ══════════════════════════════════════════════════════════
+       CircuitMind — Virtual Lab AI
+       FAB + fixed slide-in panel (never inside the console DOM)
+       Identity: PCB engineer & circuit validator
+       Modes: Wire | Build | Check
+       ══════════════════════════════════════════════════════════ -->
+
+  <!-- FAB -->
+  <button id="labAiBtn" aria-label="Open CircuitMind">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="1.8">
+      <rect x="2" y="7" width="20" height="10" rx="2"/>
+      <path d="M6 7V4M10 7V2M14 7V4M18 7V2"/>
+      <circle cx="6"  cy="13" r="1.2" fill="white"/>
+      <circle cx="10" cy="13" r="1.2" fill="white"/>
+      <circle cx="14" cy="13" r="1.2" fill="white"/>
+      <circle cx="18" cy="13" r="1.2" fill="white"/>
+    </svg>
+  </button>
+
+  <!-- CircuitMind Slide-in Panel -->
+  <div id="labAiPanel" role="dialog" aria-label="CircuitMind">
+
+    <!-- Header -->
+    <div class="lai-header">
+      <div class="lai-header-row1">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="url(#cmGrad)" stroke-width="1.8">
+          <defs>
+            <linearGradient id="cmGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#00e5ff"/>
+              <stop offset="100%" stop-color="#00ff88"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="7" width="20" height="10" rx="2"/>
+          <path d="M6 7V4M10 7V2M14 7V4M18 7V2"/>
+        </svg>
+        <span class="lai-title">CircuitMind</span>
+        <span style="font-size:9px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif;letter-spacing:0.5px;color:rgba(0,255,136,0.9)">CIRCUIT AI</span>
+        <button class="lai-close" id="labAiClose" aria-label="Close CircuitMind">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mode Toggle: Wire | Build | Check -->
+      <div class="lai-modes" id="labAiModes" data-mode="wire">
+        <div class="lai-mode-pill"></div>
+        <button class="lai-mode-btn active" data-mode="wire">
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:3px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Wire
+        </button>
+        <button class="lai-mode-btn" data-mode="build">
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:3px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Build
+        </button>
+        <button class="lai-mode-btn" data-mode="check">
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:3px"><polyline points="20 6 9 17 4 12"/></svg>Check
+        </button>
+      </div>
+    </div>
+
+    <!-- Live canvas context bar -->
+    <div class="lai-context">
+      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M20.19 8.19a8 8 0 1 0 0 7.62"/></svg>
+      <span>Live canvas</span>
+      <span class="lai-ctx-chip" id="labAiCtxChip">2D · 0C · 0W</span>
+      <button onclick="window.circuitMindCheck && window.circuitMindCheck()"
+        style="margin-left:auto;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.25);color:#00ff88;font-size:10px;padding:2px 8px;border-radius:10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">
+        ⚡ Audit
+      </button>
+    </div>
+
+    <!-- Circuit-specific quick prompts -->
+    <div class="lai-quick">
+      <button class="lai-quick-btn" data-prompt="How do I wire an LED to my ESP32? Show me a step-by-step pin connection table.">LED wiring</button>
+      <button class="lai-quick-btn" data-prompt="Check all the wires in my current circuit for errors.">Audit wiring</button>
+      <button class="lai-quick-btn" data-prompt="Generate complete Arduino code for exactly what is connected on my canvas right now.">Generate code</button>
+      <button class="lai-quick-btn" data-prompt="Are there any floating pins, missing GNDs, or electrical hazards in my circuit?">Safety check</button>
+    </div>
+
+    <!-- Per-mode isolated chat panels -->
+    <div class="lai-chat-panels">
+
+      <!-- WIRE chat -->
+      <div class="lai-chat active" id="cm-chat-wire">
+        <div class="lai-chat-badge">Wire Mode</div>
+        <div class="lai-msg bot">
+          <div class="lai-bubble">
+            ⚡ <strong>Wire mode</strong> — Tell me what you want to build and I'll give you a step-by-step pin connection table for your current components. I'll reference every component already on the canvas.
+          </div>
+        </div>
+      </div>
+
+      <!-- BUILD chat -->
+      <div class="lai-chat" id="cm-chat-build">
+        <div class="lai-chat-badge">Build Mode</div>
+        <div class="lai-msg bot">
+          <div class="lai-bubble">
+            💻 <strong>Build mode</strong> — I'll generate complete, compilable code tuned to exactly what is connected on your canvas right now. Every pin is named after its component.
+          </div>
+        </div>
+      </div>
+
+      <!-- CHECK chat -->
+      <div class="lai-chat" id="cm-chat-check">
+        <div class="lai-chat-badge">Check Mode</div>
+        <div class="lai-msg bot">
+          <div class="lai-bubble">
+            🔍 <strong>Check mode</strong> — I'll audit your wiring for missing GNDs, floating pins, voltage level mismatches, and isolated components. I'll give you a verdict and a list of fixes.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .lai-chat-panels -->
+
+    <!-- Input -->
+    <div class="lai-input-wrap">
+      <div class="lai-input-inner">
+        <textarea class="lai-textarea" id="labAiInput"
+          placeholder="Ask about your circuit wiring, connections, or code…"
+          rows="1"></textarea>
+        <button class="lai-send" id="labAiSend" title="Send (Enter)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- End CircuitMind Panel -->
+
+  <script src="../config/config.js"></script>
+  <script src="../assistant_workflow/lab-ai.js"></script>
 </body>
 </html>

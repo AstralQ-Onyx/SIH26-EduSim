@@ -10,4 +10,9 @@ const ENV = {
   FIREBASE_STORAGE_BUCKET:     "edu-sim.appspot.com",
   FIREBASE_MESSAGING_SENDER_ID:"836936321609",
   FIREBASE_APP_ID:             "1:836936321609:web:edusim_phase1",
+  
+  // Set to your deployed Render service URL for cloud deployments
+  BACKEND_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:3746'
+    : 'https://edusim-agent.onrender.com'
 };
