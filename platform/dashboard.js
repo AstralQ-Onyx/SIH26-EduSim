@@ -1053,17 +1053,36 @@ modeOptions.forEach(opt => {
   opt.addEventListener('click', function() {
     modeOptions.forEach(o => o.classList.remove('selected'));
     this.classList.add('selected');
+    // Mark the clicked option with the data-selected attribute for reliable reading
+    document.querySelectorAll('.mode-option').forEach(o => o.removeAttribute('data-selected'));
+    this.setAttribute('data-selected', 'true');
+    // Also update the radio for semantics
     const radio = this.querySelector('input[type="radio"]');
     if (radio) radio.checked = true;
   });
 });
+
+// Helper: reliably read chosen lab mode from the UI
+function getSelectedLabMode() {
+  // 1) Prefer data-selected attribute (set on click)
+  const byAttr = document.querySelector('.mode-option[data-selected]');
+  if (byAttr) return byAttr.querySelector('input[type="radio"]')?.value || '2d';
+  // 2) Fall back to checked radio
+  const byRadio = document.querySelector('input[name="labMode"]:checked');
+  if (byRadio) return byRadio.value;
+  // 3) Fall back to .selected class
+  const byClass = document.querySelector('.mode-option.selected');
+  if (byClass) return byClass.querySelector('input[type="radio"]')?.value || '2d';
+  return '2d';
+}
 
 if (createLabProjectBtn) {
   createLabProjectBtn.addEventListener('click', () => {
     const name = document.getElementById('labProjName').value.trim() || 'Untitled Lab';
     const controller = document.getElementById('labController').value;
     const desc = document.getElementById('labProjDesc') ? document.getElementById('labProjDesc').value.trim() : '';
-    const mode = document.querySelector('input[name="labMode"]:checked')?.value || '2d';
+    const mode = getSelectedLabMode();
+    console.log('[EduSim] Creating lab with mode:', mode); // debug — remove after testing
     
     // Save stub to localStorage so it appears in the grid after returning
     const id = 'vlab_' + Date.now();

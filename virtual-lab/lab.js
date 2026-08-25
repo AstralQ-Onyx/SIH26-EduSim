@@ -23,8 +23,16 @@ try {
     if (parsed.controller) PROJECT.controller = parsed.controller;
     // URL takes precedence, otherwise use saved mode
     if (parsed.mode && !params.has('mode')) PROJECT.mode = parsed.mode;
+    // If URL has no mode but localStorage does, still honor it
+    if (parsed.mode && params.has('mode') && params.get('mode') === '2d' && parsed.mode === '3d') {
+      PROJECT.mode = '3d'; // localStorage wins over default 2d fallback
+    }
   }
 } catch(e) {}
+
+// Expose globally so lab3d.js can access it
+window.LAB_PROJECT = PROJECT;
+console.log('[Lab] mode:', PROJECT.mode, '| id:', PROJECT.id);
 
 const titleEl = document.getElementById('labProjectTitleText');
 if (titleEl) titleEl.textContent = PROJECT.name;
@@ -1174,4 +1182,10 @@ document.addEventListener('contextmenu', e => {
 setTimeout(() => {
   applyTransform();
   loadProject();
+  // Directly boot the 3D engine if available (lab3d.js defines window.boot3DLab)
+  // This is more reliable than the custom event approach
+  if (typeof window.boot3DLab === 'function') {
+    window.boot3DLab();
+  }
 }, 0);
+

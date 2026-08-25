@@ -5,9 +5,26 @@
 'use strict';
 
 // ── Read URL Mode ─────────────────────────────────────────
-const _urlParams   = new URLSearchParams(window.location.search);
-const _labMode     = _urlParams.get('mode') || '2d';
-const IS_3D        = _labMode === '3d';
+const _urlParams = new URLSearchParams(window.location.search);
+const _urlMode   = _urlParams.get('mode');   // may be null if not in URL
+const _projId    = _urlParams.get('id');
+
+// Check localStorage for the project's saved mode — reliable even if URL is wrong
+let _savedMode = null;
+if (_projId) {
+  try {
+    const _raw = localStorage.getItem('edusim_vlab_' + _projId);
+    if (_raw) _savedMode = (JSON.parse(_raw)).mode || null;
+  } catch(e) {}
+}
+
+// IS_3D: check all 3 sources — URL param, localStorage, window.LAB_PROJECT (set by lab.js)
+const IS_3D = (_urlMode === '3d')
+           || (_savedMode === '3d')
+           || (window.LAB_PROJECT && window.LAB_PROJECT.mode === '3d');
+
+console.log('[lab3d] urlMode:', _urlMode, '| savedMode:', _savedMode, '| IS_3D:', IS_3D);
+
 
 // ── Globals ───────────────────────────────────────────────
 let scene, camera, renderer, controls, transformControl;
@@ -31,46 +48,43 @@ const MODEL_PATHS = {
 // LEDs keep procedural materials so emissive glow works at runtime.
 
 // ── Boot ──────────────────────────────────────────────────
-// Wait for lab.js to finish its DOMContentLoaded initialisation,
-// then boot the 3D scene (components[] and wires[] are ready by then).
-window.addEventListener('edusim-project-loaded', () => {
-  if (!IS_3D) return;   // 2D mode — do nothing
+// Single boot function — called via self-timer, direct call, or event listener
+var _3dBooted = false;
+function _do3DBoot() {
+  if (_3dBooted) return;          // prevent double-init
+  if (!IS_3D) return;             // 2D mode — do nothing
+  _3dBooted = true;
+
+  console.log('[lab3d] _do3DBoot() activated');
 
   const labSvg      = document.getElementById('labSvg');
   const canvas3dDiv = document.getElementById('canvas3d');
 
   if (!labSvg || !canvas3dDiv) {
-    console.error('[lab3d] Required DOM elements not found.');
+    console.error('[lab3d] DOM elements missing — retrying in 200ms');
+    _3dBooted = false;
+    setTimeout(_do3DBoot, 200);
     return;
   }
 
-  // Hide 2D canvas, show 3D container
+  // ── Switch canvas ─────────────────────────────────────────
   labSvg.style.display      = 'none';
   canvas3dDiv.style.display = 'block';
+  console.log('[lab3d] Canvas switched to 3D');
 
-  // Update page title and badge
-  const projName = document.getElementById('labProjectName');
-  if (projName) {
-    document.title = `EduSim 3D — ${projName.textContent.trim()}`;
-  }
   const badge = document.getElementById('labModeBadge');
   if (badge) badge.style.display = 'inline-block';
-
-  // Disable 2D-only toolbar buttons
   ['wireBtn', 'fitBtn', 'zoomInBtn', 'zoomOutBtn'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.disabled = true; el.style.opacity = '0.35'; el.title += ' (2D only)'; }
+    if (el) { el.disabled = true; el.style.opacity = '0.35'; }
   });
 
-  // Give the layout a frame to measure the container, then boot
+  // ── Initialize Three.js ───────────────────────────────────
   requestAnimationFrame(() => {
     init3DScene(canvas3dDiv);
     build3DScene();
 
-    // The WebGL canvas must receive pointer events for OrbitControls and 3D picking to work.
-    // Drops from the HTML palette will be handled by the listener on canvas3dDiv below.
-
-    // Also listen for drops directly on the canvas3d wrapper div as a second path
+    // Drop support on canvas3d wrapper
     canvas3dDiv.addEventListener('dragover', e => e.preventDefault());
     canvas3dDiv.addEventListener('drop', e => {
       e.preventDefault();
@@ -81,37 +95,49 @@ window.addEventListener('edusim-project-loaded', () => {
       if (!pt) return;
       if (typeof window.pushHistory  === 'function') window.pushHistory();
       if (typeof window.addComponent === 'function') window.addComponent(defId, Math.round(pt.x / 10) * 10, Math.round(pt.y / 10) * 10);
-      // Force rebuild immediately
       clearTimeout(window._3dRebuildTimer);
       window._3dRebuildTimer = setTimeout(build3DScene, 50);
     });
 
-    // Raycaster for drag-and-drop from palette
-    const raycaster = new THREE.Raycaster();
-    const mouse3d   = new THREE.Vector2();
-
+    // Raycaster for palette drag-drop position
+    const _rBoot = new THREE.Raycaster();
+    const _mBoot = new THREE.Vector2();
     window.get3DDropPoint = function(clientX, clientY) {
       if (!scene || !camera) return null;
       const rect = canvas3dDiv.getBoundingClientRect();
-      mouse3d.x = ((clientX - rect.left) / rect.width)  *  2 - 1;
-      mouse3d.y = ((clientY - rect.top)  / rect.height) * -2 + 1;
-      raycaster.setFromCamera(mouse3d, camera);
-      const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const target = new THREE.Vector3();
-      const hit = raycaster.ray.intersectPlane(floorPlane, target);
-      return hit ? { x: target.x, y: -target.z } : null;
+      _mBoot.x = ((clientX - rect.left) / rect.width)  *  2 - 1;
+      _mBoot.y = ((clientY - rect.top)  / rect.height) * -2 + 1;
+      _rBoot.setFromCamera(_mBoot, camera);
+      const fp = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const tg = new THREE.Vector3();
+      return _rBoot.ray.intersectPlane(fp, tg) ? { x: tg.x, y: -tg.z } : null;
     };
 
-    // Hook pushHistory — lab.js is guaranteed ready at this point
     const _origPush = window.pushHistory;
     window.pushHistory = function(...args) {
       if (typeof _origPush === 'function') _origPush(...args);
-      // Debounce scene rebuild
       clearTimeout(window._3dRebuildTimer);
       window._3dRebuildTimer = setTimeout(build3DScene, 80);
     };
   });
-});
+}
+
+
+// Expose globally (for lab.js direct call)
+window.boot3DLab = _do3DBoot;
+
+// ── Self-boot: fires 100ms after page loads ─────────────────
+// loadProject() uses setTimeout(0) in lab.js → it runs first.
+// Our 100ms timer ensures components[] is populated before build3DScene().
+if (IS_3D) {
+  console.log('[lab3d] Self-boot armed for 3D mode');
+  setTimeout(_do3DBoot, 100);
+}
+
+// Backup: custom event from lab.js
+window.addEventListener('edusim-project-loaded', _do3DBoot);
+
+
 
 // ── Scene Initialisation ─────────────────────────────────
 function init3DScene(container) {
