@@ -504,24 +504,13 @@ body{display:flex}
 .vlab-card p  { font-size:12px; color:var(--muted); line-height:1.5; flex:1; }
 .vlab-card-meta { display:flex; gap:8px; flex-wrap:wrap; }
 
-/* ── MENTOR AI: horizontal flex layout (editor + drawer) ── */
+/* ── MENTOR AI: Layout Wrapper ── */
 .ide-body-wrapper {
   flex: 1;
   display: flex;
   flex-direction: row;
   min-height: 0;
   overflow: hidden;
-}
-
-/* When MENTOR panel open: hide non-essential toolbar items */
-.tab-panel:has(#aiPanel.open) #saveSketchBtn,
-.tab-panel:has(#aiPanel.open) #btnAiToggle {
-  display: none;
-}
-/* Also slim down the toolbar gap */
-.tab-panel:has(#aiPanel.open) .toolbar {
-  gap: 6px;
-  padding: 0 8px;
 }
 
 /* Mode Picker */
