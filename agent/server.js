@@ -157,7 +157,8 @@ async function startServer() {
   console.log(`║   ws://127.0.0.1:${AGENT_PORT}                ║`);
   console.log(`╚══════════════════════════════════════════╝\n`);
   
-  await setupArduinoCli();
+  // Run background setup without blocking server startup
+  setupArduinoCli().catch(err => console.error('[Setup] Background setup warning:', err.message));
 
   // ── HTTP REST API for Virtual Lab ─────────────────────
   const httpServer = http.createServer(async (req, res) => {
