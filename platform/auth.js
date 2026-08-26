@@ -73,7 +73,7 @@ window.toggleTheme = function () {
       if (this.y < 0 || this.y > H) this.vy *= -1;
     }
     draw(isLight) {
-      const bColor = isLight ? '0,102,255' : '0,212,255';
+      const bColor = isLight ? '0,102,255' : '53,208,186';
       const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3);
       grad.addColorStop(0, `rgba(${bColor},0.8)`);
       grad.addColorStop(1, `rgba(${bColor},0)`);
@@ -91,7 +91,7 @@ window.toggleTheme = function () {
 
   function drawLines(isLight) {
     const maxDist = 140;
-    const bColor = isLight ? '0,102,255' : '0,212,255';
+    const bColor = isLight ? '0,102,255' : '53,208,186';
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const dx = nodes[i].x - nodes[j].x;

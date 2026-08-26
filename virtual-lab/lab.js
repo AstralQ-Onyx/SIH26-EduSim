@@ -524,7 +524,7 @@ function cancelWire() {
   }
 }
 
-function drawWire(from, to, color = '#00d4ff') {
+function drawWire(from, to, color = '#35d0ba') {
   const id   = 'w_' + (nextId++);
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   line.classList.add('lab-wire');
@@ -644,7 +644,7 @@ function renderWireProps(wire) {
   input.type = 'color';
   input.className = 'prop-input prop-color';
   input.id = 'prop_wirecolor';
-  input.value = wire.color || '#00d4ff';
+  input.value = wire.color || '#35d0ba';
   
   input.addEventListener('change', () => {
     wire.color = input.value;
@@ -789,7 +789,7 @@ function renderProps(comp) {
           pinTable.innerHTML += `
             <div style="display:flex;align-items:center;gap:8px;margin:3px 0;padding:3px 4px;border-radius:5px;transition:background .12s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
               <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${
-                pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#00d4ff'}"></div>
+                pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#35d0ba'}"></div>
               <span style="font-size:11px;font-family:var(--font-mono);font-weight:600;color:var(--accent);min-width:38px">${pin.id}</span>
               <span style="font-size:10px;color:var(--text)">${label}</span>
               <span style="font-size:9px;color:var(--muted);margin-left:auto">${pin.type}</span>
@@ -818,7 +818,7 @@ function renderProps(comp) {
       tbl.innerHTML += `
         <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
           <div style="width:8px;height:8px;border-radius:50%;background:${
-            pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#00d4ff'}"></div>
+            pin.type==='power'?'#ff4466':pin.type==='gnd'?'#888':pin.type==='analog'?'#aa66ff':'#35d0ba'}"></div>
           <span style="font-size:11px;font-weight:600">${pin.id}</span>
           <span style="font-size:10px;color:var(--muted)">${pin.label}</span>
         </div>`;
