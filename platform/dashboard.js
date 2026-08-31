@@ -897,7 +897,7 @@ function boardLabel() {
 }
 
 // ── Verify / Compile ──────────────────────────────────────
-const CLOUD_COMPILER_URL = 'http://localhost:3000/compile'; // Change this when deployed
+const CLOUD_COMPILER_URL = 'https://edusim-compiler.onrender.com/compile';
 
 document.getElementById('compileBtn').addEventListener('click', async () => {
   const build = document.getElementById('buildOutput');
