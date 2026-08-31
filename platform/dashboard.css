@@ -233,12 +233,14 @@ body{display:flex}
   padding:8px 12px;
   font-family:var(--font-mono);font-size:12px;
   line-height:1.55;
+  background:#060c16;
+  color:#dde4ef;
 }
 .terminal-line{white-space:pre-wrap;word-break:break-all}
-.terminal-line.sys{color:var(--accent)}
-.terminal-line.err{color:var(--error)}
-.terminal-line.success{color:var(--success)}
-.terminal-line.warn{color:var(--warning)}
+.terminal-line.sys{color:#00d4ff}
+.terminal-line.err{color:#ff4466}
+.terminal-line.success{color:#00ff88}
+.terminal-line.warn{color:#ffd700}
 
 .terminal-input-row{
   display:flex;border-top:1px solid var(--border);flex-shrink:0;

@@ -559,7 +559,9 @@ function buildLog(msg, type = '') {
   const line = document.createElement('div');
   line.className = 'terminal-line' + (type ? ' ' + type : '');
   line.textContent = msg;
-  document.getElementById('buildOutput').appendChild(line);
+  const build = document.getElementById('buildOutput');
+  build.appendChild(line);
+  if (autoScroll) build.scrollTop = build.scrollHeight;
 }
 
 document.getElementById('autoScrollBtn').addEventListener('click', function() {
