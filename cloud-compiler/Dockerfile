@@ -29,7 +29,7 @@ RUN arduino-cli core install esp8266:esp8266
 RUN arduino-cli core install rp2040:rp2040
 
 # (Optional) Pre-install common libraries to make compilations fast
-RUN arduino-cli lib install "Adafruit Unified Sensor" "DHT sensor library" "LiquidCrystal I2C" "Servo" "Wire"
+RUN arduino-cli lib install "Adafruit Unified Sensor" "DHT sensor library" "LiquidCrystal I2C" "Servo"
 
 # Create app directory
 WORKDIR /usr/src/app
