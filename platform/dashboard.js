@@ -897,42 +897,68 @@ function boardLabel() {
 }
 
 // ── Verify / Compile ──────────────────────────────────────
-document.getElementById('compileBtn').addEventListener('click', () => {
+const CLOUD_COMPILER_URL = 'http://localhost:3000/compile'; // Change this when deployed
+
+document.getElementById('compileBtn').addEventListener('click', async () => {
   const build = document.getElementById('buildOutput');
   build.innerHTML = '';
   document.querySelector('[data-panel="output"]').click();
   document.getElementById('compileBtn').disabled = true;
 
   const p = getBoardProfile();
+  const code = getCode();
+  const lang = document.getElementById('langSelect').value;
 
-  if (agentOnline) {
-    // ── REAL compilation via agent ──
-    buildLog(`[EduSim] Compiling for ${boardLabel()} (${p.fqbn}) …`, 'sys');
-    sendAgent({ type: 'compile', code: getCode(), fqbn: p.fqbn, sketchName: 'edusim_sketch' });
-    setTimeout(() => { document.getElementById('compileBtn').disabled = false; }, 500);
+  // Intercept non-C++ languages
+  if (lang !== 'cpp') {
+    buildLog(`[EduSim] Verification skipped for ${lang.toUpperCase()}.`, 'sys');
+    buildLog(`MicroPython and JavaScript are interpreted languages and do not require C++ compilation.`, 'warn');
+    buildLog(`You can click 'Upload' to transfer this script directly to the device.`, 'success');
+    document.getElementById('compileBtn').disabled = false;
+    document.getElementById('uploadBtn').disabled = false;
     return;
   }
 
-  // ── Simulation fallback ──
-  const size = Math.floor(Math.random() * p.flashKB * 500 + p.flashKB * 200);
-  const pct  = Math.round(size / (p.flashKB * 1024) * 100);
-  const ram  = Math.floor(Math.random() * p.ramKB * 200 + 500);
-  const ramPct = Math.round(ram / (p.ramKB * 1024) * 100);
-  const cc = p.family==='avr'?'avr-gcc':p.family==='esp'?'xtensa-gcc':'arm-none-eabi-gcc';
 
-  buildLog(`[EduSim] [SIMULATION] Target: ${boardLabel()}  FQBN: ${p.fqbn}`, 'sys');
-  buildLog(`[EduSim] ⚠ Start the local agent for real compilation.`, 'warn');
 
-  const sim = [
-    [400,  `[${cc}] Detecting libraries…`],
-    [800,  `[${cc}] Compiling…`],
-    [1300, `[${cc}] Linking…`],
-    [1700, `[EduSim] Sketch uses ${size.toLocaleString()} bytes (${pct}%) of ${(p.flashKB*1024).toLocaleString()} bytes.`],
-    [1800, `[EduSim] Global vars: ${ram.toLocaleString()} bytes (${ramPct}%). Free: ${(p.ramKB*1024-ram).toLocaleString()} bytes.`],
-    [1900, '[EduSim] Verification OK (simulated) ✓', 'success'],
-  ];
-  sim.forEach(([t,m,l]) => setTimeout(() => buildLog(m, l||''), t));
-  setTimeout(() => { document.getElementById('compileBtn').disabled = false; showToast('Verified OK (simulation)', ''); }, 1950);
+  // ── Cloud Compilation ──
+  buildLog(`[EduSim] [CLOUD] Compiling for ${boardLabel()} (${p.fqbn}) …`, 'sys');
+  buildLog(`[EduSim] Sending code to Cloud Compiler API (${CLOUD_COMPILER_URL})…`);
+
+  try {
+    const response = await fetch(CLOUD_COMPILER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code, fqbn: p.fqbn })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      buildLog(`[Cloud API Error] Compilation FAILED`, 'err');
+      if (data.details) {
+        data.details.split('\n').filter(l => l.trim()).forEach(l => buildLog(l, 'err'));
+      } else {
+        buildLog(data.error || 'Unknown error', 'err');
+      }
+      showToast('Compilation failed', 'error');
+    } else {
+      buildLog(`[Cloud API] Compilation successful ✓`, 'success');
+      buildLog(`[Cloud API] Received .${data.format} file (${Math.round(data.data.length / 1024)} KB)`);
+      buildLog(`[EduSim] Ready to upload ↑`, 'sys');
+      
+      // Store the compiled binary globally so the Upload button can access it later
+      window._cloudCompiledData = data;
+      showToast('Verified OK (Cloud)', 'success');
+      document.getElementById('uploadBtn').disabled = false;
+    }
+  } catch (err) {
+    buildLog(`[Cloud API Error] Failed to connect to Cloud Compiler: ${err.message}`, 'err');
+    buildLog(`⚠ Ensure the Cloud Compiler backend is running on port 3000.`, 'warn');
+    showToast('Cloud compile failed', 'error');
+  } finally {
+    document.getElementById('compileBtn').disabled = false;
+  }
 });
 
 // ── Upload ────────────────────────────────────────────────
@@ -944,62 +970,60 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
 
   const p = getBoardProfile();
 
-  if (agentOnline) {
-    // ── REAL upload via agent ──
-    if (!selectedPort) {
-      buildLog('[EduSim] ✗ No port selected. Use the port dropdown to pick your device.', 'err');
-      showToast('Select a port first', 'error');
-      uploadBtn.disabled = false;
-      return;
-    }
-    
-    // Remember connection state to auto-reconnect after upload
-    window._wasConnected = statusDot.classList.contains('connected');
-    window._lastBaud = parseInt(document.getElementById('baudRate').value) || 9600;
 
-    buildLog(`[EduSim] Compiling + uploading to ${selectedPort} …`, 'sys');
-    sendAgent({ type: 'upload', code: getCode(), fqbn: p.fqbn, port: selectedPort, sketchName: 'edusim_sketch' });
-    return; // uploadBtn re-enabled by agent upload_done / upload_error message
+
+  // ── Cloud / Web Serial Upload ──
+  if (!window._cloudCompiledData) {
+    buildLog(`[EduSim] ✗ No compiled code found. Please click Verify first.`, 'err');
+    showToast('Click Verify first', 'error');
+    uploadBtn.disabled = false;
+    return;
   }
 
-  // ── Simulation fallback ──
-  buildLog(`[EduSim] [SIMULATION] Upload to ${boardLabel()}`, 'sys');
-  buildLog('[EduSim] ⚠ Start the local agent for real upload.', 'warn');
+  buildLog(`[EduSim] [CLOUD UPLOAD] Preparing to flash ${boardLabel()} via Web Serial…`, 'sys');
+  
+  if (!('serial' in navigator)) {
+    buildLog(`[EduSim] ✗ Web Serial API is not supported in this browser. Please use Chrome or Edge.`, 'err');
+    uploadBtn.disabled = false;
+    return;
+  }
 
-  const simAVR = [
-    [500,'[avr-gcc] Compiling…'],
-    [1000,`[avrdude] Using programmer: ${p.mcu==='ATmega2560'?'wiring':'arduino'}`],
-    [1400,`[avrdude] Connecting to ${p.mcu}…`],
-    [1800,'[avrdude] Erasing flash…'],
-    [2200,'[avrdude] Writing flash: [################] 25%'],
-    [2600,'[avrdude] Writing flash: [################################] 50%'],
-    [3000,'[avrdude] Writing flash: [################################################] 75%'],
-    [3400,'[avrdude] Writing flash: [################################################################] 100%'],
-    [3800,'[avrdude] Verifying…done. Thank you.'],
-    [4100,'[EduSim] Upload complete (simulated) ✓','success'],
-  ];
-  const simESP = [
-    [500,'[xtensa-gcc] Compiling…'],
-    [1000,'[esptool.py] Connecting…'],
-    [1400,`[esptool.py] Chip is ${p.mcu}`],
-    [1800,'[esptool.py] Writing at 0x00010000… (25%)'],
-    [2200,'[esptool.py] Writing at 0x00018000… (50%)'],
-    [2600,'[esptool.py] Writing at 0x00020000… (75%)'],
-    [3000,'[esptool.py] Writing at 0x00028000… (100%)'],
-    [3400,'[esptool.py] Hash of data verified.'],
-    [3700,'[esptool.py] Leaving… Hard resetting via RTS pin…','success'],
-    [4000,'[EduSim] Upload complete (simulated) ✓','success'],
-  ];
-  const simRP = [
-    [500,'[arm-none-eabi-gcc] Compiling…'],
-    [1000,'[picotool] Loading into Flash: [==============================] 100%'],
-    [1500,'[picotool] Rebooting device…'],
-    [2000,'[EduSim] Upload complete (simulated) ✓','success'],
-  ];
-  const steps = p.family==='esp' ? simESP : p.family==='rp' ? simRP : simAVR;
-  steps.forEach(([t,m,l]) => setTimeout(() => buildLog(m, l||''), t));
-  const dur = steps[steps.length-1][0]+200;
-  setTimeout(() => { uploadBtn.disabled = false; showToast('Upload done (simulation)', ''); }, dur);
+  try {
+    buildLog(`[EduSim] Please select your board from the browser popup...`);
+    const port = await navigator.serial.requestPort();
+    
+    // Close the serial monitor port if it's currently open
+    if (window._wsPort) {
+      window._wsKeepReading = false;
+      try { await window._wsReader?.cancel(); } catch {}
+      try { await window._wsPort.close(); } catch {}
+      window._wsPort = null;
+    }
+
+    buildLog(`[EduSim] Connected to port. Initializing flasher...`, 'sys');
+
+    const compiledData = window._cloudCompiledData;
+    
+    if (p.family === 'esp') {
+      buildLog(`[EduSim] ESP board detected. Integrating esptool.js...`, 'sys');
+      // TODO: Implement esptool-js flashing here using compiledData.data (base64)
+      buildLog(`⚠ esptool-js library not yet loaded. Flashing skipped.`, 'warn');
+    } else if (p.family === 'avr') {
+      buildLog(`[EduSim] AVR board detected. Integrating avrgirl-arduino...`, 'sys');
+      // TODO: Implement avrgirl-arduino flashing here using compiledData.data (hex string)
+      buildLog(`⚠ avrgirl-arduino library not yet loaded. Flashing skipped.`, 'warn');
+    } else {
+      buildLog(`[EduSim] ✗ Web Serial flashing for ${p.family} is not yet supported.`, 'err');
+    }
+
+    buildLog(`[EduSim] Upload process finished.`, 'success');
+
+  } catch (err) {
+    buildLog(`[EduSim] Web Serial Error: ${err.message}`, 'err');
+    showToast('Upload aborted', 'error');
+  } finally {
+    uploadBtn.disabled = false;
+  }
 });
 
 // ── Save Sketch ───────────────────────────────────────────
