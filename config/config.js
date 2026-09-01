@@ -5,7 +5,7 @@
 
 const ENV = {
   FIREBASE_API_KEY:            "AIzaSyBAD3LTO0wwOT1EdVxJhxGc4682RfSkDAI",
-  FIREBASE_AUTH_DOMAIN:        "edu-sim.firebaseapp.com",
+  FIREBASE_AUTH_DOMAIN:        "sih-26-edu-sim.vercel.app",
   FIREBASE_PROJECT_ID:         "edu-sim",
   FIREBASE_STORAGE_BUCKET:     "edu-sim.appspot.com",
   FIREBASE_MESSAGING_SENDER_ID:"836936321609",
