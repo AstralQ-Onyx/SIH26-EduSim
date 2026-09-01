@@ -9,10 +9,16 @@ const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ARDUINO_CLI = process.env.ARDUINO_CLI_PATH || 'arduino-cli';
+let ARDUINO_CLI = process.env.ARDUINO_CLI_PATH || 'arduino-cli';
+if (os.platform() === 'win32' && !process.env.ARDUINO_CLI_PATH) {
+  const localAgentPath = path.join(__dirname, '..', 'agent', 'bin', 'arduino-cli.exe');
+  if (fs.existsSync(localAgentPath)) {
+    ARDUINO_CLI = localAgentPath;
+  }
+}
 
-app.use(helmet());
 app.use(cors());
+app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
@@ -66,19 +72,27 @@ function compileSketch(code, fqbn) {
       sketchDir
     ];
 
-    const proc = spawn(ARDUINO_CLI, args);
+    const proc = spawn(`"${ARDUINO_CLI}"`, args, { shell: true });
     let stdout = '';
     let stderr = '';
+
+    const timeout = setTimeout(() => {
+      proc.kill();
+      cleanup(tmpBase);
+      reject(new Error('Compilation timed out after 45 seconds'));
+    }, 45000);
 
     proc.stdout.on('data', d => stdout += d.toString());
     proc.stderr.on('data', d => stderr += d.toString());
 
     proc.on('error', err => {
+      clearTimeout(timeout);
       cleanup(tmpBase);
       reject(new Error('arduino-cli process error: ' + err.message));
     });
 
     proc.on('close', exitCode => {
+      clearTimeout(timeout);
       if (exitCode !== 0) {
         cleanup(tmpBase);
         return reject(new Error(stderr.trim() || stdout.trim() || `Compilation failed (exit ${exitCode})`));

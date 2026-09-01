@@ -15,4 +15,5 @@ const ENV = {
   // Set to your deployed Render service URL for cloud deployments
   // Using the cloud compiler by default so local development doesn't require running the node server
   BACKEND_URL: 'https://edusim-compiler.onrender.com'
+  
 };
