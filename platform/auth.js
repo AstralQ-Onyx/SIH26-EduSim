@@ -400,19 +400,23 @@ function setStatus(msg) {
 }
 
 // ── Google OAuth Sign-In ───────────────────────────────────────
-// IMPORTANT: This function must NOT be async. signInWithPopup must be
-// called synchronously within the click handler so the browser treats
-// the popup as user-initiated and does NOT block it.
+// signInWithPopup MUST be the very first call — zero code before it.
+// Any DOM manipulation before the popup call gives browsers enough
+// reason to classify it as "not directly user-initiated" and block it.
+// We fall back to signInWithRedirect if the popup is still blocked.
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
 
+  // ← popup opened as the absolute first action on click
+  const popupPromise = auth.signInWithPopup(provider);
+
+  // DOM updates happen AFTER the popup is already opening
   setLoading(true);
   setStatus('AUTHENTICATING WITH GOOGLE...');
 
-  // Called synchronously — browser cannot block this popup
-  auth.signInWithPopup(provider).then(result => {
+  popupPromise.then(result => {
     const user = result.user;
     const isNew = result.additionalUserInfo?.isNewUser ?? false;
 
@@ -438,16 +442,21 @@ function handleGoogleSignIn() {
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
     }
   }).catch(err => {
-    setLoading(false);
-    setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
-    const msgs = {
-      'auth/popup-blocked':    'Popup was blocked. Please allow popups for this site in your browser settings.',
-      'auth/popup-closed-by-user': 'Sign-in was cancelled.',
-      'auth/cancelled-popup-request': 'Another sign-in window is already open.',
-      'auth/network-request-failed': 'Network error. Check your connection.',
-      'auth/account-exists-with-different-credential': 'An account already exists with this email.',
-    };
-    showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
+    if (err.code === 'auth/popup-blocked') {
+      // Last resort — full page redirect (works 100% of the time)
+      setStatus('REDIRECTING TO GOOGLE…');
+      auth.signInWithRedirect(provider);
+    } else {
+      setLoading(false);
+      setStatus('SYSTEM ONLINE · SECURE CONNECTION ESTABLISHED');
+      const msgs = {
+        'auth/popup-closed-by-user':    'Sign-in was cancelled.',
+        'auth/cancelled-popup-request': 'Another sign-in window is already open.',
+        'auth/network-request-failed':  'Network error. Check your connection.',
+        'auth/account-exists-with-different-credential': 'An account already exists with this email.',
+      };
+      showToast(msgs[err.code] || `Authentication failed: ${err.message}`, 'error');
+    }
   });
 }
 
@@ -667,7 +676,29 @@ async function showForgotPassword(e) {
 }
 
 // ── Auth State Observer ─────────────────────────────────────
-// Redirects any already-logged-in user to the dashboard automatically.
+// getRedirectResult handles the case where signInWithRedirect was used as fallback.
+auth.getRedirectResult().then(result => {
+  if (!result || !result.user) return;
+  const user = result.user;
+  const isNew = result.additionalUserInfo?.isNewUser ?? false;
+  setLoading(true);
+  if (isNew) {
+    const userData = {
+      uid: user.uid, name: user.displayName || '', email: user.email,
+      photoURL: user.photoURL || '', authMethod: 'google',
+      role: '', username: '', org: '', dept: '', year: '', contactMail: '',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+    db.collection('users').doc(user.uid).set(userData).then(() => {
+      setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1200);
+    });
+  } else {
+    showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+}).catch(() => {}); // Silently ignore — no redirect was in progress
+
 auth.onAuthStateChanged(user => {
   if (user) {
     const params = new URLSearchParams(window.location.search);
