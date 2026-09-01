@@ -6,6 +6,52 @@ It provides an all-in-one simulator workspace integrating a **2D/3D Virtual Circ
 
 ---
 
+## 🛠️ Technology Stack
+
+**Frontend Architecture**
+*   **Core**: HTML5, CSS3, Vanilla JavaScript (zero heavy frameworks for maximum performance).
+*   **Editor**: Monaco Editor (VS Code engine) via CDN.
+*   **3D Rendering**: Three.js for interactive circuit visualization.
+*   **Hardware Interface**: Web Serial API (`esptool-js`, `avrgirl-arduino`) for direct browser-to-board flashing.
+
+**Backend & Infrastructure (Cloud Native)**
+*   **Compiler Backend**: Node.js & Express API.
+*   **Containerization**: Docker (Debian-based container running `arduino-cli` and required board cores).
+*   **Cloud Hosting**: Vercel (Frontend), Render.com (Dockerized Cloud Compiler).
+*   **Proxying**: Vercel Serverless Configs (`vercel.json`) for seamless third-party cookie bypass.
+
+**Authentication & Database**
+*   **Auth Provider**: Firebase Authentication.
+*   **OAuth**: Google OAuth 2.0 (First-party proxy architecture to bypass modern Chrome/Safari popup blockers).
+*   **Database**: Firebase Firestore (NoSQL) for user profiles, saved sketches, and custom virtual components.
+
+**AI Integration**
+*   **Local AI**: Ollama (Llama 3.2) for completely offline, private AI assistance.
+*   **Cloud AI**: Google Gemini API integration for lightweight production deployments.
+
+---
+
+## 🗓️ Development Timeline & Progress
+
+### Phase 1: Core Engine & Simulation (Completed)
+*   [x] Built the Monaco-powered Web IDE with syntax highlighting and auto-save.
+*   [x] Developed the 2D drag-and-drop Virtual Circuit canvas.
+*   [x] Implemented a synchronized 3D viewer for breadboard circuits using Three.js.
+*   [x] Integrated Dual AI Copilots (EduSim MENTOR for code, CircuitMind for hardware) powered by local LLMs.
+
+### Phase 2: Cloud Migration & Hardware (Completed)
+*   [x] **Cloud Compiler**: Decoupled compilation from the local agent by containerizing `arduino-cli` in a Docker image.
+*   [x] **Production Deployment**: Successfully deployed the isolated compiler backend to Render.com.
+*   [x] **Web Serial Flashing**: Eliminated the need for a local USB agent server by integrating the Web Serial API directly into the browser to flash AVR and ESP microcontrollers.
+
+### Phase 3: Enterprise Security & Auth Fixes (Completed)
+*   [x] Resolved strict modern browser (Chrome 2024+) third-party cookie blocking on Vercel deployments.
+*   [x] Configured `vercel.json` to proxy `/__/auth/` routes to Firebase, making Google OAuth a trusted first-party request.
+*   [x] Implemented synchronized, popup-first Google Sign-In with automated redirect fallbacks.
+*   [x] Modified COOP/COEP headers to allow secure cross-origin communication between the Vercel site and Google's Auth popups.
+
+---
+
 ## 🚀 Key Modules & File Architecture
 
 ### 1. 💻 Web IDE & Student Workspace (`/platform`)
