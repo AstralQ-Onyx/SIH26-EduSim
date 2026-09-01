@@ -396,6 +396,9 @@ function setBtnLoading(btnId, loading) {
 
 // ── Update Status Bar ───────────────────────────────────────
 function setStatus(msg) {
+  document.getElementById('statusText').textContent = msg;
+}
+
 // ── Google Identity Services (GSI - No Popups) ─────────────────
 window.onload = function () {
   if (typeof google !== 'undefined' && google.accounts && ENV.GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID") {
