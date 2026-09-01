@@ -5,14 +5,14 @@
  */
 'use strict';
 
-const AGENT_HTTP = 'http://127.0.0.1:3746';
+const AGENT_HTTP = (typeof ENV !== 'undefined' && ENV.BACKEND_URL) ? ENV.BACKEND_URL : 'https://edusim-compiler.onrender.com';
 
 // Board FQBN map
 const FQBN_MAP = {
-  arduino_uno_r3:   'arduino:avr:uno',
-  arduino_nano:     'arduino:avr:nano',
+  arduino_uno_r3: 'arduino:avr:uno',
+  arduino_nano: 'arduino:avr:nano',
   esp32_dev_module: 'esp32:esp32:esp32',
-  esp32:            'esp32:esp32:esp32',
+  esp32: 'esp32:esp32:esp32',
 };
 
 // ── avr8js loaded state ─────────────────────────────────────
@@ -42,9 +42,9 @@ function parseHex(hexString) {
   hexString.split('\n').forEach(line => {
     line = line.trim();
     if (!line.startsWith(':')) return;
-    const bytes  = parseInt(line.slice(1, 3), 16);
-    const addr   = parseInt(line.slice(3, 7), 16);
-    const type   = parseInt(line.slice(7, 9), 16);
+    const bytes = parseInt(line.slice(1, 3), 16);
+    const addr = parseInt(line.slice(3, 7), 16);
+    const type = parseInt(line.slice(7, 9), 16);
     if (type !== 0) return; // only data records
     for (let i = 0; i < bytes; i++) {
       const byte = parseInt(line.slice(9 + i * 2, 11 + i * 2), 16);
@@ -73,10 +73,10 @@ function transpileArduinoToJS(code) {
   return js;
 }
 
-async function runPseudoSim(code, onLog, onReady) {
+async function runPseudoSim(code, callbacks) {
   pseudoStopRequested = false;
   const jsCode = transpileArduinoToJS(code);
-  
+
   const env = {
     HIGH: 1,
     LOW: 0,
@@ -86,11 +86,11 @@ async function runPseudoSim(code, onLog, onReady) {
     digitalWrite: (pin, val) => {
       if (onPinChange) onPinChange('PSEUDO', pin, val);
     },
-    pinMode: () => {},
+    pinMode: () => { },
     Serial: {
-      begin: () => {},
-      print: (msg) => onLog(msg, 'sys'),
-      println: (msg) => onLog(msg, 'sys')
+      begin: () => { },
+      print: (msg) => { if (callbacks.onSerial) callbacks.onSerial(String(msg)); },
+      println: (msg) => { if (callbacks.onSerial) callbacks.onSerial(String(msg) + '\n'); }
     }
   };
 
@@ -111,11 +111,11 @@ async function runPseudoSim(code, onLog, onReady) {
   try {
     env.checkStop = () => pseudoStopRequested;
     const runner = new Function(wrappedCode)();
-    onLog('[PseudoSim] Lexical transpilation complete. Running...', 'sys');
-    onReady();
-    pseudoSimRunner = runner(env); 
-  } catch(err) {
-    onLog('[PseudoSim] Transpiler Error: ' + err.message, 'err');
+    callbacks.onLog('[PseudoSim] Lexical transpilation complete. Running...', 'sys');
+    callbacks.onReady();
+    pseudoSimRunner = runner(env);
+  } catch (err) {
+    callbacks.onLog('[PseudoSim] Transpiler Error: ' + err.message, 'err');
   }
 }
 
@@ -131,29 +131,58 @@ async function compileAndSimulate(code, defId, callbacks) {
     onError(`[Sim] Unknown board type.`);
     return false;
   }
-  
+
   onLog(`[Sim] Compiling for ${fqbn}…`, 'sys');
+  onLog(`[Sim] Sending to cloud compiler: ${AGENT_HTTP}`, 'sys');
 
   let hex;
   try {
-    const resp = await fetch(`${AGENT_HTTP}/compile-hex`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, fqbn }),
-    });
-    const data = await resp.json();
-    if (!resp.ok || data.error) throw new Error(data.error || 'Compile failed');
-    hex = data.hex;
-    onLog('[Sim] Compilation successful ✓', 'success');
+    // Try /compile-hex first (returns { hex, fqbn } directly for avr8js)
+    // Falls back to /compile (returns { data, format, fqbn }) if /compile-hex is unavailable
+    let resp;
+    let data;
+    let usedEndpoint = '/compile-hex';
+
+    try {
+      resp = await fetch(`${AGENT_HTTP}/compile-hex`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, fqbn }),
+      });
+      data = await resp.json();
+    } catch (fetchErr) {
+      // /compile-hex not available, try /compile
+      onLog('[Sim] /compile-hex not available, trying /compile…', 'warn');
+      usedEndpoint = '/compile';
+      resp = await fetch(`${AGENT_HTTP}/compile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, fqbn }),
+      });
+      data = await resp.json();
+    }
+
+    if (!resp.ok || data.error) {
+      const details = data.details || data.error || 'Compile failed';
+      throw new Error(details);
+    }
+
+    // Extract hex from whichever endpoint responded
+    hex = data.hex || data.data;
+    onLog(`[Sim] Compilation successful ✓ (via ${usedEndpoint})`, 'success');
   } catch (err) {
-    onError(`[Sim] ${err.message}`);
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('ERR_')) {
+      onError(`[Sim] Cannot reach cloud compiler at ${AGENT_HTTP}. The server may be starting up (cold start ~30s). Please try again.`);
+    } else {
+      onError(`[Sim] ${err.message}`);
+    }
     return false;
   }
 
   // ── Route to correct emulator ──
   if (!fqbn.includes('avr')) {
     onLog(`[Sim] Warning: Non-AVR board detected. Engaging Lexical Pseudo-Simulator...`, 'warn');
-    runPseudoSim(code, onLog, onReady);
+    runPseudoSim(code, callbacks);
     return true;
   }
 
@@ -164,13 +193,20 @@ async function compileAndSimulate(code, defId, callbacks) {
     return false;
   }
 
-  const { CPU, avrInstruction, AVRTimer, timer0Config, timer1Config, timer2Config, AVRIOPort, portBConfig, portCConfig, portDConfig } = window.avr8js;
+  const { CPU, avrInstruction, AVRTimer, timer0Config, timer1Config, timer2Config, AVRIOPort, portBConfig, portCConfig, portDConfig, AVRUSART, usart0Config } = window.avr8js;
 
   const prog = parseHex(hex);
-  cpu   = new CPU(new Uint16Array(prog.buffer));
+  cpu = new CPU(new Uint16Array(prog.buffer));
   portB = new AVRIOPort(cpu, portBConfig);
   portC = new AVRIOPort(cpu, portCConfig);
   portD = new AVRIOPort(cpu, portDConfig);
+
+  const usart = new AVRUSART(cpu, usart0Config, 16e6);
+  usart.onByteTransmit = (byte) => {
+    if (callbacks.onSerial) {
+      callbacks.onSerial(String.fromCharCode(byte));
+    }
+  };
 
   function watchPort(port, name) {
     port.addListener(() => {
@@ -191,7 +227,7 @@ async function compileAndSimulate(code, defId, callbacks) {
   onLog('[Sim] CPU initialized. Running…', 'sys');
   onReady();
 
-  const CYCLES_PER_TICK = 160000; 
+  const CYCLES_PER_TICK = 160000;
   simRunner = setInterval(() => {
     for (let i = 0; i < CYCLES_PER_TICK; i++) {
       avrInstruction(cpu);

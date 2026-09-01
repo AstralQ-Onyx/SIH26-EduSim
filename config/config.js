@@ -13,7 +13,6 @@ const ENV = {
   GOOGLE_CLIENT_ID:            "836936321609-pf0pv1b8sfv5r7sog28882j066h0a820.apps.googleusercontent.com", // TODO: Put your Google Client ID here
   
   // Set to your deployed Render service URL for cloud deployments
-  BACKEND_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://127.0.0.1:3746'
-    : 'https://edusim-agent.onrender.com'
+  // Using the cloud compiler by default so local development doesn't require running the node server
+  BACKEND_URL: 'https://edusim-compiler.onrender.com'
 };

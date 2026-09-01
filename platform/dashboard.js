@@ -897,7 +897,7 @@ function boardLabel() {
 }
 
 // ── Verify / Compile ──────────────────────────────────────
-const CLOUD_COMPILER_URL = 'https://edusim-compiler.onrender.com/compile';
+const CLOUD_COMPILER_URL = ((typeof ENV !== 'undefined' && ENV.BACKEND_URL) ? ENV.BACKEND_URL : 'https://edusim-compiler.onrender.com') + '/compile';
 
 document.getElementById('compileBtn').addEventListener('click', async () => {
   const build = document.getElementById('buildOutput');

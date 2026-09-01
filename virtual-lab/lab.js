@@ -942,6 +942,7 @@ async function runUpload() {
     onLog:  (msg, type) => clog(msg, type),
     onError:(msg)       => clog(msg, 'err'),
     onReady: ()         => setSimUI(true),
+    onSerial: (text)    => slog(text),
     onPin: (portName, bit, pinState) => {
       const isHigh = (pinState === 1 || pinState === true);
 
@@ -1069,6 +1070,24 @@ function clog(msg, type='') {
   el.textContent = msg;
   document.getElementById('consoleBody').appendChild(el);
   document.getElementById('consoleBody').scrollTop = 9999;
+}
+
+let serialBuffer = '';
+function slog(text) {
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '\n') {
+      const el = document.createElement('div');
+      el.className = 'clog';
+      el.textContent = serialBuffer || ' ';
+      const sb = document.getElementById('serialBody');
+      sb.appendChild(el);
+      sb.scrollTop = 9999;
+      serialBuffer = '';
+    } else {
+      if (char !== '\r') serialBuffer += char;
+    }
+  }
 }
 
 // ── Undo / Redo buttons ───────────────────────────────────
