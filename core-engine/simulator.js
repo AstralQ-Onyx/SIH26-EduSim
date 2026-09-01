@@ -133,12 +133,22 @@ async function compileAndSimulate(code, defId, callbacks) {
   }
 
   onLog(`[Sim] Compiling for ${fqbn}…`, 'sys');
+
+  // ── Route to correct emulator FIRST ────────────────────
+  // For non-AVR boards (ESP32, ESP8266, RP2040), the pseudo-simulator
+  // uses JS transpilation — it does NOT need a compiled .hex file.
+  // Skip the cloud compile step entirely for instant startup!
+  if (!fqbn.includes('avr')) {
+    onLog(`[Sim] Non-AVR board detected — using Lexical Pseudo-Simulator (no cloud compile needed)`, 'sys');
+    runPseudoSim(code, callbacks);
+    return true;
+  }
+
+  // ── AVR boards only: compile to .hex via cloud compiler ─
   onLog(`[Sim] Sending to cloud compiler: ${AGENT_HTTP}`, 'sys');
 
   let hex;
   try {
-    // Try /compile-hex first (returns { hex, fqbn } directly for avr8js)
-    // Falls back to /compile (returns { data, format, fqbn }) if /compile-hex is unavailable
     let resp;
     let data;
     let usedEndpoint = '/compile-hex';
@@ -151,7 +161,6 @@ async function compileAndSimulate(code, defId, callbacks) {
       });
       data = await resp.json();
     } catch (fetchErr) {
-      // /compile-hex not available, try /compile
       onLog('[Sim] /compile-hex not available, trying /compile…', 'warn');
       usedEndpoint = '/compile';
       resp = await fetch(`${AGENT_HTTP}/compile`, {
@@ -167,7 +176,6 @@ async function compileAndSimulate(code, defId, callbacks) {
       throw new Error(details);
     }
 
-    // Extract hex from whichever endpoint responded
     hex = data.hex || data.data;
     onLog(`[Sim] Compilation successful ✓ (via ${usedEndpoint})`, 'success');
   } catch (err) {
@@ -177,13 +185,6 @@ async function compileAndSimulate(code, defId, callbacks) {
       onError(`[Sim] ${err.message}`);
     }
     return false;
-  }
-
-  // ── Route to correct emulator ──
-  if (!fqbn.includes('avr')) {
-    onLog(`[Sim] Warning: Non-AVR board detected. Engaging Lexical Pseudo-Simulator...`, 'warn');
-    runPseudoSim(code, callbacks);
-    return true;
   }
 
   try {
