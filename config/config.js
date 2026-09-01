@@ -10,6 +10,7 @@ const ENV = {
   FIREBASE_STORAGE_BUCKET:     "edu-sim.appspot.com",
   FIREBASE_MESSAGING_SENDER_ID:"836936321609",
   FIREBASE_APP_ID:             "1:836936321609:web:edusim_phase1",
+  GOOGLE_CLIENT_ID:            "836936321609-pf0pv1b8sfv5r7sog28882j066h0a820.apps.googleusercontent.com", // TODO: Put your Google Client ID here
   
   // Set to your deployed Render service URL for cloud deployments
   BACKEND_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')

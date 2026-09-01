@@ -396,24 +396,65 @@ function setBtnLoading(btnId, loading) {
 
 // ── Update Status Bar ───────────────────────────────────────
 function setStatus(msg) {
-  document.getElementById('statusText').textContent = msg;
-}
+// ── Google Identity Services (GSI - No Popups) ─────────────────
+window.onload = function () {
+  if (typeof google !== 'undefined' && google.accounts && ENV.GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID") {
+    google.accounts.id.initialize({
+      client_id: ENV.GOOGLE_CLIENT_ID,
+      callback: handleGsiCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: false
+    });
+    
+    const loginBtn = document.getElementById('gsiLoginBtn');
+    if (loginBtn) {
+      google.accounts.id.renderButton(loginBtn, { theme: 'outline', size: 'large', text: 'signin_with', width: 320 });
+    }
 
-// ── Google OAuth Sign-In (Redirect flow — bulletproof for Vercel/mobile) ──────
-function handleGoogleSignIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.addScope('profile');
-  provider.addScope('email');
-  
+    const regBtn = document.getElementById('gsiRegisterBtn');
+    if (regBtn) {
+      google.accounts.id.renderButton(regBtn, { theme: 'outline', size: 'large', text: 'signup_with', width: 320 });
+    }
+  } else if (ENV.GOOGLE_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID") {
+    console.warn("EduSim: Please set your GOOGLE_CLIENT_ID in config.js to enable Google Sign-In.");
+  }
+};
+
+async function handleGsiCredentialResponse(response) {
   setLoading(true);
-  setStatus('REDIRECTING TO GOOGLE…');
-  
-  // This completely bypasses all browser popup blockers
-  auth.signInWithRedirect(provider).catch(err => {
+  setStatus('AUTHENTICATING WITH GOOGLE...');
+
+  try {
+    // Exchange GSI Token for Firebase Credential so Firestore secure rules work seamlessly
+    const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+    const result = await auth.signInWithCredential(credential);
+    
+    const user = result.user;
+    const isNew = result.additionalUserInfo?.isNewUser ?? false;
+
+    if (isNew) {
+      const userData = {
+        uid: user.uid,
+        name: user.displayName || '',
+        email: user.email,
+        photoURL: user.photoURL || '',
+        authMethod: 'google',
+        role: '', username: '', org: '', dept: '', year: '', contactMail: '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+      await db.collection('users').doc(user.uid).set(userData);
+      showToast('Google account linked! Please complete your profile.', 'success');
+      setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
+    } else {
+      showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+  } catch (err) {
     setLoading(false);
     setStatus('SYSTEM ONLINE');
-    showToast(`Authentication failed: ${err.message}`, 'error');
-  });
+    showToast(`Google Sign-In failed: ${err.message}`, 'error');
+  }
 }
 
 // ── Email Login ─────────────────────────────────────────────
@@ -631,45 +672,13 @@ async function showForgotPassword(e) {
   }
 }
 
-// ── Auth State & Redirect Handling ──────────────────────────
-// Check if we are returning from a Google Redirect
-auth.getRedirectResult().then(result => {
-  if (result.user) {
-    setLoading(true);
-    setStatus('FINALIZING SECURE CONNECTION...');
-    const user = result.user;
-    const isNew = result.additionalUserInfo?.isNewUser ?? false;
-
-    if (isNew) {
-      const userData = {
-        uid: user.uid,
-        name: user.displayName || '',
-        email: user.email,
-        photoURL: user.photoURL || '',
-        authMethod: 'google',
-        role: '', username: '', org: '', dept: '', year: '', contactMail: '',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      };
-      db.collection('users').doc(user.uid).set(userData).then(() => {
-        showToast('Google account linked! Please complete your profile.', 'success');
-        setTimeout(() => { window.location.href = `dashboard.html?setup=1&uid=${user.uid}`; }, 1500);
-      });
-    } else {
-      showToast(`Welcome back, ${user.displayName?.split(' ')[0] || 'there'}!`, 'success');
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+// ── Auth State Observer ─────────────────────────────────────
+// Redirects any already-logged-in user to the dashboard automatically.
+auth.onAuthStateChanged(user => {
+  if (user) {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('setup')) {
+      window.location.href = 'dashboard.html';
     }
-  } else {
-    // If no redirect occurred, start observing normal auth state
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        const params = new URLSearchParams(window.location.search);
-        if (!params.has('setup')) {
-          window.location.href = 'dashboard.html';
-        }
-      }
-    });
   }
-}).catch(err => {
-  showToast(`Google Sign-In failed: ${err.message}`, 'error');
 });
