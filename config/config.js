@@ -12,8 +12,7 @@ const ENV = {
   FIREBASE_APP_ID:             "1:836936321609:web:edusim_phase1",
   GOOGLE_CLIENT_ID:            "836936321609-pf0pv1b8sfv5r7sog28882j066h0a820.apps.googleusercontent.com", // TODO: Put your Google Client ID here
   
-  // Set to your deployed Render service URL for cloud deployments
-  // Using the cloud compiler by default so local development doesn't require running the node server
+  // Cloud compiler on Render — handles all compilation for both IDE and Virtual Lab
   BACKEND_URL: 'https://edusim-compiler.onrender.com'
   
 };

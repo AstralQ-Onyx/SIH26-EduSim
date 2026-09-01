@@ -72,15 +72,17 @@ function compileSketch(code, fqbn) {
       sketchDir
     ];
 
-    const proc = spawn(`"${ARDUINO_CLI}"`, args, { shell: true });
+    // Do NOT use shell: true — pass the CLI path directly to avoid security warnings and arg injection
+    const proc = spawn(ARDUINO_CLI, args);
     let stdout = '';
     let stderr = '';
 
+    // 120s timeout to handle Render's slower free-tier CPU (local is ~12s, Render ~30-60s)
     const timeout = setTimeout(() => {
       proc.kill();
       cleanup(tmpBase);
-      reject(new Error('Compilation timed out after 45 seconds'));
-    }, 45000);
+      reject(new Error('Compilation timed out after 120 seconds. The server CPU may be under load.'));
+    }, 120000);
 
     proc.stdout.on('data', d => stdout += d.toString());
     proc.stderr.on('data', d => stderr += d.toString());
