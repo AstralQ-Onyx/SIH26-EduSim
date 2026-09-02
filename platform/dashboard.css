@@ -4,19 +4,19 @@
 
 /* ── Design Tokens ── */
 :root {
-  --bg:          #060c16;
-  --surface:     #0d1626;
-  --surface2:    #111e35;
-  --surface3:    #172240;
-  --border:      rgba(0,212,255,.14);
-  --border-h:    rgba(0,212,255,.35);
-  --accent:      #00d4ff;
-  --accent2:     #7b2fff;
-  --text:        #dde4ef;
+  --bg:          #080A0F;
+  --surface:     #11151C;
+  --surface2:    #171D25;
+  --surface3:    rgba(155, 126, 222, 0.08);
+  --border:      rgba(53, 208, 186, 0.14);
+  --border-h:    rgba(53, 208, 186, 0.35);
+  --accent:      #35D0BA;
+  --accent2:     #9B7EDE;
+  --text:        #E8EDF2;
   --muted:       #5a7090;
   --success:     #00ff88;
   --error:       #ff4466;
-  --warning:     #ffd700;
+  --warning:     #F5B942;
 
   --font-logo:   'Orbitron', monospace;
   --font-ui:     'Rajdhani', sans-serif;

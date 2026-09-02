@@ -7,23 +7,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --c-bg:          #060b14;
-  --c-surface:     #0d1626;
-  --c-surface2:    #111e33;
-  --c-surface-alpha: rgba(13, 22, 38, 0.85);
-  --c-border:      rgba(0, 212, 255, 0.15);
-  --c-border-h:    rgba(0, 212, 255, 0.45);
-  --c-accent:      #00d4ff;
-  --c-accent2:     #7b2fff;
-  --c-accent3:     #ff6b35;
-  --c-text:        #e2e8f0;
+  --c-bg:          #080A0F;
+  --c-surface:     #11151C;
+  --c-surface2:    #171D25;
+  --c-surface-alpha: rgba(17, 21, 28, 0.85);
+  --c-border:      rgba(53, 208, 186, 0.15);
+  --c-border-h:    rgba(53, 208, 186, 0.45);
+  --c-accent:      #35D0BA;
+  --c-accent2:     #9B7EDE;
+  --c-accent3:     #F5B942;
+  --c-text:        #E8EDF2;
   --c-text-muted:  #64748b;
   --c-text-dim:    #94a3b8;
   --c-success:     #00ff88;
   --c-error:       #ff4466;
-  --c-warning:     #ffd700;
-  --glow-accent:   0 0 20px rgba(0, 212, 255, 0.4);
-  --glow-purple:   0 0 20px rgba(123, 47, 255, 0.4);
+  --c-warning:     #F5B942;
+  --glow-accent:   0 0 20px rgba(53, 208, 186, 0.4);
+  --glow-purple:   0 0 20px rgba(155, 126, 222, 0.4);
   --glow-success:  0 0 12px rgba(0, 255, 136, 0.5);
   --glow-error:    0 0 12px rgba(255, 68, 102, 0.5);
   

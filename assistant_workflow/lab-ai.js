@@ -151,8 +151,24 @@ const labAiSend  = document.getElementById('labAiSend');
 const labAiCtx   = document.getElementById('labAiCtxChip');
 
 // ── Toggle ────────────────────────────────────────────────────
-function openCM()  { labAiPanel?.classList.add('open'); refreshCtx(); labAiInput?.focus(); }
-function closeCM() { labAiPanel?.classList.remove('open'); }
+function openCM()  { 
+  labAiPanel?.classList.add('open'); 
+  if (labAiBtn) {
+    labAiBtn.style.opacity = '0';
+    labAiBtn.style.pointerEvents = 'none';
+    labAiBtn.style.transform = 'scale(0.8)';
+  }
+  refreshCtx(); 
+  labAiInput?.focus(); 
+}
+function closeCM() { 
+  labAiPanel?.classList.remove('open'); 
+  if (labAiBtn) {
+    labAiBtn.style.opacity = '1';
+    labAiBtn.style.pointerEvents = 'auto';
+    labAiBtn.style.transform = '';
+  }
+}
 
 labAiBtn?.addEventListener('click', () =>
   labAiPanel?.classList.contains('open') ? closeCM() : openCM()

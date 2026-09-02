@@ -472,7 +472,7 @@ function build3DScene() {
 
     const curve   = new THREE.QuadraticBezierCurve3(p1, mid, p2);
     const tubeGeo = new THREE.TubeGeometry(curve, 24, 1.8, 8, false);
-    const colorHex = parseInt((wire.color || '#00d4ff').replace('#', ''), 16);
+    const colorHex = parseInt((wire.color || '#35D0BA').replace('#', ''), 16);
     const tubeMat  = new THREE.MeshStandardMaterial({
       color: colorHex,
       roughness: 0.5,
@@ -564,11 +564,11 @@ window.update3DComponentState = function(compId, isHigh) {
   wireToast.id = 'wire3dToast';
   Object.assign(wireToast.style, {
     position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
-    background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.5)',
-    backdropFilter: 'blur(10px)', color: '#00d4ff', fontFamily: 'Inter,sans-serif',
+    background: 'rgba(53,208,186,0.12)', border: '1px solid rgba(53,208,186,0.5)',
+    backdropFilter: 'blur(10px)', color: '#35D0BA', fontFamily: 'Inter,sans-serif',
     fontSize: '13px', fontWeight: '600', padding: '8px 18px', borderRadius: '8px',
     pointerEvents: 'none', zIndex: '9999', display: 'none', letterSpacing: '0.3px',
-    boxShadow: '0 0 20px rgba(0,212,255,0.3)'
+    boxShadow: '0 0 20px rgba(53,208,186,0.3)'
   });
   document.body.appendChild(wireToast);
 
@@ -613,7 +613,7 @@ window.update3DComponentState = function(compId, isHigh) {
     selectedWire3d = { wireId, mesh };
     // Highlight selected wire
     if (mesh && mesh.material) {
-      mesh.material.emissive    = new THREE.Color(0x00d4ff);
+      mesh.material.emissive    = new THREE.Color(0x35D0BA);
       mesh.material.emissiveIntensity = 0.6;
     }
     // Show wire props in the right panel
@@ -629,7 +629,7 @@ window.update3DComponentState = function(compId, isHigh) {
       grp.innerHTML = '<label class="prop-label" for="prop_wire3dcolor">Wire Color</label>';
       const inp = document.createElement('input');
       inp.type = 'color'; inp.className = 'prop-input prop-color'; inp.id = 'prop_wire3dcolor';
-      inp.value = wire.color || '#00d4ff';
+      inp.value = wire.color || '#35D0BA';
       inp.addEventListener('input', () => {
         wire.color = inp.value;
         // Update tube material
@@ -691,7 +691,7 @@ window.update3DComponentState = function(compId, isHigh) {
         id: wireId,
         from: { compId: pendingWireFrom.compId, pinId: pendingWireFrom.pinId },
         to:   { compId: pinData.compId,         pinId: pinData.pinId },
-        color: '#00d4ff'
+        color: '#35D0BA'
       };
       if (window.wires) {
         window.wires.push(newWire);
@@ -776,7 +776,7 @@ window.update3DComponentState = function(compId, isHigh) {
           const curve = new THREE.QuadraticBezierCurve3(p1, mid, target);
           const geo = new THREE.TubeGeometry(curve, 32, 1.5, 8, false);
           const mat = new THREE.MeshStandardMaterial({
-            color: 0x00d4ff, emissive: 0x003344, emissiveIntensity: 0.5,
+            color: 0x35D0BA, emissive: 0x003344, emissiveIntensity: 0.5,
             roughness: 0.3, metalness: 0.2, transparent: true, opacity: 0.8
           });
           activeWireMesh = new THREE.Mesh(geo, mat);

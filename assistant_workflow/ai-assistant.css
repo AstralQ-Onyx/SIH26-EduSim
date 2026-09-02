@@ -7,33 +7,43 @@
 /* ── Panel Shell ─────────────────────────────────────────────── */
 #aiPanel {
   width: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border-left: 1px solid var(--border-h);
-  box-shadow: -8px 0 32px rgba(0,0,0,0.25);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  opacity: 0;
+  visibility: hidden;
   font-family: var(--font);
   color: var(--text);
   transition: width 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              min-width 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+              min-width 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.3s ease,
+              visibility 0.3s ease;
   position: relative;
+}
 
-  /* Dot-grid texture that works in both themes */
+#aiPanel.open {
+  width: 390px;
+  min-width: 390px;
+  border-left: 1px solid var(--border-h);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.25);
+  background: var(--surface);
+  opacity: 1;
+  visibility: visible;
   background-image:
     radial-gradient(circle, var(--border) 1px, transparent 1px),
     linear-gradient(var(--surface), var(--surface));
   background-size: 22px 22px, 100% 100%;
 }
 
-#aiPanel.open {
-  width: 390px;
-  min-width: 390px;
-}
-
-/* ── Top accent bar ──────────────────────────────────────────── */
-#aiPanel::before {
+/* ── Top accent bar (only when panel is open) ─────────────────── */
+#aiPanel.open::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -43,41 +53,7 @@
   pointer-events: none;
 }
 
-/* ── Floating Trigger Tab ────────────────────────────────────── */
-#aiPanelTrigger {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 9999;
-  writing-mode: vertical-rl;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 9px;
-  background: linear-gradient(180deg, var(--accent2), var(--accent));
-  color: #fff;
-  font-family: var(--font-logo);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  border: none;
-  border-radius: 10px 0 0 10px;
-  cursor: pointer;
-  box-shadow: -4px 0 18px rgba(0,212,255,0.2);
-  transition: padding 0.2s, box-shadow 0.2s, opacity 0.2s;
-}
-#aiPanelTrigger:hover {
-  padding: 16px 13px;
-  box-shadow: -6px 0 28px rgba(0,212,255,0.4);
-}
-/* Hide trigger when panel is open */
-body:has(#aiPanel.open) #aiPanelTrigger {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ── Header ──────────────────────────────────────────────────── */
+/* ── HEADER ──────────────────────────────────────────────────── */
 .ai-header {
   padding: 15px 16px 12px;
   background: var(--surface2);

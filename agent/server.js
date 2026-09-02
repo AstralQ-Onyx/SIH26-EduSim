@@ -20,11 +20,35 @@
 'use strict';
 
 const { WebSocketServer } = require('ws');
+const fs    = require('fs');
+const path  = require('path');
+
+// ── Load .env from root folder ────────────────────────────
+try {
+  const envPath = path.join(__dirname, '..', '.env');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+      const index = line.indexOf('=');
+      if (index > 0) {
+        const key = line.substring(0, index).trim();
+        let val = line.substring(index + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.substring(1, val.length - 1);
+        }
+        process.env[key] = val;
+      }
+    });
+    console.log('[Agent] Loaded environment variables from .env');
+  }
+} catch (e) {
+  console.warn('[Agent] Failed to load .env file:', e.message);
+}
 const { spawn, execSync, exec } = require('child_process');
 const { SerialPort }      = require('serialport');
 const { ReadlineParser }  = require('@serialport/parser-readline');
-const fs    = require('fs');
-const path  = require('path');
 const os    = require('os');
 const https = require('https');
 const http  = require('http');
