@@ -136,6 +136,7 @@ function restoreState(data) {
   _suppressHistory = true;   // <<< stop child calls from polluting stacks
   document.getElementById('componentsLayer').innerHTML = '';
   document.getElementById('wiresLayer').innerHTML = '';
+  wireHandlesGroup = null; // Reset since its DOM node was destroyed
   components.length = 0;
   wires.length = 0;
   clearSelection();
@@ -742,6 +743,7 @@ function deleteSelected() {
     wires = wires.filter(w => w !== selectedWire);
     window.wires = wires; // update global ref
     selectedWire = null;
+    clearSelection(); // This clears the UI handles
 
     // Re-evaluate affected components after wire removal
     affectedCompIds.forEach(id => {
@@ -1237,6 +1239,169 @@ function saveProject() {
   localStorage.setItem('edusim_vlab_' + PROJECT.id, JSON.stringify(data));
   clog('[Lab] Project saved to local storage ✓', 'ok');
 }
+
+// ── Report Modal ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const reportModal = document.getElementById('reportModal');
+  if (!reportModal) return;
+
+  document.getElementById('reportLabBtn').addEventListener('click', () => {
+    document.getElementById('reportProjectName').value = PROJECT.name || 'EduSim Project';
+    
+    const userInfoInput = document.getElementById('reportUserInfo');
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      const user = firebase.auth().currentUser;
+      userInfoInput.value = user.displayName || user.email || '';
+    } else {
+      userInfoInput.value = '';
+    }
+
+    const compList = components.map(c => c.props.label || c.def.label || c.def.name).filter(Boolean);
+    document.getElementById('reportComponents').textContent = compList.join(', ') || 'No components used';
+
+    document.getElementById('reportCode').textContent = labEditor ? labEditor.getValue() : 'No code uploaded.';
+
+    const svgNode = document.getElementById('labSvg').cloneNode(true);
+    svgNode.style.width = '100%';
+    svgNode.style.height = '100%';
+    svgNode.style.background = 'transparent';
+    
+    // Strip zoom/pan transforms so it renders cleanly in the PDF
+    const cLayer = svgNode.querySelector('#componentsLayer');
+    const wLayer = svgNode.querySelector('#wiresLayer');
+    if (cLayer) cLayer.removeAttribute('transform');
+    if (wLayer) wLayer.removeAttribute('transform');
+    
+    // Compute proper bounding box, falling back to 80px if w/h not defined
+    let vbW = 800, vbH = 400;
+    let vbx = 0, vby = 0;
+    if (components.length > 0) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      components.forEach(c => {
+        minX = Math.min(minX, c.x);
+        minY = Math.min(minY, c.y);
+        maxX = Math.max(maxX, c.x + (c.def.w || 80));
+        maxY = Math.max(maxY, c.y + (c.def.h || 80));
+      });
+      const pad = 60;
+      minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+      vbW = maxX - minX;
+      vbH = maxY - minY;
+      vbx = minX;
+      vby = minY;
+      svgNode.setAttribute('viewBox', `${minX} ${minY} ${vbW} ${vbH}`);
+    }
+
+    const cs = getComputedStyle(document.documentElement);
+    const varMap = {
+      '--accent':   cs.getPropertyValue('--accent').trim()  || '#00d4ff',
+      '--accent2':  cs.getPropertyValue('--accent2').trim() || '#7c3aed',
+      '--bg':       cs.getPropertyValue('--bg').trim()      || '#0d1117',
+      '--surface':  cs.getPropertyValue('--surface').trim() || '#161b22',
+      '--surface2': cs.getPropertyValue('--surface2').trim()|| '#1c2128',
+      '--text':     cs.getPropertyValue('--text').trim()    || '#e6edf3',
+      '--muted':    cs.getPropertyValue('--muted').trim()   || '#8b949e',
+      '--border':   cs.getPropertyValue('--border').trim()  || '#30363d',
+      '--border-h': cs.getPropertyValue('--border-h').trim()|| '#444c56',
+      '--success':  cs.getPropertyValue('--success').trim() || '#3fb950',
+      '--error':    cs.getPropertyValue('--error').trim()   || '#ff4466',
+    };
+
+    const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bgRect.setAttribute('x', String(vbx));
+    bgRect.setAttribute('y', String(vby));
+    bgRect.setAttribute('width', String(vbW));
+    bgRect.setAttribute('height', String(vbH));
+    bgRect.setAttribute('fill', varMap['--bg']);
+    svgNode.insertBefore(bgRect, svgNode.firstChild);
+    
+    let svgStr = new XMLSerializer().serializeToString(svgNode);
+    svgStr = svgStr.replace(/var\(\s*(--[\w-]+)\s*(?:,[^)]+)?\s*\)/g, (_, varName) => varMap[varName] || '#888888');
+    
+    const container = document.getElementById('reportImageContainer');
+    container.innerHTML = '<div style="color:var(--text-dim);font-style:italic">Rendering circuit...</div>';
+    reportModal.style.display = 'flex';
+
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = Math.round(1200 * (vbH / vbW));
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(svgUrl);
+      
+      const outImg = document.createElement('img');
+      outImg.src = canvas.toDataURL('image/png');
+      outImg.style.width = '100%';
+      outImg.style.maxHeight = '100%';
+      outImg.style.objectFit = 'contain';
+      outImg.style.borderRadius = '4px';
+      
+      container.innerHTML = '';
+      container.appendChild(outImg);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      container.innerHTML = '';
+      container.appendChild(svgNode); // fallback
+    };
+    img.src = svgUrl;
+  });
+
+  // Close handlers
+  const _closeReport = () => { reportModal.style.display = 'none'; };
+  document.getElementById('closeReportBtn').addEventListener('click', _closeReport);
+  document.getElementById('closeReportFooterBtn').addEventListener('click', _closeReport);
+  reportModal.addEventListener('click', e => { if (e.target === reportModal) _closeReport(); });
+
+  // Print / Save PDF
+  document.getElementById('printReportBtn').addEventListener('click', () => {
+    window.print();
+  });
+
+
+
+  document.getElementById('reportAiToggle').addEventListener('change', async (e) => {
+    const descEl = document.getElementById('reportDescription');
+    const generatingText = document.getElementById('aiGeneratingText');
+    
+    if (e.target.checked) {
+      descEl.disabled = true;
+      generatingText.style.display = 'inline';
+      
+      try {
+        const compList = components.map(c => c.props.label || c.def.label || c.def.name).join(', ');
+        const codeStr = labEditor ? labEditor.getValue() : '';
+        
+        const prompt = `Write a short, professional description (2-3 sentences max) for an electronics project. Components used: ${compList}. Code snippet: ${codeStr.substring(0, 400)}. Focus on what the circuit likely does. No conversational filler, just the description.`;
+
+        const aiUrl = (typeof ENV !== 'undefined' && ENV.BACKEND_URL) 
+          ? `${ENV.BACKEND_URL}/api/ai/generate` 
+          : 'http://localhost:3000/api/ai/generate';
+
+        const res = await fetch(aiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+        });
+        
+        if (!res.ok) throw new Error('AI API failed');
+        const data = await res.json();
+        descEl.value = data.message.content.trim();
+      } catch (err) {
+        console.error('AI error:', err);
+        descEl.value = 'Failed to generate description. Please ensure the backend is running.';
+        e.target.checked = false;
+      } finally {
+        descEl.disabled = false;
+        generatingText.style.display = 'none';
+      }
+    }
+  });
+});
 
 // ── Load ──────────────────────────────────────────────────
 function loadProject() {
