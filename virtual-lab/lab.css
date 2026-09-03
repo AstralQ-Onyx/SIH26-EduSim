@@ -35,6 +35,18 @@ body.light-theme {
   --muted:    #5a7090;
 }
 
+/* Force Console and Code panels to stay dark in light theme */
+body.light-theme .lab-console,
+body.light-theme .code-panel {
+  --bg:       #060c16;
+  --surface:  #0d1626;
+  --surface2: #111e35;
+  --border:   rgba(0,212,255,.14);
+  --border-h: rgba(0,212,255,.35);
+  --text:     #dde4ef;
+  --muted:    #5a7090;
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--text);background:var(--bg)}
 

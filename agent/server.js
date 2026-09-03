@@ -731,8 +731,6 @@ async function handleSerialSend(ws, msg) {
   });
 }
 
-<<<<<<< HEAD
-=======
 // ── AI Assistant Handlers ─────────────────────────────────
 async function handleAIDebug(ws, msg) {
   const { context, compileOutput } = msg;
@@ -753,6 +751,5 @@ async function handleAIMessage(ws, msg) {
   }
 }
 
->>>>>>> origin/Nikil
 // ── Utility ───────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

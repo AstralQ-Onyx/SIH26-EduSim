@@ -1,8 +1,8 @@
 # EduSim — Interactive IoT & Embedded Systems Simulator
 
-> A full-stack, browser-based platform for hardware prototyping, firmware development, and AI-assisted embedded systems education.
+EduSim is a state-of-the-art, interactive Web-based IoT and Embedded Systems Simulator designed for hardware prototyping, schematic design, firmware development, and interactive AI mentoring. 
 
-EduSim combines a **2D/3D Virtual Circuit Lab**, a **Monaco-powered Web IDE**, an **Admin Dashboard**, and **Dual Local AI Copilots** into a single cohesive workspace — all running in the browser, backed by a lightweight local Node.js agent.
+It provides an all-in-one simulator workspace integrating a **2D/3D Virtual Circuit Lab**, a **Monaco-based Web IDE**, an **Admin Control Panel**, and **Dual Local AI Copilots** (EduSim MENTOR & CircuitMind) powered by local LLMs (via Ollama).
 
 ---
 

@@ -22,378 +22,1003 @@ const EDUSIM_COMPONENTS = {
   /* ════════════════════════════
      CONTROLLERS
   ════════════════════════════ */
-  esp32: {
-    id: 'esp32',
-    label: 'ESP32 Dev Module',
-    category: 'Controllers',
-    desc: 'ESP32 WiFi + Bluetooth development board, 30 GPIO',
-    w: 100,
-    h: 220,
+ esp32: {
+  id: 'esp32',
+  label: 'ESP32 Dev Module',
+  category: 'Controllers',
+  desc: 'ESP32 WiFi + Bluetooth development board with USB-C and 30 GPIO pins',
 
-    svg: `
-    <!-- ================= BOARD ================= -->
+  w: 100,
+  h: 220,
+
+  svg: `
     <defs>
-      <linearGradient id="esp32PcbGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#24282b"/>
-        <stop offset="0.55" stop-color="#111416"/>
-        <stop offset="1" stop-color="#050607"/>
+
+      <!-- PCB -->
+      <linearGradient id="esp32BoardGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#303738"/>
+        <stop offset="45%" stop-color="#151a1b"/>
+        <stop offset="100%" stop-color="#070909"/>
       </linearGradient>
 
-      <linearGradient id="esp32MetalGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#d0d0d0"/>
-        <stop offset="0.35" stop-color="#9c9c9c"/>
-        <stop offset="1" stop-color="#666"/>
+      <!-- ESP32 Shield -->
+      <linearGradient id="esp32ShieldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#eeeeee"/>
+        <stop offset="35%" stop-color="#bdbdbd"/>
+        <stop offset="70%" stop-color="#dedede"/>
+        <stop offset="100%" stop-color="#9a9a9a"/>
       </linearGradient>
 
+      <!-- Metal USB -->
       <linearGradient id="esp32UsbGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#d9d9d9"/>
-        <stop offset="1" stop-color="#8b8b8b"/>
+        <stop offset="0%" stop-color="#eeeeee"/>
+        <stop offset="50%" stop-color="#b5b5b5"/>
+        <stop offset="100%" stop-color="#777777"/>
       </linearGradient>
+
+      <!-- LED -->
+      <radialGradient id="esp32LedGrad">
+        <stop offset="0%" stop-color="#ffffcc"/>
+        <stop offset="50%" stop-color="#d9b800"/>
+        <stop offset="100%" stop-color="#6b5200"/>
+      </radialGradient>
+
+      <filter id="esp32Shadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow
+          dx="0"
+          dy="1"
+          stdDeviation="1"
+          flood-color="#000000"
+          flood-opacity=".65"
+        />
+      </filter>
+
     </defs>
 
-    <!-- PCB -->
+
+    <!-- ========================================= -->
+    <!-- MAIN PCB -->
+    <!-- ========================================= -->
+
     <rect
-      x="4" y="4"
-      width="92" height="212"
-      rx="6"
-      fill="url(#esp32PcbGrad)"
-      stroke="#25292b"
-      stroke-width="1.4"
+      x="4"
+      y="3"
+      width="92"
+      height="214"
+      rx="3"
+      fill="url(#esp32BoardGrad)"
+      stroke="#555"
+      stroke-width="1"
     />
 
-    <!-- Inner board -->
+    <!-- PCB border -->
+
     <rect
-      x="7" y="7"
-      width="86" height="206"
-      rx="4"
+      x="6"
+      y="5"
+      width="88"
+      height="210"
+      rx="2"
       fill="none"
-      stroke="#3b3f41"
-      stroke-width=".8"
-    />
-
-    <!-- ================= MOUNTING HOLES ================= -->
-    <g>
-      <circle cx="10" cy="10" r="5.5" fill="#0a0b0c" stroke="#bcbcbc" stroke-width="1.4"/>
-      <circle cx="90" cy="10" r="5.5" fill="#0a0b0c" stroke="#bcbcbc" stroke-width="1.4"/>
-      <circle cx="10" cy="210" r="5.5" fill="#0a0b0c" stroke="#bcbcbc" stroke-width="1.4"/>
-      <circle cx="90" cy="210" r="5.5" fill="#0a0b0c" stroke="#bcbcbc" stroke-width="1.4"/>
-    </g>
-
-    <!-- ================= ANTENNA ================= -->
-    <rect
-      x="23" y="8"
-      width="54" height="17"
-      rx="1.5"
-      fill="#151718"
-      stroke="#383b3d"
+      stroke="#697172"
       stroke-width=".5"
     />
 
-    <g fill="none" stroke="#c4c4c4" stroke-width="1.4">
-      <path d="M28 10 H72"/>
-      <path d="M31 13 H69"/>
-      <path d="M34 16 H66"/>
+
+    <!-- ========================================= -->
+    <!-- MOUNTING HOLES -->
+    <!-- ========================================= -->
+
+    <g>
+
+      <!-- Top Left -->
+
+      <circle
+        cx="12"
+        cy="12"
+        r="6"
+        fill="#080909"
+        stroke="#bfc3c3"
+        stroke-width="1.5"
+      />
+
+      <!-- Top Right -->
+
+      <circle
+        cx="88"
+        cy="12"
+        r="6"
+        fill="#080909"
+        stroke="#bfc3c3"
+        stroke-width="1.5"
+      />
+
+      <!-- Bottom Left -->
+
+      <circle
+        cx="12"
+        cy="208"
+        r="6"
+        fill="#080909"
+        stroke="#bfc3c3"
+        stroke-width="1.5"
+      />
+
+      <!-- Bottom Right -->
+
+      <circle
+        cx="88"
+        cy="208"
+        r="6"
+        fill="#080909"
+        stroke="#bfc3c3"
+        stroke-width="1.5"
+      />
+
     </g>
 
-    <!-- ================= ESP-WROOM SHIELD ================= -->
-    <rect
-      x="20" y="24"
-      width="60" height="76"
-      rx="2.5"
-      fill="url(#esp32MetalGrad)"
-      stroke="#666"
-      stroke-width=".8"
-    />
+
+    <!-- ========================================= -->
+    <!-- TOP ANTENNA -->
+    <!-- ========================================= -->
 
     <rect
-      x="23" y="27"
-      width="54" height="70"
+      x="20"
+      y="4"
+      width="60"
+      height="27"
+      fill="#15191a"
+      stroke="#3b4041"
+      stroke-width=".6"
+    />
+
+    <!-- Antenna pattern -->
+
+    <g
+      fill="none"
+      stroke="#262d2e"
+      stroke-width="1.3"
+    >
+
+      <path d="M24 7 H76" />
+
+      <path d="M27 11 H73" />
+
+      <path d="M30 15 H42 V25 H50 V17 H58 V26 H67 V10 H76" />
+
+      <path d="M24 25 H35" />
+
+    </g>
+
+
+    <!-- ========================================= -->
+    <!-- ESP32 METAL SHIELD -->
+    <!-- ========================================= -->
+
+    <rect
+      x="18"
+      y="29"
+      width="64"
+      height="78"
       rx="2"
-      fill="#9a9a9a"
-      stroke="#858585"
-      stroke-width=".4"
+      fill="url(#esp32ShieldGrad)"
+      stroke="#777"
+      stroke-width="1"
+      filter="url(#esp32Shadow)"
+    />
+
+    <!-- Inner Shield -->
+
+    <rect
+      x="20"
+      y="31"
+      width="60"
+      height="74"
+      rx="1"
+      fill="none"
+      stroke="#eeeeee"
+      stroke-opacity=".55"
+      stroke-width=".6"
+    />
+
+
+    <!-- ESP32 Text -->
+
+    <text
+      x="50"
+      y="55"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="10"
+      font-weight="bold"
+      fill="#666"
+    >
+      ESP-32
+    </text>
+
+
+    <!-- WiFi Badge -->
+
+    <rect
+      x="25"
+      y="63"
+      width="19"
+      height="9"
+      rx="3"
+      fill="#eeeeee"
+      opacity=".75"
     />
 
     <text
-      x="50" y="45"
+      x="34.5"
+      y="69.8"
       text-anchor="middle"
-      fill="#6d6d6d"
-      font-size="4.8"
-      font-family="Arial, sans-serif"
+      font-family="Arial"
+      font-size="5"
+      fill="#777"
       font-weight="bold"
     >
-      ESP-WROOM-32
+      WiFi
+    </text>
+
+
+    <!-- Bluetooth -->
+
+    <text
+      x="48"
+      y="72"
+      text-anchor="middle"
+      font-family="Arial"
+      font-size="11"
+      fill="#777"
+    >
+      ♢
+    </text>
+
+
+    <!-- FCC / CE -->
+
+    <text
+      x="64"
+      y="72"
+      text-anchor="middle"
+      font-family="Arial"
+      font-size="8"
+      font-weight="bold"
+      fill="#777"
+    >
+      FCC
+    </text>
+
+
+    <text
+      x="78"
+      y="72"
+      text-anchor="middle"
+      font-family="Arial"
+      font-size="9"
+      fill="#777"
+    >
+      CE
+    </text>
+
+
+    <!-- Module description -->
+
+    <text
+      x="50"
+      y="82"
+      text-anchor="middle"
+      font-family="Arial"
+      font-size="5"
+      fill="#777"
+    >
+      WiFi+BT SoC Inside
     </text>
 
     <text
-      x="50" y="53"
+      x="50"
+      y="91"
       text-anchor="middle"
-      fill="#747474"
-      font-size="3"
-      font-family="Arial, sans-serif"
+      font-family="Arial"
+      font-size="5"
+      fill="#777"
     >
-      WiFi + Bluetooth
+      ISM2.4G 802.11b/g/n
     </text>
 
-    <text
-      x="50" y="62"
-      text-anchor="middle"
-      fill="#747474"
-      font-size="2.8"
-      font-family="Arial, sans-serif"
+
+    <!-- Shield screw / mark -->
+
+    <circle
+      cx="27"
+      cy="98"
+      r="2"
+      fill="#111"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- PIN HEADER METAL CONTACTS -->
+    <!-- ========================================= -->
+
+    <g
+      fill="#c8c8c8"
+      stroke="#666"
+      stroke-width=".45"
     >
-      CE  FCC
-    </text>
 
-    <!-- ================= HEADER PADS ================= -->
-    <g fill="#bcbcbc" stroke="#555" stroke-width=".35">
       <!-- LEFT -->
-      <rect x="4.5" y="32" width="6" height="4"/>
-      <rect x="4.5" y="42" width="6" height="4"/>
-      <rect x="4.5" y="52" width="6" height="4"/>
-      <rect x="4.5" y="62" width="6" height="4"/>
-      <rect x="4.5" y="72" width="6" height="4"/>
-      <rect x="4.5" y="82" width="6" height="4"/>
-      <rect x="4.5" y="92" width="6" height="4"/>
-      <rect x="4.5" y="102" width="6" height="4"/>
-      <rect x="4.5" y="112" width="6" height="4"/>
-      <rect x="4.5" y="122" width="6" height="4"/>
-      <rect x="4.5" y="132" width="6" height="4"/>
-      <rect x="4.5" y="142" width="6" height="4"/>
-      <rect x="4.5" y="152" width="6" height="4"/>
-      <rect x="4.5" y="162" width="6" height="4"/>
-      <rect x="4.5" y="172" width="6" height="4"/>
+
+      <rect x="5" y="32" width="7" height="5"/>
+      <rect x="5" y="42" width="7" height="5"/>
+      <rect x="5" y="52" width="7" height="5"/>
+      <rect x="5" y="62" width="7" height="5"/>
+      <rect x="5" y="72" width="7" height="5"/>
+      <rect x="5" y="82" width="7" height="5"/>
+      <rect x="5" y="92" width="7" height="5"/>
+      <rect x="5" y="102" width="7" height="5"/>
+      <rect x="5" y="112" width="7" height="5"/>
+      <rect x="5" y="122" width="7" height="5"/>
+      <rect x="5" y="132" width="7" height="5"/>
+      <rect x="5" y="142" width="7" height="5"/>
+      <rect x="5" y="152" width="7" height="5"/>
+      <rect x="5" y="162" width="7" height="5"/>
+      <rect x="5" y="172" width="7" height="5"/>
+
 
       <!-- RIGHT -->
-      <rect x="89.5" y="32" width="6" height="4"/>
-      <rect x="89.5" y="42" width="6" height="4"/>
-      <rect x="89.5" y="52" width="6" height="4"/>
-      <rect x="89.5" y="62" width="6" height="4"/>
-      <rect x="89.5" y="72" width="6" height="4"/>
-      <rect x="89.5" y="82" width="6" height="4"/>
-      <rect x="89.5" y="92" width="6" height="4"/>
-      <rect x="89.5" y="102" width="6" height="4"/>
-      <rect x="89.5" y="112" width="6" height="4"/>
-      <rect x="89.5" y="122" width="6" height="4"/>
-      <rect x="89.5" y="132" width="6" height="4"/>
-      <rect x="89.5" y="142" width="6" height="4"/>
-      <rect x="89.5" y="152" width="6" height="4"/>
-      <rect x="89.5" y="162" width="6" height="4"/>
-      <rect x="89.5" y="172" width="6" height="4"/>
+
+      <rect x="88" y="32" width="7" height="5"/>
+      <rect x="88" y="42" width="7" height="5"/>
+      <rect x="88" y="52" width="7" height="5"/>
+      <rect x="88" y="62" width="7" height="5"/>
+      <rect x="88" y="72" width="7" height="5"/>
+      <rect x="88" y="82" width="7" height="5"/>
+      <rect x="88" y="92" width="7" height="5"/>
+      <rect x="88" y="102" width="7" height="5"/>
+      <rect x="88" y="112" width="7" height="5"/>
+      <rect x="88" y="122" width="7" height="5"/>
+      <rect x="88" y="132" width="7" height="5"/>
+      <rect x="88" y="142" width="7" height="5"/>
+      <rect x="88" y="152" width="7" height="5"/>
+      <rect x="88" y="162" width="7" height="5"/>
+      <rect x="88" y="172" width="7" height="5"/>
+
     </g>
 
-    <!-- ================= BOARD PIN LABELS ================= -->
-    <g fill="#e7e7e7" font-size="3" font-family="monospace">
-      <!-- LEFT -->
-      <text x="12" y="35">VIN</text>
-      <text x="12" y="45">GND</text>
-      <text x="12" y="55">GPIO13</text>
-      <text x="12" y="65">GPIO12</text>
-      <text x="12" y="75">GPIO14</text>
-      <text x="12" y="85">GPIO27</text>
-      <text x="12" y="95">GPIO26</text>
-      <text x="12" y="105">GPIO25</text>
-      <text x="12" y="115">GPIO33</text>
-      <text x="12" y="125">GPIO32</text>
-      <text x="12" y="135">GPIO35</text>
-      <text x="12" y="145">GPIO34</text>
-      <text x="12" y="155">GPIO39</text>
-      <text x="12" y="165">GPIO36</text>
-      <text x="12" y="175">EN</text>
 
-      <!-- RIGHT -->
-      <text x="88" y="35" text-anchor="end">3V3</text>
-      <text x="88" y="45" text-anchor="end">GND</text>
-      <text x="88" y="55" text-anchor="end">GPIO15</text>
-      <text x="88" y="65" text-anchor="end">GPIO2</text>
-      <text x="88" y="75" text-anchor="end">GPIO4</text>
-      <text x="88" y="85" text-anchor="end">GPIO16</text>
-      <text x="88" y="95" text-anchor="end">GPIO17</text>
-      <text x="88" y="105" text-anchor="end">GPIO5</text>
-      <text x="88" y="115" text-anchor="end">GPIO18</text>
-      <text x="88" y="125" text-anchor="end">GPIO19</text>
-      <text x="88" y="135" text-anchor="end">GPIO21</text>
-      <text x="88" y="145" text-anchor="end">GPIO3</text>
-      <text x="88" y="155" text-anchor="end">GPIO1</text>
-      <text x="88" y="165" text-anchor="end">GPIO22</text>
-      <text x="88" y="175" text-anchor="end">GPIO23</text>
+    <!-- ========================================= -->
+    <!-- PIN LABELS -->
+    <!-- ========================================= -->
+
+    <g
+      fill="#eeeeee"
+      font-family="Arial, monospace"
+      font-size="3.4"
+      font-weight="bold"
+    >
+
+      <!-- LEFT SIDE -->
+
+      <text x="16" y="36">EN</text>
+      <text x="16" y="46">VP</text>
+      <text x="16" y="56">VN</text>
+      <text x="16" y="66">D34</text>
+      <text x="16" y="76">D35</text>
+      <text x="16" y="86">D32</text>
+      <text x="16" y="96">D33</text>
+      <text x="16" y="106">D25</text>
+      <text x="16" y="116">D26</text>
+      <text x="16" y="126">D27</text>
+      <text x="16" y="136">D14</text>
+      <text x="16" y="146">D12</text>
+      <text x="16" y="156">D13</text>
+      <text x="16" y="166">GND</text>
+      <text x="16" y="176">VIN</text>
+
+
+      <!-- RIGHT SIDE -->
+
+      <text x="84" y="36" text-anchor="end">D23</text>
+      <text x="84" y="46" text-anchor="end">D22</text>
+      <text x="84" y="56" text-anchor="end">TX0</text>
+      <text x="84" y="66" text-anchor="end">RX0</text>
+      <text x="84" y="76" text-anchor="end">D21</text>
+      <text x="84" y="86" text-anchor="end">D19</text>
+      <text x="84" y="96" text-anchor="end">D18</text>
+      <text x="84" y="106" text-anchor="end">D5</text>
+      <text x="84" y="116" text-anchor="end">TX2</text>
+      <text x="84" y="126" text-anchor="end">RX2</text>
+      <text x="84" y="136" text-anchor="end">D4</text>
+      <text x="84" y="146" text-anchor="end">D2</text>
+      <text x="84" y="156" text-anchor="end">D15</text>
+      <text x="84" y="166" text-anchor="end">GND</text>
+      <text x="84" y="176" text-anchor="end">3V3</text>
+
     </g>
 
-    <!-- ================= COMPONENT AREA ================= -->
-    <g fill="#c9c6a4" stroke="#666" stroke-width=".35">
-      <rect x="18" y="106" width="13" height="4" rx=".5"/>
-      <rect x="18" y="113" width="13" height="4" rx=".5"/>
-      <rect x="18" y="120" width="13" height="4" rx=".5"/>
-      <rect x="18" y="127" width="13" height="4" rx=".5"/>
 
-      <rect x="69" y="106" width="13" height="4" rx=".5"/>
-      <rect x="69" y="113" width="13" height="4" rx=".5"/>
-      <rect x="69" y="120" width="13" height="4" rx=".5"/>
-      <rect x="69" y="127" width="13" height="4" rx=".5"/>
+    <!-- ========================================= -->
+    <!-- COMPONENTS BELOW ESP32 -->
+    <!-- ========================================= -->
 
-      <rect x="36" y="106" width="5" height="4" rx=".5"/>
-      <rect x="46" y="106" width="5" height="4" rx=".5"/>
-      <rect x="56" y="106" width="5" height="4" rx=".5"/>
+    <!-- Resistors -->
+
+    <g
+      fill="#2b2e2e"
+      stroke="#777"
+      stroke-width=".4"
+    >
+
+      <rect x="17" y="111" width="8" height="4" rx=".4"/>
+      <rect x="28" y="111" width="8" height="4" rx=".4"/>
+      <rect x="39" y="111" width="8" height="4" rx=".4"/>
+      <rect x="50" y="111" width="8" height="4" rx=".4"/>
+      <rect x="61" y="111" width="8" height="4" rx=".4"/>
+      <rect x="72" y="111" width="8" height="4" rx=".4"/>
+
+      <rect x="17" y="119" width="12" height="4" rx=".5"/>
+      <rect x="33" y="119" width="12" height="4" rx=".5"/>
+      <rect x="49" y="119" width="12" height="4" rx=".5"/>
+      <rect x="65" y="119" width="12" height="4" rx=".5"/>
+
     </g>
 
-    <!-- ================= VOLTAGE REGULATOR ================= -->
+
+    <!-- Crystal -->
+
     <rect
-      x="27" y="136"
-      width="16" height="20"
-      rx="1.5"
-      fill="#26292a"
-      stroke="#555"
-      stroke-width=".5"
+      x="18"
+      y="130"
+      width="18"
+      height="10"
+      rx="1"
+      fill="#c8a866"
+      stroke="#eee"
+      stroke-width=".6"
     />
 
     <text
-      x="35" y="148"
+      x="27"
+      y="136"
       text-anchor="middle"
-      fill="#777"
-      font-size="2.8"
+      font-size="2.5"
       font-family="monospace"
+      fill="#66522c"
+    >
+      40MHz
+    </text>
+
+
+    <!-- Capacitors -->
+
+    <g
+      fill="#d8d5c8"
+      stroke="#777"
+      stroke-width=".4"
+    >
+
+      <rect x="40" y="130" width="5" height="9"/>
+      <rect x="47" y="130" width="5" height="9"/>
+      <rect x="54" y="130" width="5" height="9"/>
+
+    </g>
+
+
+    <!-- Voltage regulator -->
+
+    <rect
+      x="38"
+      y="145"
+      width="15"
+      height="17"
+      rx="1"
+      fill="#141616"
+      stroke="#555"
+      stroke-width=".6"
+    />
+
+    <text
+      x="45.5"
+      y="156"
+      text-anchor="middle"
+      font-family="monospace"
+      font-size="3"
+      fill="#777"
     >
       3.3V
     </text>
 
-    <!-- ================= CP2102 ================= -->
+
+    <!-- CP2102 Chip -->
+
     <rect
-      x="51" y="135"
-      width="29" height="28"
-      rx="1.5"
-      fill="#0a0b0c"
-      stroke="#444"
+      x="58"
+      y="143"
+      width="25"
+      height="27"
+      rx="2"
+      fill="#111313"
+      stroke="#555"
       stroke-width=".6"
     />
 
-    <g stroke="#777" stroke-width=".45">
-      <path d="M55 135V131"/>
-      <path d="M60 135V131"/>
-      <path d="M65 135V131"/>
-      <path d="M70 135V131"/>
-      <path d="M75 135V131"/>
+    <!-- Chip pins -->
 
-      <path d="M55 163V167"/>
-      <path d="M60 163V167"/>
-      <path d="M65 163V167"/>
-      <path d="M70 163V167"/>
-      <path d="M75 163V167"/>
+    <g
+      stroke="#aaa"
+      stroke-width=".7"
+    >
+
+      <path d="M58 147 H55"/>
+      <path d="M58 151 H55"/>
+      <path d="M58 155 H55"/>
+      <path d="M58 159 H55"/>
+      <path d="M58 163 H55"/>
+
+      <path d="M83 147 H86"/>
+      <path d="M83 151 H86"/>
+      <path d="M83 155 H86"/>
+      <path d="M83 159 H86"/>
+      <path d="M83 163 H86"/>
+
     </g>
 
+
     <text
-      x="65.5" y="151"
+      x="70.5"
+      y="155"
       text-anchor="middle"
-      fill="#666"
-      font-size="3.5"
       font-family="monospace"
+      font-size="3.2"
+      fill="#777"
     >
       CP2102
     </text>
 
-    <!-- ================= STATUS LEDs ================= -->
-    <g fill="#ddd7a7" stroke="#666" stroke-width=".3">
-      <rect x="29" y="166" width="8" height="4" rx=".5"/>
-      <rect x="41" y="166" width="8" height="4" rx=".5"/>
-      <rect x="53" y="166" width="8" height="4" rx=".5"/>
-    </g>
+    <text
+      x="70.5"
+      y="161"
+      text-anchor="middle"
+      font-family="monospace"
+      font-size="2.4"
+      fill="#666"
+    >
+      USB UART
+    </text>
 
-    <!-- ================= RESET / BOOT BUTTONS ================= -->
-    <g>
-      <rect x="12" y="182" width="16" height="16" rx="2" fill="#2a2d2e" stroke="#666" stroke-width=".6"/>
-      <circle cx="20" cy="190" r="4.5" fill="#555" stroke="#202020" stroke-width=".7"/>
-      <text x="20" y="202" text-anchor="middle" fill="#d0d0d0" font-size="2.8" font-family="monospace">EN</text>
 
-      <rect x="72" y="182" width="16" height="16" rx="2" fill="#2a2d2e" stroke="#666" stroke-width=".6"/>
-      <circle cx="80" cy="190" r="4.5" fill="#555" stroke="#202020" stroke-width=".7"/>
-      <text x="80" y="202" text-anchor="middle" fill="#d0d0d0" font-size="2.8" font-family="monospace">BOOT</text>
-    </g>
+    <!-- ========================================= -->
+    <!-- STATUS LED -->
+    <!-- ========================================= -->
 
-    <!-- ================= USB CONNECTOR ================= -->
-    <path
-      d="M36 181 H64 Q68 181 68 185 V209 H32 V185 Q32 181 36 181Z"
-      fill="url(#esp32UsbGrad)"
-      stroke="#777"
+    <circle
+      cx="24"
+      cy="169"
+      r="2"
+      fill="url(#esp32LedGrad)"
+      stroke="#333"
+      stroke-width=".5"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- BOARD LABEL -->
+    <!-- ========================================= -->
+
+    <text
+      x="50"
+      y="180"
+      text-anchor="middle"
+      font-family="monospace"
+      font-size="3.4"
+      fill="#9a9a9a"
+    >
+      ESP32 DEVKIT
+    </text>
+
+
+    <!-- ========================================= -->
+    <!-- EN BUTTON -->
+    <!-- ========================================= -->
+
+    <rect
+      x="12"
+      y="183"
+      width="16"
+      height="20"
+      rx="2"
+      fill="#c8c8c8"
+      stroke="#555"
       stroke-width=".8"
     />
 
-    <rect
-      x="36" y="188"
-      width="28" height="15"
-      rx="1.5"
-      fill="#505050"
+    <circle
+      cx="20"
+      cy="193"
+      r="4"
+      fill="#333"
     />
 
-    <rect
-      x="39" y="191"
-      width="22" height="9"
-      rx="1"
-      fill="#17191a"
-    />
-
-    <!-- ================= BOARD LABEL ================= -->
     <text
-      x="50" y="177"
+      x="20"
+      y="181"
       text-anchor="middle"
-      fill="#7f7f7f"
-      font-size="3.2"
       font-family="monospace"
+      font-size="3"
+      fill="#eee"
     >
-      ESP32 DEV MODULE
+      EN
     </text>
+
+
+    <!-- ========================================= -->
+    <!-- BOOT BUTTON -->
+    <!-- ========================================= -->
+
+    <rect
+      x="72"
+      y="183"
+      width="16"
+      height="20"
+      rx="2"
+      fill="#c8c8c8"
+      stroke="#555"
+      stroke-width=".8"
+    />
+
+    <circle
+      cx="80"
+      cy="193"
+      r="4"
+      fill="#333"
+    />
+
+    <text
+      x="80"
+      y="181"
+      text-anchor="middle"
+      font-family="monospace"
+      font-size="3"
+      fill="#eee"
+    >
+      BOOT
+    </text>
+
+
+    <!-- ========================================= -->
+    <!-- USB-C CONNECTOR -->
+    <!-- ========================================= -->
+
+    <rect
+      x="33"
+      y="188"
+      width="34"
+      height="29"
+      rx="4"
+      fill="url(#esp32UsbGrad)"
+      stroke="#666"
+      stroke-width="1"
+      filter="url(#esp32Shadow)"
+    />
+
+    <!-- USB opening -->
+
+    <rect
+      x="37"
+      y="191"
+      width="26"
+      height="14"
+      rx="3"
+      fill="#171919"
+    />
+
+    <rect
+      x="40"
+      y="194"
+      width="20"
+      height="7"
+      rx="2"
+      fill="#555"
+    />
+
+    <!-- USB contacts -->
+
+    <g
+      stroke="#d0a866"
+      stroke-width=".8"
+    >
+
+      <path d="M43 195 V200"/>
+      <path d="M46 195 V200"/>
+      <path d="M49 195 V200"/>
+      <path d="M52 195 V200"/>
+      <path d="M55 195 V200"/>
+      <path d="M58 195 V200"/>
+
+    </g>
+
   `,
 
-    pins: [
-      // LEFT SIDE — Top to Bottom
-      { id: 'VIN', x: 0, y: 34, type: 'power', label: 'VIN' },
-      { id: 'GND1', x: 0, y: 44, type: 'gnd', label: 'GND' },
-      { id: 'GPIO13', x: 0, y: 54, type: 'digital', label: 'GPIO13' },
-      { id: 'GPIO12', x: 0, y: 64, type: 'digital', label: 'GPIO12' },
-      { id: 'GPIO14', x: 0, y: 74, type: 'digital', label: 'GPIO14' },
-      { id: 'GPIO27', x: 0, y: 84, type: 'digital', label: 'GPIO27' },
-      { id: 'GPIO26', x: 0, y: 94, type: 'digital', label: 'GPIO26' },
-      { id: 'GPIO25', x: 0, y: 104, type: 'digital', label: 'GPIO25' },
-      { id: 'GPIO33', x: 0, y: 114, type: 'digital', label: 'GPIO33' },
-      { id: 'GPIO32', x: 0, y: 124, type: 'digital', label: 'GPIO32' },
-      { id: 'GPIO35', x: 0, y: 134, type: 'analog', label: 'GPIO35' },
-      { id: 'GPIO34', x: 0, y: 144, type: 'analog', label: 'GPIO34' },
-      { id: 'GPIO39', x: 0, y: 154, type: 'analog', label: 'GPIO39 / VN' },
-      { id: 'GPIO36', x: 0, y: 164, type: 'analog', label: 'GPIO36 / VP' },
-      { id: 'EN', x: 0, y: 174, type: 'digital', label: 'EN' },
 
-      // RIGHT SIDE — Top to Bottom
-      { id: '3V3', x: 100, y: 34, type: 'power', label: '3.3V' },
-      { id: 'GND2', x: 100, y: 44, type: 'gnd', label: 'GND' },
-      { id: 'GPIO15', x: 100, y: 54, type: 'digital', label: 'GPIO15' },
-      { id: 'GPIO2', x: 100, y: 64, type: 'digital', label: 'GPIO2' },
-      { id: 'GPIO4', x: 100, y: 74, type: 'digital', label: 'GPIO4' },
-      { id: 'GPIO16', x: 100, y: 84, type: 'digital', label: 'GPIO16 / RX2' },
-      { id: 'GPIO17', x: 100, y: 94, type: 'digital', label: 'GPIO17 / TX2' },
-      { id: 'GPIO5', x: 100, y: 104, type: 'digital', label: 'GPIO5' },
-      { id: 'GPIO18', x: 100, y: 114, type: 'digital', label: 'GPIO18' },
-      { id: 'GPIO19', x: 100, y: 124, type: 'digital', label: 'GPIO19' },
-      { id: 'GPIO21', x: 100, y: 134, type: 'digital', label: 'GPIO21' },
-      { id: 'GPIO3', x: 100, y: 144, type: 'digital', label: 'GPIO3 / RX0' },
-      { id: 'GPIO1', x: 100, y: 154, type: 'digital', label: 'GPIO1 / TX0' },
-      { id: 'GPIO22', x: 100, y: 164, type: 'digital', label: 'GPIO22' },
-      { id: 'GPIO23', x: 100, y: 174, type: 'digital', label: 'GPIO23' }
-    ],
+  pins: [
 
-    defaults: {
-      label: 'ESP32'
+    // =====================================
+    // LEFT SIDE
+    // =====================================
+
+    {
+      id: 'EN',
+      x: 0,
+      y: 34,
+      type: 'digital',
+      label: 'EN'
     },
 
-    props: [
-      {
-        key: 'label',
-        label: 'Label',
-        type: 'text'
-      }
-    ],
+    {
+      id: 'GPIO36',
+      x: 0,
+      y: 44,
+      type: 'analog',
+      label: 'GPIO36 / VP'
+    },
 
-    simulate(state, inputs) {
-      return {};
+    {
+      id: 'GPIO39',
+      x: 0,
+      y: 54,
+      type: 'analog',
+      label: 'GPIO39 / VN'
+    },
+
+    {
+      id: 'GPIO34',
+      x: 0,
+      y: 64,
+      type: 'analog',
+      label: 'GPIO34'
+    },
+
+    {
+      id: 'GPIO35',
+      x: 0,
+      y: 74,
+      type: 'analog',
+      label: 'GPIO35'
+    },
+
+    {
+      id: 'GPIO32',
+      x: 0,
+      y: 84,
+      type: 'analog',
+      label: 'GPIO32'
+    },
+
+    {
+      id: 'GPIO33',
+      x: 0,
+      y: 94,
+      type: 'analog',
+      label: 'GPIO33'
+    },
+
+    {
+      id: 'GPIO25',
+      x: 0,
+      y: 104,
+      type: 'analog',
+      label: 'GPIO25'
+    },
+
+    {
+      id: 'GPIO26',
+      x: 0,
+      y: 114,
+      type: 'analog',
+      label: 'GPIO26'
+    },
+
+    {
+      id: 'GPIO27',
+      x: 0,
+      y: 124,
+      type: 'digital',
+      label: 'GPIO27'
+    },
+
+    {
+      id: 'GPIO14',
+      x: 0,
+      y: 134,
+      type: 'digital',
+      label: 'GPIO14'
+    },
+
+    {
+      id: 'GPIO12',
+      x: 0,
+      y: 144,
+      type: 'digital',
+      label: 'GPIO12'
+    },
+
+    {
+      id: 'GPIO13',
+      x: 0,
+      y: 154,
+      type: 'digital',
+      label: 'GPIO13'
+    },
+
+    {
+      id: 'GND1',
+      x: 0,
+      y: 164,
+      type: 'gnd',
+      label: 'GND'
+    },
+
+    {
+      id: 'VIN',
+      x: 0,
+      y: 174,
+      type: 'power',
+      label: 'VIN'
+    },
+
+
+    // =====================================
+    // RIGHT SIDE
+    // =====================================
+
+    {
+      id: 'GPIO23',
+      x: 100,
+      y: 34,
+      type: 'digital',
+      label: 'GPIO23'
+    },
+
+    {
+      id: 'GPIO22',
+      x: 100,
+      y: 44,
+      type: 'digital',
+      label: 'GPIO22'
+    },
+
+    {
+      id: 'GPIO1',
+      x: 100,
+      y: 54,
+      type: 'digital',
+      label: 'GPIO1 / TX0'
+    },
+
+    {
+      id: 'GPIO3',
+      x: 100,
+      y: 64,
+      type: 'digital',
+      label: 'GPIO3 / RX0'
+    },
+
+    {
+      id: 'GPIO21',
+      x: 100,
+      y: 74,
+      type: 'digital',
+      label: 'GPIO21'
+    },
+
+    {
+      id: 'GPIO19',
+      x: 100,
+      y: 84,
+      type: 'digital',
+      label: 'GPIO19'
+    },
+
+    {
+      id: 'GPIO18',
+      x: 100,
+      y: 94,
+      type: 'digital',
+      label: 'GPIO18'
+    },
+
+    {
+      id: 'GPIO5',
+      x: 100,
+      y: 104,
+      type: 'digital',
+      label: 'GPIO5'
+    },
+
+    {
+      id: 'GPIO17',
+      x: 100,
+      y: 114,
+      type: 'digital',
+      label: 'GPIO17 / TX2'
+    },
+
+    {
+      id: 'GPIO16',
+      x: 100,
+      y: 124,
+      type: 'digital',
+      label: 'GPIO16 / RX2'
+    },
+
+    {
+      id: 'GPIO4',
+      x: 100,
+      y: 134,
+      type: 'digital',
+      label: 'GPIO4'
+    },
+
+    {
+      id: 'GPIO2',
+      x: 100,
+      y: 144,
+      type: 'digital',
+      label: 'GPIO2'
+    },
+
+    {
+      id: 'GPIO15',
+      x: 100,
+      y: 154,
+      type: 'digital',
+      label: 'GPIO15'
+    },
+
+    {
+      id: 'GND2',
+      x: 100,
+      y: 164,
+      type: 'gnd',
+      label: 'GND'
+    },
+
+    {
+      id: '3V3',
+      x: 100,
+      y: 174,
+      type: 'power',
+      label: '3.3V'
     }
+
+  ],
+
+
+  defaults: {
+    label: 'ESP32'
   },
+
+
+  props: [
+
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+
+  ],
+
+
+  simulate(state, inputs) {
+
+    return {};
+
+  }
+
+},
   esp8266: {
     id: 'esp8266',
     label: 'ESP8266 NodeMCU',
@@ -3019,762 +3644,153 @@ const EDUSIM_COMPONENTS = {
   /* ════════════════════════════
      OUTPUTS
   ════════════════════════════ */
-ledRed5mm: {
-  id: 'ledRed5mm',
-  label: 'Red LED',
-  category: 'Outputs',
-  desc: '5mm red light-emitting diode with anode (+) and cathode (-) terminals',
-  w: 60,
-  h: 120,
+// =====================================================
+// BLUE LED
+// =====================================================
 
-  svg: `
-    <defs>
-      <!-- LED red plastic body -->
-      <linearGradient id="redLedBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ff6666"/>
-        <stop offset="0.35" stop-color="#ed1c24"/>
-        <stop offset="0.75" stop-color="#b50812"/>
-        <stop offset="1" stop-color="#76040a"/>
-      </linearGradient>
-
-      <!-- Transparent highlight -->
-      <linearGradient id="redLedHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".8"/>
-        <stop offset=".5" stop-color="#ffaaaa" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
-
-      <!-- Metal legs -->
-      <linearGradient id="ledLeadMetal" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#777"/>
-        <stop offset=".35" stop-color="#eeeeee"/>
-        <stop offset=".65" stop-color="#a7a7a7"/>
-        <stop offset="1" stop-color="#555"/>
-      </linearGradient>
-
-      <!-- Glow when LED is ON -->
-      <radialGradient id="redLedGlow">
-        <stop offset="0" stop-color="#ff3030" stop-opacity=".9"/>
-        <stop offset=".5" stop-color="#ff2020" stop-opacity=".35"/>
-        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-
-    <!-- ================= LED GLOW ================= -->
-    <circle
-      cx="30"
-      cy="29"
-      r="26"
-      fill="url(#redLedGlow)"
-      opacity="0"
-      data-led-glow="true"
-    />
-
-    <!-- ================= METAL LEGS ================= -->
-
-    <!-- ANODE: longer lead -->
-    <path
-      d="M24 53
-         L22 117"
-      fill="none"
-      stroke="url(#ledLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- CATHODE: shorter lead -->
-    <path
-      d="M36 53
-         L38 104"
-      fill="none"
-      stroke="url(#ledLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- ================= INTERNAL LED POSTS ================= -->
-    <path d="M24 50 L24 36"
-          stroke="#bdbdbd"
-          stroke-width="2"
-          opacity=".75"/>
-
-    <path d="M36 50 L36 35"
-          stroke="#bdbdbd"
-          stroke-width="2"
-          opacity=".75"/>
-
-    <!-- bond wire -->
-    <path d="M24 36 Q29 29 34 35"
-          fill="none"
-          stroke="#d7d7d7"
-          stroke-width=".8"
-          opacity=".75"/>
-
-    <!-- internal die -->
-    <rect
-      x="32"
-      y="32"
-      width="6"
-      height="5"
-      rx=".5"
-      fill="#8c0c12"
-      opacity=".85"
-    />
-
-    <!-- ================= LED BODY ================= -->
-    <path
-      d="M17 49
-         L17 25
-         C17 12 22 5 30 5
-         C38 5 43 12 43 25
-         L43 49
-         Q43 55 37 55
-         H23
-         Q17 55 17 49 Z"
-      fill="url(#redLedBody)"
-      stroke="#8e0710"
-      stroke-width="1"
-      opacity=".92"
-    />
-
-    <!-- flat cathode edge -->
-    <path
-      d="M42 38 L42 50"
-      stroke="#6e050b"
-      stroke-width="1.5"
-      opacity=".9"
-    />
-
-    <!-- ================= BODY HIGHLIGHT ================= -->
-    <path
-      d="M22 18
-         C23 11 27 8 31 8
-         C27 15 26 25 27 39
-         C23 34 21 26 22 18 Z"
-      fill="url(#redLedHighlight)"
-      opacity=".7"
-    />
-
-    <ellipse
-      cx="34"
-      cy="12"
-      rx="3"
-      ry="5"
-      fill="#ffffff"
-      opacity=".35"
-      transform="rotate(-25 34 12)"
-    />
-
-    <!-- ================= BASE RIM ================= -->
-    <path
-      d="M15 48
-         Q15 54 21 56
-         H39
-         Q45 54 45 48"
-      fill="none"
-      stroke="#a20a12"
-      stroke-width="2"
-    />
-
-    <!-- ================= TERMINAL LABELS ================= -->
-    <text
-      x="17"
-      y="112"
-      text-anchor="end"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      A
-    </text>
-
-    <text
-      x="43"
-      y="101"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      K
-    </text>
-
-    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
-    <circle
-      cx="22"
-      cy="120"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="A"
-    />
-
-    <circle
-      cx="38"
-      cy="107"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="K"
-    />
-  `,
-
-  pins: [
-    {
-      id: 'A',
-      x: 22,
-      y: 120,
-      type: 'digital',
-      label: 'Anode (+)'
-    },
-    {
-      id: 'K',
-      x: 38,
-      y: 107,
-      type: 'gnd',
-      label: 'Cathode (-)'
-    }
-  ],
-
-  defaults: {
-    label: 'Red LED',
-    state: false
-  },
-
-  props: [
-    {
-      key: 'label',
-      label: 'Label',
-      type: 'text'
-    },
-    {
-      key: 'state',
-      label: 'LED State',
-      type: 'checkbox'
-    }
-  ],
-
-  simulate(state, inputs) {
-    /*
-      Basic LED simulation:
-      A = anode input
-      K = cathode.
-
-      The LED is considered ON when the anode is HIGH
-      and the cathode is LOW/GND.
-    */
-    const anode = Number(inputs?.A ?? 0);
-    const cathode = Number(inputs?.K ?? 0);
-    const on = anode > cathode;
-
-    return {
-      state: on,
-      on: on
-    };
-  }
-},
-ledWhite5mm: {
-  id: 'ledWhite5mm',
-  label: 'White LED',
-  category: 'Outputs',
-  desc: '5mm clear white light-emitting diode with anode (+) and cathode (-) terminals',
-  w: 60,
-  h: 120,
-
-  svg: `
-    <defs>
-      <linearGradient id="whiteLedBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>
-        <stop offset=".35" stop-color="#eaf5ff" stop-opacity=".58"/>
-        <stop offset=".72" stop-color="#c8d5df" stop-opacity=".38"/>
-        <stop offset="1" stop-color="#8f9ca5" stop-opacity=".55"/>
-      </linearGradient>
-
-      <linearGradient id="whiteLedHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
-        <stop offset=".55" stop-color="#ffffff" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
-
-      <linearGradient id="whiteLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#666"/>
-        <stop offset=".3" stop-color="#eeeeee"/>
-        <stop offset=".62" stop-color="#a9a9a9"/>
-        <stop offset="1" stop-color="#555"/>
-      </linearGradient>
-
-      <radialGradient id="whiteLedGlow">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
-        <stop offset=".35" stop-color="#e9f6ff" stop-opacity=".65"/>
-        <stop offset=".7" stop-color="#cfeaff" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-
-    <!-- ================= LED GLOW ================= -->
-    <circle
-      cx="30"
-      cy="29"
-      r="27"
-      fill="url(#whiteLedGlow)"
-      opacity="0"
-      data-led-glow="true"
-    />
-
-    <!-- ================= METAL LEGS ================= -->
-
-    <!-- ANODE (+), longer lead -->
-    <path
-      d="M24 53 L22 117"
-      fill="none"
-      stroke="url(#whiteLedLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- CATHODE (-), shorter lead -->
-    <path
-      d="M36 53 L38 104"
-      fill="none"
-      stroke="url(#whiteLedLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- ================= INTERNAL POSTS ================= -->
-    <path d="M24 51 L24 35"
-          stroke="#b7b7b7"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <path d="M36 51 L36 34"
-          stroke="#b7b7b7"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <!-- reflector cup -->
-    <path
-      d="M32 36
-         L35 31
-         L39 36
-         L37 42
-         L33 42 Z"
-      fill="#d8d8d8"
-      stroke="#888"
-      stroke-width=".45"
-      opacity=".85"
-    />
-
-    <!-- semiconductor die -->
-    <rect
-      x="33.5"
-      y="32"
-      width="4.5"
-      height="4"
-      rx=".4"
-      fill="#d9ecf7"
-      stroke="#8c9aa3"
-      stroke-width=".35"
-    />
-
-    <!-- bond wire -->
-    <path
-      d="M24 35 Q29 27 35 33"
-      fill="none"
-      stroke="#d8d8d8"
-      stroke-width=".8"
-      opacity=".9"
-    />
-
-    <!-- ================= CLEAR LED BODY ================= -->
-    <path
-      d="M17 49
-         L17 25
-         C17 12 22 5 30 5
-         C38 5 43 12 43 25
-         L43 49
-         Q43 55 37 55
-         H23
-         Q17 55 17 49 Z"
-      fill="url(#whiteLedBody)"
-      stroke="#8d9ba4"
-      stroke-width="1"
-      opacity=".82"
-    />
-
-    <!-- cathode flat side -->
-    <path
-      d="M42 37 L42 50"
-      stroke="#77848d"
-      stroke-width="1.5"
-      opacity=".8"
-    />
-
-    <!-- ================= BODY HIGHLIGHTS ================= -->
-    <path
-      d="M21 19
-         C22 11 26 8 30 8
-         C27 15 26 25 27 39
-         C23 34 20 27 21 19 Z"
-      fill="url(#whiteLedHighlight)"
-      opacity=".85"
-    />
-
-    <ellipse
-      cx="35"
-      cy="12"
-      rx="3"
-      ry="5"
-      fill="#ffffff"
-      opacity=".7"
-      transform="rotate(-25 35 12)"
-    />
-
-    <ellipse
-      cx="28"
-      cy="23"
-      rx="7"
-      ry="12"
-      fill="#ffffff"
-      opacity=".12"
-    />
-
-    <!-- ================= BASE RIM ================= -->
-    <path
-      d="M15 48
-         Q15 54 21 56
-         H39
-         Q45 54 45 48"
-      fill="none"
-      stroke="#9aa6ad"
-      stroke-width="2"
-      opacity=".9"
-    />
-
-    <!-- ================= TERMINAL LABELS ================= -->
-    <text
-      x="17"
-      y="112"
-      text-anchor="end"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      A
-    </text>
-
-    <text
-      x="43"
-      y="101"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      K
-    </text>
-
-    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
-    <circle
-      cx="22"
-      cy="120"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="A"
-    />
-
-    <circle
-      cx="38"
-      cy="107"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="K"
-    />
-  `,
-
-  pins: [
-    {
-      id: 'A',
-      x: 22,
-      y: 120,
-      type: 'digital',
-      label: 'Anode (+)'
-    },
-    {
-      id: 'K',
-      x: 38,
-      y: 107,
-      type: 'gnd',
-      label: 'Cathode (-)'
-    }
-  ],
-
-  defaults: {
-    label: 'White LED',
-    state: false
-  },
-
-  props: [
-    {
-      key: 'label',
-      label: 'Label',
-      type: 'text'
-    },
-    {
-      key: 'state',
-      label: 'LED State',
-      type: 'checkbox'
-    }
-  ],
-
-  simulate(state, inputs) {
-    const anode = Number(inputs?.A ?? 0);
-    const cathode = Number(inputs?.K ?? 0);
-    const on = anode > cathode;
-
-    return {
-      state: on,
-      on: on
-    };
-  }
-},
-ledBlue5mm: {
-  id: 'ledBlue5mm',
+ledBlue: {
+  id: 'ledBlue',
   label: 'Blue LED',
   category: 'Outputs',
-  desc: '5mm blue light-emitting diode with anode (+) and cathode (-) terminals',
-  w: 60,
+  desc: '5mm Blue Light Emitting Diode',
+
+  w: 50,
   h: 120,
 
   svg: `
     <defs>
-      <!-- Blue transparent LED body -->
-      <linearGradient id="blueLedBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#6db7ff" stop-opacity=".95"/>
-        <stop offset=".30" stop-color="#1685ff" stop-opacity=".92"/>
-        <stop offset=".68" stop-color="#005bea" stop-opacity=".90"/>
-        <stop offset="1" stop-color="#00359b" stop-opacity=".95"/>
+      <linearGradient id="ledBlueBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#d9f3ff"/>
+        <stop offset="20%" stop-color="#55b8ff"/>
+        <stop offset="65%" stop-color="#086db5"/>
+        <stop offset="100%" stop-color="#034c80"/>
       </linearGradient>
 
-      <!-- Plastic highlight -->
-      <linearGradient id="blueLedHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
-        <stop offset=".45" stop-color="#9fd2ff" stop-opacity=".3"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      <linearGradient id="ledBlueBase" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#258bd0"/>
+        <stop offset="100%" stop-color="#03416e"/>
       </linearGradient>
 
-      <!-- Metal leads -->
-      <linearGradient id="blueLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#666"/>
-        <stop offset=".32" stop-color="#eeeeee"/>
-        <stop offset=".65" stop-color="#a5a5a5"/>
-        <stop offset="1" stop-color="#555"/>
-      </linearGradient>
-
-      <!-- Blue glow -->
-      <radialGradient id="blueLedGlow">
-        <stop offset="0" stop-color="#58b7ff" stop-opacity=".95"/>
-        <stop offset=".38" stop-color="#168cff" stop-opacity=".65"/>
-        <stop offset=".72" stop-color="#006cff" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#0055ff" stop-opacity="0"/>
-      </radialGradient>
+      <filter id="ledBlueGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2"/>
+      </filter>
     </defs>
 
-    <!-- ================= LED GLOW ================= -->
-    <circle
-      cx="30"
-      cy="29"
-      r="27"
-      fill="url(#blueLedGlow)"
-      opacity="0"
-      data-led-glow="true"
+    <!-- LED dome glow -->
+    <ellipse
+      cx="25"
+      cy="27"
+      rx="17"
+      ry="25"
+      fill="#339cff"
+      opacity=".22"
+      filter="url(#ledBlueGlow)"
     />
 
-    <!-- ================= METAL LEGS ================= -->
-
-    <!-- ANODE (+): longer lead -->
+    <!-- LED dome -->
     <path
-      d="M24 53 L22 117"
-      fill="none"
-      stroke="url(#blueLedLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- CATHODE (-): shorter lead -->
-    <path
-      d="M36 53 L38 104"
-      fill="none"
-      stroke="url(#blueLedLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
-    />
-
-    <!-- ================= INTERNAL POSTS ================= -->
-    <path d="M24 51 L24 35"
-          stroke="#bfc8d0"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <path d="M36 51 L36 34"
-          stroke="#bfc8d0"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <!-- reflector -->
-    <path
-      d="M32 36
-         L35 31
-         L39 36
-         L37 42
-         L33 42 Z"
-      fill="#9fc7e8"
-      stroke="#48779e"
-      stroke-width=".45"
-      opacity=".8"
-    />
-
-    <!-- LED die -->
-    <rect
-      x="33.5"
-      y="32"
-      width="4.5"
-      height="4"
-      rx=".4"
-      fill="#45b4ff"
-      stroke="#176aa4"
-      stroke-width=".35"
-    />
-
-    <!-- bond wire -->
-    <path
-      d="M24 35 Q29 27 35 33"
-      fill="none"
-      stroke="#d9e8f5"
-      stroke-width=".8"
-      opacity=".9"
-    />
-
-    <!-- ================= BLUE LED BODY ================= -->
-    <path
-      d="M17 49
-         L17 25
-         C17 12 22 5 30 5
-         C38 5 43 12 43 25
-         L43 49
-         Q43 55 37 55
-         H23
-         Q17 55 17 49 Z"
-      fill="url(#blueLedBody)"
-      stroke="#003fbb"
+      d="M10 34
+         V22
+         C10 10 16 3 25 3
+         C34 3 40 10 40 22
+         V34
+         Z"
+      fill="url(#ledBlueBody)"
+      stroke="#075d99"
       stroke-width="1"
-      opacity=".92"
     />
 
-    <!-- Cathode flat edge -->
+    <!-- Highlight -->
     <path
-      d="M42 37 L42 50"
-      stroke="#002f8c"
-      stroke-width="1.5"
-      opacity=".9"
-    />
-
-    <!-- ================= HIGHLIGHTS ================= -->
-    <path
-      d="M21 19
-         C22 11 26 8 30 8
-         C27 15 26 25 27 39
-         C23 34 20 27 21 19 Z"
-      fill="url(#blueLedHighlight)"
-      opacity=".8"
-    />
-
-    <ellipse
-      cx="35"
-      cy="12"
-      rx="3"
-      ry="5"
-      fill="#ffffff"
-      opacity=".55"
-      transform="rotate(-25 35 12)"
-    />
-
-    <ellipse
-      cx="29"
-      cy="24"
-      rx="7"
-      ry="13"
-      fill="#77c5ff"
-      opacity=".12"
-    />
-
-    <!-- ================= BASE RIM ================= -->
-    <path
-      d="M15 48
-         Q15 54 21 56
-         H39
-         Q45 54 45 48"
+      d="M17 8
+         C13 13 13 23 14 28"
       fill="none"
-      stroke="#0048ca"
-      stroke-width="2"
+      stroke="#ffffff"
+      stroke-opacity=".55"
+      stroke-width="3"
+      stroke-linecap="round"
     />
 
-    <!-- ================= TERMINAL LABELS ================= -->
-    <text
+    <!-- LED internal -->
+    <path
+      d="M21 28
+         L21 19
+         Q25 16 29 19
+         L29 28"
+      fill="#075b9d"
+      opacity=".7"
+    />
+
+    <rect
+      x="19"
+      y="29"
+      width="12"
+      height="7"
+      rx="1"
+      fill="#0765a6"
+      opacity=".85"
+    />
+
+    <!-- LED base -->
+    <path
+      d="M9 34
+         H41
+         L44 41
+         H6
+         Z"
+      fill="url(#ledBlueBase)"
+      stroke="#064a78"
+      stroke-width=".8"
+    />
+
+    <!-- Metal leads -->
+    <rect
       x="17"
-      y="112"
-      text-anchor="end"
-      fill="#d9d9d9"
-      font-size="5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <rect
+      x="30.5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <!-- Pin labels -->
+    <text
+      x="18"
+      y="118"
+      text-anchor="middle"
+      font-size="4"
       font-family="monospace"
-    >
-      A
-    </text>
+      fill="#b0b0b0"
+    >+</text>
 
     <text
-      x="43"
-      y="101"
-      fill="#d9d9d9"
-      font-size="5"
+      x="32"
+      y="118"
+      text-anchor="middle"
+      font-size="4"
       font-family="monospace"
-    >
-      K
-    </text>
-
-    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
-    <circle
-      cx="22"
-      cy="120"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="A"
-    />
-
-    <circle
-      cx="38"
-      cy="107"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="K"
-    />
+      fill="#b0b0b0"
+    >-</text>
   `,
 
   pins: [
-    {
-      id: 'A',
-      x: 22,
-      y: 120,
-      type: 'digital',
-      label: 'Anode (+)'
-    },
-    {
-      id: 'K',
-      x: 38,
-      y: 107,
-      type: 'gnd',
-      label: 'Cathode (-)'
-    }
+    { id: 'ANODE', x: 18, y: 120, type: 'power', label: 'Anode (+)' },
+    { id: 'CATHODE', x: 32, y: 120, type: 'gnd', label: 'Cathode (-)' }
   ],
 
   defaults: {
-    label: 'Blue LED',
-    state: false
+    label: 'Blue LED'
   },
 
   props: [
@@ -3782,262 +3798,519 @@ ledBlue5mm: {
       key: 'label',
       label: 'Label',
       type: 'text'
-    },
-    {
-      key: 'state',
-      label: 'LED State',
-      type: 'checkbox'
     }
   ],
 
   simulate(state, inputs) {
-    const anode = Number(inputs?.A ?? 0);
-    const cathode = Number(inputs?.K ?? 0);
-    const on = anode > cathode;
-
-    return {
-      state: on,
-      on: on
-    };
+    return {};
   }
 },
-ledGreen5mm: {
-  id: 'ledGreen5mm',
+ledRed: {
+  id: 'ledRed',
+  label: 'Red LED',
+  category: 'Outputs',
+  desc: '5mm Red Light Emitting Diode',
+
+  w: 50,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="ledRedBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffe1db"/>
+        <stop offset="20%" stop-color="#ff6548"/>
+        <stop offset="65%" stop-color="#d61d0c"/>
+        <stop offset="100%" stop-color="#8f0904"/>
+      </linearGradient>
+
+      <linearGradient id="ledRedBase" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e8422d"/>
+        <stop offset="100%" stop-color="#8f1108"/>
+      </linearGradient>
+
+      <filter id="ledRedGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2"/>
+      </filter>
+    </defs>
+
+    <ellipse
+      cx="25"
+      cy="27"
+      rx="17"
+      ry="25"
+      fill="#ff3018"
+      opacity=".22"
+      filter="url(#ledRedGlow)"
+    />
+
+    <path
+      d="M10 34
+         V22
+         C10 10 16 3 25 3
+         C34 3 40 10 40 22
+         V34
+         Z"
+      fill="url(#ledRedBody)"
+      stroke="#9e160b"
+      stroke-width="1"
+    />
+
+    <path
+      d="M17 8
+         C13 13 13 23 14 28"
+      fill="none"
+      stroke="#ffffff"
+      stroke-opacity=".6"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M21 28
+         L21 19
+         Q25 16 29 19
+         L29 28"
+      fill="#b51508"
+      opacity=".7"
+    />
+
+    <rect
+      x="19"
+      y="29"
+      width="12"
+      height="7"
+      rx="1"
+      fill="#a71208"
+      opacity=".85"
+    />
+
+    <path
+      d="M9 34
+         H41
+         L44 41
+         H6
+         Z"
+      fill="url(#ledRedBase)"
+      stroke="#8c1007"
+      stroke-width=".8"
+    />
+
+    <rect
+      x="17"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <rect
+      x="30.5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <text x="18" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">+</text>
+
+    <text x="32" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">-</text>
+  `,
+
+  pins: [
+    { id: 'ANODE', x: 18, y: 120, type: 'power', label: 'Anode (+)' },
+    { id: 'CATHODE', x: 32, y: 120, type: 'gnd', label: 'Cathode (-)' }
+  ],
+
+  defaults: {
+    label: 'Red LED'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+},
+ledWhite: {
+  id: 'ledWhite',
+  label: 'White LED',
+  category: 'Outputs',
+  desc: '5mm White Light Emitting Diode',
+
+  w: 50,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="ledWhiteBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="35%" stop-color="#f5f7f8"/>
+        <stop offset="75%" stop-color="#c8ced1"/>
+        <stop offset="100%" stop-color="#9da4a7"/>
+      </linearGradient>
+
+      <linearGradient id="ledWhiteBase" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#eef1f2"/>
+        <stop offset="100%" stop-color="#aeb5b8"/>
+      </linearGradient>
+    </defs>
+
+    <path
+      d="M10 34
+         V22
+         C10 10 16 3 25 3
+         C34 3 40 10 40 22
+         V34
+         Z"
+      fill="url(#ledWhiteBody)"
+      stroke="#9ca3a6"
+      stroke-width="1"
+    />
+
+    <path
+      d="M17 8
+         C13 13 13 23 14 28"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M21 28
+         L21 19
+         Q25 16 29 19
+         L29 28"
+      fill="#9ca3a6"
+      opacity=".5"
+    />
+
+    <rect
+      x="19"
+      y="29"
+      width="12"
+      height="7"
+      rx="1"
+      fill="#b9c0c3"
+    />
+
+    <path
+      d="M9 34
+         H41
+         L44 41
+         H6
+         Z"
+      fill="url(#ledWhiteBase)"
+      stroke="#8f9699"
+      stroke-width=".8"
+    />
+
+    <rect
+      x="17"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <rect
+      x="30.5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <text x="18" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">+</text>
+
+    <text x="32" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">-</text>
+  `,
+
+  pins: [
+    { id: 'ANODE', x: 18, y: 120, type: 'power', label: 'Anode (+)' },
+    { id: 'CATHODE', x: 32, y: 120, type: 'gnd', label: 'Cathode (-)' }
+  ],
+
+  defaults: {
+    label: 'White LED'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+},
+ledYellow: {
+  id: 'ledYellow',
+  label: 'Yellow LED',
+  category: 'Outputs',
+  desc: '5mm Yellow Light Emitting Diode',
+
+  w: 50,
+  h: 120,
+
+  svg: `
+    <defs>
+      <linearGradient id="ledYellowBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fffbd1"/>
+        <stop offset="20%" stop-color="#fff35a"/>
+        <stop offset="65%" stop-color="#e7bb00"/>
+        <stop offset="100%" stop-color="#9b7800"/>
+      </linearGradient>
+
+      <linearGradient id="ledYellowBase" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffe533"/>
+        <stop offset="100%" stop-color="#9d7800"/>
+      </linearGradient>
+    </defs>
+
+    <path
+      d="M10 34
+         V22
+         C10 10 16 3 25 3
+         C34 3 40 10 40 22
+         V34
+         Z"
+      fill="url(#ledYellowBody)"
+      stroke="#b69200"
+      stroke-width="1"
+    />
+
+    <path
+      d="M17 8
+         C13 13 13 23 14 28"
+      fill="none"
+      stroke="#ffffff"
+      stroke-opacity=".7"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+
+    <path
+      d="M21 28
+         L21 19
+         Q25 16 29 19
+         L29 28"
+      fill="#c7a000"
+      opacity=".7"
+    />
+
+    <rect
+      x="19"
+      y="29"
+      width="12"
+      height="7"
+      rx="1"
+      fill="#c6a000"
+    />
+
+    <path
+      d="M9 34
+         H41
+         L44 41
+         H6
+         Z"
+      fill="url(#ledYellowBase)"
+      stroke="#9b7800"
+      stroke-width=".8"
+    />
+
+    <rect
+      x="17"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <rect
+      x="30.5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
+    />
+
+    <text x="18" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">+</text>
+
+    <text x="32" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">-</text>
+  `,
+
+  pins: [
+    { id: 'ANODE', x: 18, y: 120, type: 'power', label: 'Anode (+)' },
+    { id: 'CATHODE', x: 32, y: 120, type: 'gnd', label: 'Cathode (-)' }
+  ],
+
+  defaults: {
+    label: 'Yellow LED'
+  },
+
+  props: [
+    {
+      key: 'label',
+      label: 'Label',
+      type: 'text'
+    }
+  ],
+
+  simulate(state, inputs) {
+    return {};
+  }
+},
+ledGreen: {
+  id: 'ledGreen',
   label: 'Green LED',
   category: 'Outputs',
-  desc: '5mm green light-emitting diode with anode (+) and cathode (-) terminals',
-  w: 60,
+  desc: '5mm Green Light Emitting Diode',
+
+  w: 50,
   h: 120,
 
   svg: `
     <defs>
-      <linearGradient id="greenLedBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#9dffae" stop-opacity=".95"/>
-        <stop offset=".30" stop-color="#42ed68" stop-opacity=".92"/>
-        <stop offset=".68" stop-color="#0bc642" stop-opacity=".90"/>
-        <stop offset="1" stop-color="#07832c" stop-opacity=".95"/>
+      <linearGradient id="ledGreenBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e1ffd6"/>
+        <stop offset="20%" stop-color="#7dff4b"/>
+        <stop offset="65%" stop-color="#23a60b"/>
+        <stop offset="100%" stop-color="#126f08"/>
       </linearGradient>
 
-      <linearGradient id="greenLedHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
-        <stop offset=".45" stop-color="#baffc6" stop-opacity=".3"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      <linearGradient id="ledGreenBase" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#53d83c"/>
+        <stop offset="100%" stop-color="#126b0b"/>
       </linearGradient>
 
-      <linearGradient id="greenLedLeadMetal" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#666"/>
-        <stop offset=".32" stop-color="#eeeeee"/>
-        <stop offset=".65" stop-color="#a5a5a5"/>
-        <stop offset="1" stop-color="#555"/>
-      </linearGradient>
-
-      <radialGradient id="greenLedGlow">
-        <stop offset="0" stop-color="#7dff9c" stop-opacity=".95"/>
-        <stop offset=".38" stop-color="#25ef62" stop-opacity=".65"/>
-        <stop offset=".72" stop-color="#00c83d" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#00a832" stop-opacity="0"/>
-      </radialGradient>
+      <filter id="ledGreenGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2"/>
+      </filter>
     </defs>
 
-    <!-- ================= LED GLOW ================= -->
-    <circle
-      cx="30"
-      cy="29"
-      r="27"
-      fill="url(#greenLedGlow)"
-      opacity="0"
-      data-led-glow="true"
+    <ellipse
+      cx="25"
+      cy="27"
+      rx="17"
+      ry="25"
+      fill="#44ff22"
+      opacity=".2"
+      filter="url(#ledGreenGlow)"
     />
 
-    <!-- ================= METAL LEGS ================= -->
-
-    <!-- ANODE (+): longer lead -->
     <path
-      d="M24 53 L22 117"
+      d="M10 34
+         V22
+         C10 10 16 3 25 3
+         C34 3 40 10 40 22
+         V34
+         Z"
+      fill="url(#ledGreenBody)"
+      stroke="#187f0b"
+      stroke-width="1"
+    />
+
+    <path
+      d="M17 8
+         C13 13 13 23 14 28"
       fill="none"
-      stroke="url(#greenLedLeadMetal)"
+      stroke="#ffffff"
+      stroke-opacity=".6"
       stroke-width="3"
       stroke-linecap="round"
     />
 
-    <!-- CATHODE (-): shorter lead -->
     <path
-      d="M36 53 L38 104"
-      fill="none"
-      stroke="url(#greenLedLeadMetal)"
-      stroke-width="3"
-      stroke-linecap="round"
+      d="M21 28
+         L21 19
+         Q25 16 29 19
+         L29 28"
+      fill="#178b0b"
+      opacity=".7"
     />
 
-    <!-- ================= INTERNAL POSTS ================= -->
-    <path d="M24 51 L24 35"
-          stroke="#bfc8c0"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <path d="M36 51 L36 34"
-          stroke="#bfc8c0"
-          stroke-width="2"
-          opacity=".8"/>
-
-    <!-- reflector -->
-    <path
-      d="M32 36
-         L35 31
-         L39 36
-         L37 42
-         L33 42 Z"
-      fill="#9fe8b0"
-      stroke="#3f9456"
-      stroke-width=".45"
-      opacity=".8"
-    />
-
-    <!-- LED die -->
     <rect
-      x="33.5"
-      y="32"
-      width="4.5"
-      height="4"
-      rx=".4"
-      fill="#46f278"
-      stroke="#16883a"
-      stroke-width=".35"
+      x="19"
+      y="29"
+      width="12"
+      height="7"
+      rx="1"
+      fill="#157b0b"
     />
 
-    <!-- bond wire -->
     <path
-      d="M24 35 Q29 27 35 33"
-      fill="none"
-      stroke="#d9f5df"
+      d="M9 34
+         H41
+         L44 41
+         H6
+         Z"
+      fill="url(#ledGreenBase)"
+      stroke="#12680a"
       stroke-width=".8"
-      opacity=".9"
     />
 
-    <!-- ================= GREEN LED BODY ================= -->
-    <path
-      d="M17 49
-         L17 25
-         C17 12 22 5 30 5
-         C38 5 43 12 43 25
-         L43 49
-         Q43 55 37 55
-         H23
-         Q17 55 17 49 Z"
-      fill="url(#greenLedBody)"
-      stroke="#087f2c"
-      stroke-width="1"
-      opacity=".92"
-    />
-
-    <!-- Cathode flat edge -->
-    <path
-      d="M42 37 L42 50"
-      stroke="#066523"
-      stroke-width="1.5"
-      opacity=".9"
-    />
-
-    <!-- ================= HIGHLIGHTS ================= -->
-    <path
-      d="M21 19
-         C22 11 26 8 30 8
-         C27 15 26 25 27 39
-         C23 34 20 27 21 19 Z"
-      fill="url(#greenLedHighlight)"
-      opacity=".8"
-    />
-
-    <ellipse
-      cx="35"
-      cy="12"
-      rx="3"
-      ry="5"
-      fill="#ffffff"
-      opacity=".55"
-      transform="rotate(-25 35 12)"
-    />
-
-    <ellipse
-      cx="29"
-      cy="24"
-      rx="7"
-      ry="13"
-      fill="#78ff9b"
-      opacity=".12"
-    />
-
-    <!-- ================= BASE RIM ================= -->
-    <path
-      d="M15 48
-         Q15 54 21 56
-         H39
-         Q45 54 45 48"
-      fill="none"
-      stroke="#079235"
-      stroke-width="2"
-    />
-
-    <!-- ================= TERMINAL LABELS ================= -->
-    <text
+    <rect
       x="17"
-      y="112"
-      text-anchor="end"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      A
-    </text>
-
-    <text
-      x="43"
-      y="101"
-      fill="#d9d9d9"
-      font-size="5"
-      font-family="monospace"
-    >
-      K
-    </text>
-
-    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
-    <circle
-      cx="22"
-      cy="120"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="A"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
     />
 
-    <circle
-      cx="38"
-      cy="107"
-      r="2"
-      fill="#cfcfcf"
-      data-pin="K"
+    <rect
+      x="30.5"
+      y="41"
+      width="2.5"
+      height="74"
+      fill="#8c969b"
+      stroke="#444"
+      stroke-width=".4"
     />
+
+    <text x="18" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">+</text>
+
+    <text x="32" y="118" text-anchor="middle"
+      font-size="4" font-family="monospace" fill="#b0b0b0">-</text>
   `,
 
   pins: [
-    {
-      id: 'A',
-      x: 22,
-      y: 120,
-      type: 'digital',
-      label: 'Anode (+)'
-    },
-    {
-      id: 'K',
-      x: 38,
-      y: 107,
-      type: 'gnd',
-      label: 'Cathode (-)'
-    }
+    { id: 'ANODE', x: 18, y: 120, type: 'power', label: 'Anode (+)' },
+    { id: 'CATHODE', x: 32, y: 120, type: 'gnd', label: 'Cathode (-)' }
   ],
 
   defaults: {
-    label: 'Green LED',
-    state: false
+    label: 'Green LED'
   },
 
   props: [
@@ -4045,348 +4318,11 @@ ledGreen5mm: {
       key: 'label',
       label: 'Label',
       type: 'text'
-    },
-    {
-      key: 'state',
-      label: 'LED State',
-      type: 'checkbox'
     }
   ],
 
   simulate(state, inputs) {
-    const anode = Number(inputs?.A ?? 0);
-    const cathode = Number(inputs?.K ?? 0);
-    const on = anode > cathode;
-
-    return {
-      state: on,
-      on: on
-    };
-  }
-},
-ledRgb5mm: {
-  id: 'ledRgb5mm',
-  label: 'RGB LED',
-  category: 'Outputs',
-  desc: '5mm RGB LED with independently controllable red, green and blue channels and a common cathode terminal',
-  w: 76,
-  h: 130,
-
-  svg: `
-    <defs>
-      <!-- Clear RGB LED body -->
-      <linearGradient id="rgbLedBody" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
-        <stop offset=".32" stop-color="#edf5fa" stop-opacity=".62"/>
-        <stop offset=".70" stop-color="#c9d3da" stop-opacity=".42"/>
-        <stop offset="1" stop-color="#8e9aa2" stop-opacity=".58"/>
-      </linearGradient>
-
-      <linearGradient id="rgbLedHighlight" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
-        <stop offset=".50" stop-color="#ffffff" stop-opacity=".28"/>
-        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
-
-      <linearGradient id="rgbLedMetal" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#666"/>
-        <stop offset=".30" stop-color="#eeeeee"/>
-        <stop offset=".65" stop-color="#a5a5a5"/>
-        <stop offset="1" stop-color="#555"/>
-      </linearGradient>
-
-      <!-- RGB glow gradients -->
-      <radialGradient id="rgbRedGlow">
-        <stop offset="0" stop-color="#ff4b4b" stop-opacity=".95"/>
-        <stop offset=".45" stop-color="#ff1515" stop-opacity=".55"/>
-        <stop offset="1" stop-color="#ff0000" stop-opacity="0"/>
-      </radialGradient>
-
-      <radialGradient id="rgbGreenGlow">
-        <stop offset="0" stop-color="#6dff8d" stop-opacity=".95"/>
-        <stop offset=".45" stop-color="#18e94b" stop-opacity=".55"/>
-        <stop offset="1" stop-color="#00c83d" stop-opacity="0"/>
-      </radialGradient>
-
-      <radialGradient id="rgbBlueGlow">
-        <stop offset="0" stop-color="#63bdff" stop-opacity=".95"/>
-        <stop offset=".45" stop-color="#168cff" stop-opacity=".55"/>
-        <stop offset="1" stop-color="#005eff" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-
-    <!-- ================= RGB GLOW ================= -->
-    <circle cx="38" cy="28" r="29"
-            fill="url(#rgbRedGlow)"
-            opacity="0"
-            data-led-red-glow="true"/>
-
-    <circle cx="38" cy="28" r="29"
-            fill="url(#rgbGreenGlow)"
-            opacity="0"
-            data-led-green-glow="true"/>
-
-    <circle cx="38" cy="28" r="29"
-            fill="url(#rgbBlueGlow)"
-            opacity="0"
-            data-led-blue-glow="true"/>
-
-    <!-- ================= FOUR METAL LEGS ================= -->
-
-    <!-- RED -->
-    <path d="M24 54 L18 119"
-          fill="none"
-          stroke="url(#rgbLedMetal)"
-          stroke-width="2.6"
-          stroke-linecap="round"/>
-
-    <!-- COMMON CATHODE - longest -->
-    <path d="M33 54 L31 128"
-          fill="none"
-          stroke="url(#rgbLedMetal)"
-          stroke-width="2.8"
-          stroke-linecap="round"/>
-
-    <!-- GREEN -->
-    <path d="M43 54 L46 116"
-          fill="none"
-          stroke="url(#rgbLedMetal)"
-          stroke-width="2.6"
-          stroke-linecap="round"/>
-
-    <!-- BLUE -->
-    <path d="M52 54 L59 111"
-          fill="none"
-          stroke="url(#rgbLedMetal)"
-          stroke-width="2.6"
-          stroke-linecap="round"/>
-
-    <!-- ================= INTERNAL ELECTRODES ================= -->
-    <path d="M24 52 L26 36"
-          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
-
-    <path d="M33 52 L34 32"
-          stroke="#b7b7b7" stroke-width="2.2" opacity=".85"/>
-
-    <path d="M43 52 L42 36"
-          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
-
-    <path d="M52 52 L49 37"
-          stroke="#b7b7b7" stroke-width="1.7" opacity=".8"/>
-
-    <!-- common reflector -->
-    <path d="M29 37 L34 31 L39 37 L37 44 L31 44 Z"
-          fill="#d8d8d8"
-          stroke="#888"
-          stroke-width=".45"
-          opacity=".82"/>
-
-    <!-- red die -->
-    <rect x="25" y="33" width="4.5" height="4"
-          rx=".4" fill="#ff4141"
-          stroke="#a31b1b" stroke-width=".3"/>
-
-    <!-- green die -->
-    <rect x="39" y="33" width="4.5" height="4"
-          rx=".4" fill="#39e963"
-          stroke="#168837" stroke-width=".3"/>
-
-    <!-- blue die -->
-    <rect x="47" y="35" width="4.5" height="4"
-          rx=".4" fill="#3ba7ff"
-          stroke="#176aa4" stroke-width=".3"/>
-
-    <!-- bond wires -->
-    <path d="M34 33 Q30 27 27 34"
-          fill="none" stroke="#d8d8d8"
-          stroke-width=".7" opacity=".9"/>
-
-    <path d="M34 33 Q38 27 41 34"
-          fill="none" stroke="#d8d8d8"
-          stroke-width=".7" opacity=".9"/>
-
-    <path d="M34 34 Q43 28 49 36"
-          fill="none" stroke="#d8d8d8"
-          stroke-width=".7" opacity=".9"/>
-
-    <!-- ================= CLEAR 5MM LED BODY ================= -->
-    <path
-      d="M19 49
-         L19 25
-         C19 11 26 4 38 4
-         C50 4 57 11 57 25
-         L57 49
-         Q57 56 50 57
-         H26
-         Q19 56 19 49 Z"
-      fill="url(#rgbLedBody)"
-      stroke="#8d9ba4"
-      stroke-width="1"
-      opacity=".84"
-    />
-
-    <!-- flat cathode identification side -->
-    <path d="M20 38 L20 50"
-          stroke="#77848d"
-          stroke-width="1.5"
-          opacity=".8"/>
-
-    <!-- ================= BODY HIGHLIGHTS ================= -->
-    <path
-      d="M24 18
-         C26 10 31 7 36 7
-         C31 15 30 27 31 42
-         C26 36 23 27 24 18 Z"
-      fill="url(#rgbLedHighlight)"
-      opacity=".82"
-    />
-
-    <ellipse cx="45" cy="12"
-             rx="3.5" ry="5.5"
-             fill="#ffffff"
-             opacity=".62"
-             transform="rotate(-25 45 12)"/>
-
-    <ellipse cx="38" cy="25"
-             rx="11" ry="15"
-             fill="#ffffff"
-             opacity=".10"/>
-
-    <!-- ================= BASE RIM ================= -->
-    <path
-      d="M17 48
-         Q17 55 24 58
-         H52
-         Q59 55 59 48"
-      fill="none"
-      stroke="#9aa6ad"
-      stroke-width="2"
-      opacity=".9"
-    />
-
-    <!-- ================= PIN LABELS ================= -->
-    <g fill="#d9d9d9" font-size="4.5" font-family="monospace">
-      <text x="14" y="113" text-anchor="end">R</text>
-      <text x="28" y="123" text-anchor="end">COM</text>
-      <text x="49" y="111">G</text>
-      <text x="62" y="106">B</text>
-    </g>
-
-    <!-- ================= SIMULATOR CONNECTION POINTS ================= -->
-    <circle cx="18" cy="122" r="2"
-            fill="#cfcfcf" data-pin="R"/>
-
-    <circle cx="31" cy="130" r="2"
-            fill="#cfcfcf" data-pin="COM"/>
-
-    <circle cx="46" cy="119" r="2"
-            fill="#cfcfcf" data-pin="G"/>
-
-    <circle cx="59" cy="114" r="2"
-            fill="#cfcfcf" data-pin="B"/>
-  `,
-
-  pins: [
-    {
-      id: 'R',
-      x: 18,
-      y: 122,
-      type: 'digital',
-      label: 'Red Anode (+)'
-    },
-    {
-      id: 'COM',
-      x: 31,
-      y: 130,
-      type: 'gnd',
-      label: 'Common Cathode (-)'
-    },
-    {
-      id: 'G',
-      x: 46,
-      y: 119,
-      type: 'digital',
-      label: 'Green Anode (+)'
-    },
-    {
-      id: 'B',
-      x: 59,
-      y: 114,
-      type: 'digital',
-      label: 'Blue Anode (+)'
-    }
-  ],
-
-  defaults: {
-    label: 'RGB LED',
-    red: false,
-    green: false,
-    blue: false
-  },
-
-  props: [
-    {
-      key: 'label',
-      label: 'Label',
-      type: 'text'
-    },
-    {
-      key: 'red',
-      label: 'Red',
-      type: 'checkbox'
-    },
-    {
-      key: 'green',
-      label: 'Green',
-      type: 'checkbox'
-    },
-    {
-      key: 'blue',
-      label: 'Blue',
-      type: 'checkbox'
-    }
-  ],
-
-  simulate(state, inputs) {
-    /*
-      Common-cathode RGB LED:
-      COM should normally be connected to GND.
-
-      R HIGH -> Red
-      G HIGH -> Green
-      B HIGH -> Blue
-
-      Multiple channels can be enabled together:
-      R + G       = Yellow
-      R + B       = Magenta
-      G + B       = Cyan
-      R + G + B   = White
-    */
-
-    const common = Number(inputs?.COM ?? 0);
-
-    const red =
-      Number(inputs?.R ?? 0) > common;
-
-    const green =
-      Number(inputs?.G ?? 0) > common;
-
-    const blue =
-      Number(inputs?.B ?? 0) > common;
-
-    return {
-      red,
-      green,
-      blue,
-      on: red || green || blue,
-
-      // Convenient RGB value for a renderer if required.
-      rgb: {
-        r: red ? 255 : 0,
-        g: green ? 255 : 0,
-        b: blue ? 255 : 0
-      }
-    };
+    return {};
   }
 },
 oled096I2c: {
