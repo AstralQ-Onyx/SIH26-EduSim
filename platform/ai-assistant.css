@@ -15,21 +15,29 @@
   --mentor-muted:     rgba(160, 160, 200, 0.55);
 }
 
-/* ── Panel: side drawer inside wrapper ───────────────────────── */
+/* ── Panel: floating overlay anchored to right edge ──────────── */
 #aiPanel {
-  /* No position:fixed — lives as a flex-row sibling to .ide-body */
-  width: 0;
-  flex-shrink: 0;
-  overflow: hidden;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: clamp(300px, 35vw, 420px);
+  z-index: 900;
   display: flex;
   flex-direction: column;
   background: var(--mentor-bg);
   border-left: 1px solid var(--mentor-border);
-  box-shadow: -6px 0 24px rgba(0,0,0,0.45),
-              inset 1px 0 0 rgba(138,43,226,0.06);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.55),
+              inset 1px 0 0 rgba(138,43,226,0.08);
   font-family: 'Inter', sans-serif;
   color: var(--mentor-text);
-  transition: width 0.35s cubic-bezier(0.16,1,0.3,1);
+  /* Slide in/out from the right */
+  transform: translateX(100%);
+  visibility: hidden;
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+              opacity   0.3s ease,
+              visibility 0.3s ease;
 
   /* subtle dot-grid background */
   background-image:
@@ -39,8 +47,9 @@
 }
 
 #aiPanel.open {
-  /* clamp: at least 300px, ideally 35vw, max 420px */
-  width: clamp(300px, 35vw, 420px);
+  transform: translateX(0);
+  visibility: visible;
+  opacity: 1;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
