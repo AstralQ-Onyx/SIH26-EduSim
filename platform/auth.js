@@ -32,6 +32,9 @@ let passwordValid = false;
 if (localStorage.getItem('edusim_theme') === 'light') {
   document.body.setAttribute('data-theme', 'light');
 }
+if (localStorage.getItem('edusim_theme_style') === 'multi-section') {
+  document.documentElement.setAttribute('data-theme-style', 'multi-section');
+}
 
 // ── Theme Toggle ────────────────────────────────────────────
 window.toggleTheme = function () {

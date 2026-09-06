@@ -34,6 +34,14 @@ try {
 window.LAB_PROJECT = PROJECT;
 console.log('[Lab] mode:', PROJECT.mode, '| id:', PROJECT.id);
 
+// ── Apply persisted theme style ───────────────────────────
+if (localStorage.getItem('edusim_theme') === 'light') {
+  document.body.classList.add('light-theme');
+}
+if (localStorage.getItem('edusim_theme_style') === 'multi-section') {
+  document.documentElement.setAttribute('data-theme-style', 'multi-section');
+}
+
 const titleEl = document.getElementById('labProjectTitleText');
 if (titleEl) titleEl.textContent = PROJECT.name;
 
@@ -1551,6 +1559,7 @@ document.getElementById('uploadCodeBtn').addEventListener('click', runUpload);
 document.getElementById('themeBtn').addEventListener('click', () => {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('edusim_theme', isLight ? 'light' : 'dark');
   if (labEditor) {
     monaco.editor.setTheme(isLight ? 'vs-light' : 'vs-dark');
   }

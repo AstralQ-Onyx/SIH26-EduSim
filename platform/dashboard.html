@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css"/>
+  <link rel="stylesheet" href="multi-section-theme.css"/>
   <link rel="stylesheet" href="../assistant_workflow/ai-assistant.css"/>
 </head>
 <body>
@@ -710,6 +711,13 @@
       <div class="form-group">
         <label>Contact Email (optional)</label>
         <input type="email" class="form-input" id="editContact" placeholder="alt contact email"/>
+      </div>
+      <div class="form-group">
+        <label>App Theme Style</label>
+        <select class="form-input" id="editThemeStyle">
+          <option value="default">Default</option>
+          <option value="multi-section">Multi-Section Theme</option>
+        </select>
       </div>
       <button class="btn primary" style="width:100%" id="saveProfileBtn">Save Changes</button>
     </div>

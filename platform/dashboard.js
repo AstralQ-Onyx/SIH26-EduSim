@@ -21,6 +21,11 @@ function showToast(msg, type = '') {
 const saved = localStorage.getItem('edusim_theme');
 if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
 
+const savedStyle = localStorage.getItem('edusim_theme_style');
+if (savedStyle === 'multi-section') {
+  document.documentElement.setAttribute('data-theme-style', 'multi-section');
+}
+
 document.getElementById('themeBtn').addEventListener('click', () => {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
@@ -139,6 +144,13 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('editOrg').value     = data.org      || '';
     document.getElementById('editDept').value    = data.dept     || '';
     document.getElementById('editContact').value = data.contactMail || '';
+    
+    // Theme style preference (local storage)
+    const currentThemeStyle = localStorage.getItem('edusim_theme_style') || 'default';
+    const themeStyleSelect = document.getElementById('editThemeStyle');
+    if (themeStyleSelect) {
+      themeStyleSelect.value = currentThemeStyle;
+    }
 
     // Load projects count
     loadProjects(user.uid);
@@ -217,6 +229,16 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
     document.getElementById('profOrg').textContent          = org  || '—';
     document.getElementById('profDept').textContent         = dept || '—';
     document.getElementById('profContact').textContent      = contact || '—';
+
+    // Apply and save the selected theme style
+    const themeStyle = document.getElementById('editThemeStyle').value;
+    if (themeStyle === 'multi-section') {
+      document.documentElement.setAttribute('data-theme-style', 'multi-section');
+      localStorage.setItem('edusim_theme_style', 'multi-section');
+    } else {
+      document.documentElement.removeAttribute('data-theme-style');
+      localStorage.removeItem('edusim_theme_style');
+    }
 
     editProfileModal.classList.remove('active');
     showToast('Profile updated!', 'success');
