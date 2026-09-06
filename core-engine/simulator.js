@@ -7,12 +7,32 @@
 
 const AGENT_HTTP = (typeof ENV !== 'undefined' && ENV.BACKEND_URL) ? ENV.BACKEND_URL : 'https://edusim-compiler.onrender.com';
 
-// Board FQBN map
+// Board FQBN map — supports both snake_case (registry legacy) and camelCase (current registry)
 const FQBN_MAP = {
-  arduino_uno_r3: 'arduino:avr:uno',
-  arduino_nano: 'arduino:avr:nano',
-  esp32_dev_module: 'esp32:esp32:esp32',
-  esp32: 'esp32:esp32:esp32',
+  // Arduino Uno
+  arduino_uno_r3:  'arduino:avr:uno',
+  arduinoUno:      'arduino:avr:uno',
+  arduino_uno:     'arduino:avr:uno',
+
+  // Arduino Nano
+  arduino_nano:    'arduino:avr:nano',
+  arduinoNano:     'arduino:avr:nano',   // registry id
+
+  // Arduino Mega
+  arduino_mega:    'arduino:avr:mega',
+  arduinoMega:     'arduino:avr:mega',
+
+  // ESP32
+  esp32:           'esp32:esp32:esp32',
+  esp32_dev_module:'esp32:esp32:esp32',
+  esp32DevModule:  'esp32:esp32:esp32',
+
+  // ESP8266
+  esp8266:         'esp8266:esp8266:nodemcuv2',
+  esp8266DevModule:'esp8266:esp8266:nodemcuv2',
+
+  // Raspberry Pi Pico / RP2040
+  rp2040:          'rp2040:rp2040:rpipico',
 };
 
 // ── avr8js loaded state ─────────────────────────────────────

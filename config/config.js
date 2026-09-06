@@ -14,6 +14,6 @@ const ENV = {
 
   // Cloud compiler on Render — handles all compilation for both IDE and Virtual Lab
   BACKEND_URL: 'https://edusim-compiler.onrender.com'
-  //BACKEND_URL: 'http://localhost:3000'
+  // BACKEND_URL: 'http://localhost:3000'
 
 };
