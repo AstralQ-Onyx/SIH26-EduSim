@@ -1,0 +1,243 @@
+/* ═══════════════════════════════════════════════════════════
+   EduSim — Multi-Section Application Theme
+   Activated when: html[data-theme-style="multi-section"]
+
+   DARK/LIGHT scoping per page:
+     Auth      — data-theme="light" is on <body>  (set by auth.js)
+     Dashboard — data-theme="light" is on <html>  (set by dashboard.js)
+     Lab       — light mode is body.light-theme class (set by lab.js)
+   ═══════════════════════════════════════════════════════════ */
+
+
+/* ════════════════════════════════════════════════════════════
+   1. AUTHENTICATION PAGE
+   data-theme-style is on <html>
+   dark/light: data-theme="light" is on <body> (auth.js puts it there)
+   ════════════════════════════════════════════════════════════ */
+
+/* Auth — DARK MODE (body has no data-theme attribute) */
+html[data-theme-style="multi-section"] body:has(.auth-wrapper):not([data-theme]) {
+  --c-bg:               #060b14;
+  --c-surface:          #0d1626;
+  --c-surface2:         #111e33;
+  --c-surface-alpha:    rgba(13, 22, 38, 0.85);
+  --c-border:           rgba(0, 212, 255, 0.15);
+  --c-border-h:         rgba(0, 212, 255, 0.45);
+  --c-accent:           #00d4ff;
+  --c-accent2:          #7b2fff;
+  --c-accent3:          #ff6b35;
+  --c-text:             #e2e8f0;
+  --c-text-muted:       #64748b;
+  --c-text-dim:         #94a3b8;
+  --c-success:          #00ff88;
+  --c-error:            #ff4466;
+  --c-warning:          #ffd700;
+  --glow-accent:        0 0 20px rgba(0, 212, 255, 0.4);
+  --glow-purple:        0 0 20px rgba(123, 47, 255, 0.4);
+  --glow-success:       0 0 12px rgba(0, 255, 136, 0.5);
+  --glow-error:         0 0 12px rgba(255, 68, 102, 0.5);
+  --tab-bg:             rgba(0, 0, 0, 0.3);
+  --google-btn-bg:      rgba(255, 255, 255, 0.04);
+  --google-btn-border:  rgba(255, 255, 255, 0.12);
+  --google-btn-bg-hover:     rgba(255, 255, 255, 0.09);
+  --google-btn-border-hover: rgba(255, 255, 255, 0.25);
+  --input-bg:           rgba(0, 0, 0, 0.3);
+  --cond-bg:            rgba(0, 212, 255, 0.03);
+  --cond-border:        rgba(0, 212, 255, 0.08);
+  --error-bg:           rgba(255, 68, 102, 0.1);
+  --error-border:       rgba(255, 68, 102, 0.3);
+  --toast-bg:           rgba(13, 22, 38, 0.95);
+  --loader-bg:          rgba(6, 11, 20, 0.9);
+}
+
+/* Auth — LIGHT MODE (body[data-theme="light"] — placed by auth.js) */
+html[data-theme-style="multi-section"] body[data-theme="light"]:has(.auth-wrapper) {
+  --c-bg:               #f0f4f8;
+  --c-surface:          #ffffff;
+  --c-surface2:         #e2e8f0;
+  --c-surface-alpha:    rgba(255, 255, 255, 0.85);
+  --c-border:           rgba(0, 102, 255, 0.2);
+  --c-border-h:         rgba(0, 102, 255, 0.5);
+  --c-accent:           #0066ff;
+  --c-accent2:          #5e17eb;
+  --c-accent3:          #ff5e00;
+  --c-text:             #0f172a;
+  --c-text-muted:       #475569;
+  --c-text-dim:         #64748b;
+  --c-success:          #059669;
+  --c-error:            #dc2626;
+  --c-warning:          #d97706;
+  --glow-accent:        0 0 15px rgba(0, 102, 255, 0.25);
+  --glow-purple:        0 0 15px rgba(94, 23, 235, 0.25);
+  --glow-success:       0 0 10px rgba(5, 150, 105, 0.3);
+  --glow-error:         0 0 10px rgba(220, 38, 38, 0.3);
+  --tab-bg:             rgba(0, 0, 0, 0.05);
+  --google-btn-bg:      rgba(0, 0, 0, 0.03);
+  --google-btn-border:  rgba(0, 0, 0, 0.1);
+  --google-btn-bg-hover:     rgba(0, 0, 0, 0.06);
+  --google-btn-border-hover: rgba(0, 0, 0, 0.2);
+  --input-bg:           rgba(255, 255, 255, 0.6);
+  --cond-bg:            rgba(0, 102, 255, 0.04);
+  --cond-border:        rgba(0, 102, 255, 0.1);
+  --error-bg:           rgba(220, 38, 38, 0.08);
+  --error-border:       rgba(220, 38, 38, 0.2);
+  --toast-bg:           rgba(255, 255, 255, 0.95);
+  --loader-bg:          rgba(240, 244, 248, 0.9);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   2. DASHBOARD PAGE
+   data-theme-style on <html>, data-theme on <html> (dashboard.js)
+   ════════════════════════════════════════════════════════════ */
+
+/* Dashboard — DARK MODE */
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) {
+  --bg:        #0b0c0d;
+  --surface:   #121415;
+  --surface2:  #191c1d;
+  --surface3:  #232728;
+  --border:    rgba(217, 139, 82, 0.14);
+  --border-h:  rgba(217, 139, 82, 0.35);
+  --accent:    #d98b52;
+  --accent2:   #6ed7e6;
+  --ai-accent: #b3a0e8;
+  --text:      #f1eee7;
+  --muted:     #9a9b99;
+  --success:   #83d39b;
+  --error:     #ff4466;
+  --warning:   #ffd700;
+}
+
+/* Dashboard — LIGHT MODE (html[data-theme="light"] — set by dashboard.js) */
+html[data-theme-style="multi-section"][data-theme="light"] body:has(.sidebar):has(.main-content) {
+  --bg:        #edf0eb;
+  --surface:   #f8faf7;
+  --surface2:  #e2e6e0;
+  --surface3:  #d5dbd4;
+  --border:    rgba(168, 95, 46, 0.15);
+  --border-h:  rgba(168, 95, 46, 0.35);
+  --accent:    #a85f2e;
+  --accent2:   #168da0;
+  --ai-accent: #6c559e;
+  --text:      #172019;
+  --muted:     #5f6c61;
+  --success:   #2f8a55;
+  --error:     #dc2626;
+  --warning:   #d97706;
+}
+
+/* Dashboard — IDE Editor: always dark in dark mode, white in light mode */
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .editor-wrapper,
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .editor-fallback {
+  background: #1e1e1e !important;
+  color:      #d4d4d4 !important;
+}
+html[data-theme-style="multi-section"][data-theme="light"] body:has(.sidebar):has(.main-content) .editor-wrapper,
+html[data-theme-style="multi-section"][data-theme="light"] body:has(.sidebar):has(.main-content) .editor-fallback {
+  background: #ffffff !important;
+  color:      #333    !important;
+}
+
+/* Dashboard — Branding: terracotta-to-aqua gradient on avatars and primary buttons */
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .avatar,
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .profile-avatar-big,
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #10150f;
+}
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .brand span {
+  background:              linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip:         text;
+}
+
+/* Dashboard — Nav hover/active states with terracotta overlay */
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .nav-item:hover,
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .user-profile:hover {
+  background: rgba(217, 139, 82, 0.05);
+}
+html[data-theme-style="multi-section"] body:has(.sidebar):has(.main-content) .nav-item.active {
+  background:   linear-gradient(90deg, rgba(217, 139, 82, 0.12), transparent);
+  border-color: var(--accent);
+  color:        var(--accent);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   3. VIRTUAL LAB PAGE
+   data-theme-style on <html>
+   dark/light: body.light-theme class toggled by lab.js themeBtn
+   ════════════════════════════════════════════════════════════ */
+
+/* Lab — DARK MODE (body does NOT have .light-theme class) */
+html[data-theme-style="multi-section"] body:has(.lab-workspace):not(.light-theme) {
+  --bg:       #060c16;
+  --surface:  #0d1626;
+  --surface2: #111e35;
+  --border:   rgba(0, 212, 255, 0.14);
+  --border-h: rgba(0, 212, 255, 0.35);
+  --accent:   #00d4ff;
+  --accent2:  #7b2fff;
+  --text:     #dde4ef;
+  --muted:    #5a7090;
+  --success:  #00ff88;
+  --error:    #ff4466;
+  --warning:  #ffd700;
+}
+
+/* Lab — LIGHT MODE (body.light-theme class toggled by lab.js) */
+html[data-theme-style="multi-section"] body.light-theme:has(.lab-workspace) {
+  --bg:       #f0f2f5;
+  --surface:  #ffffff;
+  --surface2: #e4e7eb;
+  --border:   rgba(0, 0, 0, 0.1);
+  --border-h: rgba(0, 0, 0, 0.2);
+  --accent:   #0066ff;
+  --accent2:  #5e17eb;
+  --text:     #1a1f2b;
+  --muted:    #5a7090;
+  --success:  #059669;
+  --error:    #dc2626;
+  --warning:  #d97706;
+}
+
+/* Lab — Canvas dark background with grid */
+html[data-theme-style="multi-section"] body:has(.lab-workspace):not(.light-theme) .canvas-container {
+  background-color: #070e1c;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 10px 10px, 10px 10px;
+}
+
+/* Lab — Canvas light background with grid */
+html[data-theme-style="multi-section"] body.light-theme:has(.lab-workspace) .canvas-container {
+  background-color: #f4f6f8;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 10px 10px, 10px 10px;
+}
+
+/* Lab — Primary run button: cyan-to-violet gradient */
+html[data-theme-style="multi-section"] body:has(.lab-workspace) .run-btn {
+  background: linear-gradient(135deg, #00d4ff, #7b2fff);
+  color: #fff;
+  border: none;
+}
+
+/* Lab — 3D canvas dark background preserved */
+html[data-theme-style="multi-section"] #lab3dContainer {
+  background-color: #0d1117 !important;
+}
+
+/* Lab — Wire default colour preserved */
+html[data-theme-style="multi-section"] .lab-wire {
+  stroke: #00d4ff;
+}

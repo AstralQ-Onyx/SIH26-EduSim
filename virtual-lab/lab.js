@@ -34,6 +34,14 @@ try {
 window.LAB_PROJECT = PROJECT;
 console.log('[Lab] mode:', PROJECT.mode, '| id:', PROJECT.id);
 
+// ── Apply persisted theme style ───────────────────────────
+if (localStorage.getItem('edusim_theme') === 'light') {
+  document.body.classList.add('light-theme');
+}
+if (localStorage.getItem('edusim_theme_style') === 'multi-section') {
+  document.documentElement.setAttribute('data-theme-style', 'multi-section');
+}
+
 const titleEl = document.getElementById('labProjectTitleText');
 if (titleEl) titleEl.textContent = PROJECT.name;
 
@@ -107,6 +115,8 @@ let selectedComp  = null;
 let selectedWire  = null;
 let wireMode      = false;
 let wireStart     = null;   // { compId, pinId, x, y }
+let draggingWaypoint = null; // { wire, index }
+let wireHandlesGroup = null;
 
 let components    = [];     // { id, defId, x, y, props, element }
 let wires         = [];     // { id, from:{compId,pinId}, to:{compId,pinId}, element }
@@ -123,7 +133,7 @@ function pushHistory() {
   if (_suppressHistory) return;
   const state = {
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
-    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color })),
+    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color, waypoints:w.waypoints?w.waypoints.map(p=>({...p})):[] })),
   };
   undoStack.push(JSON.stringify(state));
   if (undoStack.length > 50) undoStack.shift();
@@ -134,6 +144,7 @@ function restoreState(data) {
   _suppressHistory = true;   // <<< stop child calls from polluting stacks
   document.getElementById('componentsLayer').innerHTML = '';
   document.getElementById('wiresLayer').innerHTML = '';
+  wireHandlesGroup = null; // Reset since its DOM node was destroyed
   components.length = 0;
   wires.length = 0;
   clearSelection();
@@ -150,7 +161,11 @@ function restoreState(data) {
     if (c.props.label) comp.labelEl.textContent = c.props.label;
     comp.element.setAttribute('transform', `translate(${comp.x},${comp.y}) rotate(${comp.rotation} ${comp.def.w/2} ${comp.def.h/2})`);
   });
-  data.wires.forEach(w => drawWire(w.from, w.to, w.color));
+  data.wires.forEach(w => {
+    const nw = drawWire(w.from, w.to, w.color);
+    if (w.waypoints) nw.waypoints = [...w.waypoints];
+    updateWirePath(nw);
+  });
   _suppressHistory = false;  // <<< re-enable
   populateDeviceSelect();
 }
@@ -159,7 +174,7 @@ function undo() {
   if (!undoStack.length) return;
   const cur = {
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
-    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color })),
+    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color, waypoints:w.waypoints?w.waypoints.map(p=>({...p})):[] })),
   };
   redoStack.push(JSON.stringify(cur));
   restoreState(JSON.parse(undoStack.pop()));
@@ -170,7 +185,7 @@ function redo() {
   if (!redoStack.length) return;
   const cur = {
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
-    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color })),
+    wires: wires.map(w => ({ id:w.id, from:{...w.from}, to:{...w.to}, color:w.color, waypoints:w.waypoints?w.waypoints.map(p=>({...p})):[] })),
   };
   undoStack.push(JSON.stringify(cur));
   restoreState(JSON.parse(redoStack.pop()));
@@ -268,13 +283,49 @@ svg.addEventListener('mousemove', e => {
     panY = e.clientY - panStart.y;
     applyTransform();
   }
+  if (draggingWaypoint) {
+    const pt = svgPoint(e.clientX, e.clientY);
+    const { wire, index } = draggingWaypoint;
+    let sx = snap(pt.x);
+    let sy = snap(pt.y);
+
+    // Magnetic axis-snap: lock to neighbor X/Y if within threshold
+    const MAGNET = 15;
+    const fc = components.find(c => c.id === wire.from.compId);
+    const tc = components.find(c => c.id === wire.to.compId);
+    const p1 = fc ? getRotatedPinCoords(fc, wire.from.pinId) : null;
+    const p2 = tc ? getRotatedPinCoords(tc, wire.to.pinId) : null;
+
+    // Collect all snap targets (other waypoints + endpoints)
+    const targets = [];
+    wire.waypoints.forEach((wp, i) => { if (i !== index) targets.push(wp); });
+    if (p1) targets.push(p1);
+    if (p2) targets.push(p2);
+
+    for (const t of targets) {
+      if (Math.abs(sx - t.x) < MAGNET) sx = t.x;
+      if (Math.abs(sy - t.y) < MAGNET) sy = t.y;
+    }
+
+    wire.waypoints[index].x = sx;
+    wire.waypoints[index].y = sy;
+    updateWirePath(wire);
+    if (wireHandlesGroup && wireHandlesGroup.children[index]) {
+      wireHandlesGroup.children[index].setAttribute('cx', sx);
+      wireHandlesGroup.children[index].setAttribute('cy', sy);
+    }
+  }
   if (wireMode && wireStart) {
     const pt = svgPoint(e.clientX, e.clientY);
     activeWire.setAttribute('x2', pt.x);
     activeWire.setAttribute('y2', pt.y);
   }
 });
-svg.addEventListener('mouseup',   e => { isPanning = false; svg.style.cursor = ''; });
+svg.addEventListener('mouseup',   e => { 
+  isPanning = false; 
+  svg.style.cursor = ''; 
+  if (draggingWaypoint) draggingWaypoint = null;
+});
 svg.addEventListener('mouseleave',e => { isPanning = false; });
 
 // ── Drop component from palette ───────────────────────────
@@ -524,7 +575,29 @@ function cancelWire() {
   }
 }
 
-function drawWire(from, to, color = '#35d0ba') {
+// Rotation-aware pin coords
+function getRotatedPinCoords(comp, pinId) {
+  const pin = comp.def.pins.find(p => p.id === pinId);
+  if (!pin) return { x: comp.x, y: comp.y };
+  const cx = comp.def.w / 2;
+  const cy = comp.def.h / 2;
+  const rad = (comp.rotation || 0) * Math.PI / 180;
+  const dx = pin.x - cx, dy = pin.y - cy;
+  return {
+    x: comp.x + cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+    y: comp.y + cy + dx * Math.sin(rad) + dy * Math.cos(rad),
+  };
+}
+
+function distToSegment(p, v, w) {
+  const l2 = (v.x - w.x)**2 + (v.y - w.y)**2;
+  if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+  let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+}
+
+function drawWire(from, to, color = '#00d4ff') {
   const id   = 'w_' + (nextId++);
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   line.classList.add('lab-wire');
@@ -535,37 +608,61 @@ function drawWire(from, to, color = '#35d0ba') {
   pushHistory();
   const wire = { id, from, to, element:line, color };
   wires.push(wire);
+  
+  line.addEventListener('dblclick', e => {
+    e.stopPropagation();
+    pushHistory();
+    if (!wire.waypoints) wire.waypoints = [];
+    const pt = svgPoint(e.clientX, e.clientY);
+    
+    const fc = components.find(c => c.id === wire.from.compId);
+    const tc = components.find(c => c.id === wire.to.compId);
+    if (!fc || !tc) return;
+    
+    const p1 = getRotatedPinCoords(fc, wire.from.pinId);
+    const p2 = getRotatedPinCoords(tc, wire.to.pinId);
+    const pts = [p1, ...wire.waypoints, p2];
+    
+    let minDist = Infinity, insertIdx = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const d = distToSegment(pt, pts[i], pts[i+1]);
+      if (d < minDist) { minDist = d; insertIdx = i; }
+    }
+    
+    wire.waypoints.splice(insertIdx, 0, { x: snap(pt.x), y: snap(pt.y) });
+    updateWirePath(wire);
+    if (selectedWire === wire) renderWireHandles(wire);
+  });
+
   wiresLayer.appendChild(line);
   updateWirePath(wire);
   clog(`Wire: ${from.compId}.${from.pinId} → ${to.compId}.${to.pinId}`, 'sys');
+  return wire;
 }
 
 function updateWirePath(wire) {
   const fc = components.find(c => c.id === wire.from.compId);
   const tc = components.find(c => c.id === wire.to.compId);
   if (!fc || !tc) return;
-  const fp = fc.def.pins.find(p => p.id === wire.from.pinId);
-  const tp = tc.def.pins.find(p => p.id === wire.to.pinId);
-  if (!fp || !tp) return;
+  const p1 = getRotatedPinCoords(fc, wire.from.pinId);
+  const p2 = getRotatedPinCoords(tc, wire.to.pinId);
 
-  // Rotation-aware pin coords
-  function rotatedPin(comp, pin) {
-    const cx = comp.def.w / 2;
-    const cy = comp.def.h / 2;
-    const rad = (comp.rotation || 0) * Math.PI / 180;
-    const dx = pin.x - cx, dy = pin.y - cy;
-    return {
-      x: comp.x + cx + dx * Math.cos(rad) - dy * Math.sin(rad),
-      y: comp.y + cy + dx * Math.sin(rad) + dy * Math.cos(rad),
-    };
+  // Auto-generate ortho corner waypoints if none exist
+  if (!wire.waypoints || wire.waypoints.length === 0) {
+    const mx = snap((p1.x + p2.x) / 2);
+    wire.waypoints = [
+      { x: mx, y: snap(p1.y) },
+      { x: mx, y: snap(p2.y) },
+    ];
   }
 
-  const {x:x1, y:y1} = rotatedPin(fc, fp);
-  const {x:x2, y:y2} = rotatedPin(tc, tp);
-  
-  // Ortho routing: L-shaped path
-  const mx = (x1 + x2) / 2;
-  wire.element.setAttribute('d', `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2},${y2}`);
+  // Build path through all waypoints
+  let d = `M${p1.x},${p1.y}`;
+  wire.waypoints.forEach(wp => {
+    d += ` L${wp.x},${wp.y}`;
+  });
+  d += ` L${p2.x},${p2.y}`;
+  wire.element.setAttribute('d', d);
 }
 
 function updateWiresForComp(compId) {
@@ -574,6 +671,44 @@ function updateWiresForComp(compId) {
 }
 
 // ── Selection ─────────────────────────────────────────────
+function renderWireHandles(wire) {
+  if (!wireHandlesGroup) {
+    wireHandlesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    wireHandlesGroup.id = 'wireHandles';
+    wiresLayer.appendChild(wireHandlesGroup);
+  }
+  wireHandlesGroup.innerHTML = '';
+  
+  if (!wire.waypoints) return;
+  
+  wire.waypoints.forEach((wp, i) => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', wp.x);
+    circle.setAttribute('cy', wp.y);
+    circle.setAttribute('r', 5);
+    circle.setAttribute('fill', '#00d4ff');
+    circle.setAttribute('stroke', '#000');
+    circle.setAttribute('stroke-width', 2);
+    circle.style.cursor = 'grab';
+    
+    circle.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      pushHistory();
+      draggingWaypoint = { wire, index: i };
+    });
+    
+    circle.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      pushHistory();
+      wire.waypoints.splice(i, 1);
+      updateWirePath(wire);
+      renderWireHandles(wire);
+    });
+    
+    wireHandlesGroup.appendChild(circle);
+  });
+}
+
 function selectComponent(comp) {
   clearSelection();
   selectedComp = comp;
@@ -587,12 +722,14 @@ function selectWire(wireId) {
   if (selectedWire) {
     selectedWire.element.classList.add('selected');
     renderWireProps(selectedWire);
+    renderWireHandles(selectedWire);
   }
 }
 
 function clearSelection() {
   if (selectedComp) { selectedComp.element.classList.remove('selected'); selectedComp = null; }
   if (selectedWire) { selectedWire.element.classList.remove('selected'); selectedWire = null; }
+  if (wireHandlesGroup) { wireHandlesGroup.innerHTML = ''; }
   document.getElementById('propsBody').innerHTML = `
     <div class="props-empty">
       <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -609,15 +746,37 @@ document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
 function deleteSelected() {
   pushHistory();
   if (selectedWire) {
+    const affectedCompIds = [selectedWire.from.compId, selectedWire.to.compId];
     selectedWire.element.remove();
     wires = wires.filter(w => w !== selectedWire);
     window.wires = wires; // update global ref
     selectedWire = null;
+    clearSelection(); // This clears the UI handles
+
+    // Re-evaluate affected components after wire removal
+    affectedCompIds.forEach(id => {
+      const c = components.find(comp => comp.id === id);
+      if (c && (c.defId.startsWith('led') || c.defId.startsWith('buzzer'))) {
+        driveComponent(c, null, undefined);
+      }
+    });
+
   } else if (selectedComp) {
+    // If a buzzing component is deleted, stop its oscillator
+    if (activeOscillators[selectedComp.id]) {
+      activeOscillators[selectedComp.id].stop();
+      activeOscillators[selectedComp.id].disconnect();
+      delete activeOscillators[selectedComp.id];
+    }
+
     // Remove connected wires
+    const affectedCompIds = [];
     wires = wires.filter(w => {
       if (w.from.compId === selectedComp.id || w.to.compId === selectedComp.id) {
-        w.element.remove(); return false;
+        w.element.remove(); 
+        const otherCompId = w.from.compId === selectedComp.id ? w.to.compId : w.from.compId;
+        affectedCompIds.push(otherCompId);
+        return false;
       }
       return true;
     });
@@ -628,6 +787,16 @@ function deleteSelected() {
     selectedComp = null;
     clearSelection();
     populateDeviceSelect();
+
+    // Re-evaluate other components that lost a connection
+    setTimeout(() => {
+      affectedCompIds.forEach(id => {
+        const c = components.find(comp => comp.id === id);
+        if (c && (c.defId.startsWith('led') || c.defId.startsWith('buzzer'))) {
+          driveComponent(c, null, undefined);
+        }
+      });
+    }, 0);
   }
 }
 
@@ -845,18 +1014,72 @@ const PIN_MAP = {
 let audioCtx = null;
 const activeOscillators = {};
 
-function driveComponent(comp, pinId, isHigh) {
-  if (window.update3DComponentState) window.update3DComponentState(comp.id, isHigh);
+// Map LED defId → glow color
+const LED_GLOW_COLOR = {
+  ledBlue:   '#33aaff',
+  ledRed:    '#ff3020',
+  ledGreen:  '#44ff22',
+  ledYellow: '#ffee00',
+  ledWhite:  '#ffffff',
+};
 
-  if (comp.defId.startsWith('led_')) {
-    const ellipse = comp.element.querySelector('ellipse');
-    if (ellipse) {
-      ellipse.style.filter = isHigh
-        ? `brightness(2.5) drop-shadow(0 0 8px ${comp.props.color || '#ff0033'})`
-        : 'brightness(0.35)';
+function getPinLogicLevel(comp, pinId) {
+  // 1. Check if it's actively driven by the controller
+  if (comp.pinStates && comp.pinStates[pinId] !== undefined) {
+    return comp.pinStates[pinId];
+  }
+
+  // 2. Check if it's hardwired to a constant power/gnd pin
+  const connectedWires = wires.filter(w => 
+    (w.from.compId === comp.id && w.from.pinId === pinId) ||
+    (w.to.compId === comp.id && w.to.pinId === pinId)
+  );
+
+  for (const w of connectedWires) {
+    const otherSide = w.from.compId === comp.id ? w.to : w.from;
+    const otherComp = components.find(c => c.id === otherSide.compId);
+    if (otherComp && otherComp.def && otherComp.def.pins) {
+      const otherPinDef = otherComp.def.pins.find(p => p.id === otherSide.pinId);
+      if (otherPinDef) {
+        if (otherPinDef.type === 'gnd') return false; // Hard LOW
+        if (otherPinDef.type === 'power') return true; // Hard HIGH
+      }
     }
-  } else if (comp.defId === 'buzzer') {
-    if (isHigh) {
+  }
+
+  return undefined; // Floating / not connected
+}
+
+function driveComponent(comp, pinId, isHigh) {
+  if (!comp.pinStates) comp.pinStates = {};
+  if (pinId !== null) comp.pinStates[pinId] = isHigh;
+
+  if (comp.defId.startsWith('led')) {
+    const isAnodeHigh = getPinLogicLevel(comp, 'ANODE');
+    const isCathodeHigh = getPinLogicLevel(comp, 'CATHODE');
+    
+    // LED glows only if ANODE is HIGH and CATHODE is LOW (GND)
+    const shouldGlow = (isAnodeHigh === true) && (isCathodeHigh === false);
+
+    if (window.update3DComponentState) window.update3DComponentState(comp.id, shouldGlow);
+
+    const body = comp.element.querySelector('.comp-body');
+    if (body) {
+      const glowColor = LED_GLOW_COLOR[comp.defId] || '#ffffff';
+      body.style.filter = shouldGlow
+        ? `brightness(2.2) drop-shadow(0 0 10px ${glowColor}) drop-shadow(0 0 4px ${glowColor})`
+        : 'brightness(0.38) saturate(0.4)';
+    }
+  } else if (comp.defId.startsWith('buzzer')) {
+    const isPosHigh = getPinLogicLevel(comp, 'POS');
+    const isNegHigh = getPinLogicLevel(comp, 'NEG');
+    
+    // Buzzer buzzes if POS is HIGH and NEG is LOW (GND)
+    const shouldBuzz = (isPosHigh === true) && (isNegHigh === false);
+
+    if (window.update3DComponentState) window.update3DComponentState(comp.id, shouldBuzz);
+
+    if (shouldBuzz) {
       if (!activeOscillators[comp.id]) {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -869,14 +1092,16 @@ function driveComponent(comp, pinId, isHigh) {
         gain.connect(audioCtx.destination);
         osc.start();
         activeOscillators[comp.id] = osc;
-        comp.element.style.filter = 'drop-shadow(0 0 8px #00aaff)';
+        const body = comp.element.querySelector('.comp-body');
+        if (body) body.style.filter = 'drop-shadow(0 0 8px #ffd54a)';
       }
     } else {
       if (activeOscillators[comp.id]) {
         activeOscillators[comp.id].stop();
         activeOscillators[comp.id].disconnect();
         delete activeOscillators[comp.id];
-        comp.element.style.filter = '';
+        const body = comp.element.querySelector('.comp-body');
+        if (body) body.style.filter = '';
       }
     }
   }
@@ -884,16 +1109,18 @@ function driveComponent(comp, pinId, isHigh) {
 
 function resetVisuals() {
   components.forEach(comp => {
+    comp.pinStates = {}; // Clear active pin states on reset
     if (window.update3DComponentState) window.update3DComponentState(comp.id, false);
-    if (comp.defId.startsWith('led_')) {
-      const ellipse = comp.element.querySelector('ellipse');
-      if (ellipse) ellipse.style.filter = '';
-    } else if (comp.defId === 'buzzer') {
+    if (comp.defId.startsWith('led')) {
+      const body = comp.element.querySelector('.comp-body');
+      if (body) body.style.filter = '';
+    } else if (comp.defId.startsWith('buzzer')) {
       if (activeOscillators[comp.id]) {
         activeOscillators[comp.id].stop();
         delete activeOscillators[comp.id];
       }
-      comp.element.style.filter = '';
+      const body = comp.element.querySelector('.comp-body');
+      if (body) body.style.filter = '';
     }
   });
 }
@@ -941,7 +1168,16 @@ async function runUpload() {
   const ok = await EduSimulator.compileAndSimulate(code, defId, {
     onLog:  (msg, type) => clog(msg, type),
     onError:(msg)       => clog(msg, 'err'),
-    onReady: ()         => setSimUI(true),
+    onReady: () => {
+      setSimUI(true);
+      // Perform an initial static pass to light up anything hardwired to 5V/GND
+      components.forEach(c => {
+        if (c.defId.startsWith('led') || c.defId.startsWith('buzzer')) {
+          driveComponent(c, null, undefined);
+        }
+      });
+    },
+    onSerial: (text)    => slog(text),
     onPin: (portName, bit, pinState) => {
       const isHigh = (pinState === 1 || pinState === true);
 
@@ -958,8 +1194,17 @@ async function runUpload() {
         if (!cPinId) return;
 
         if (portName === 'PSEUDO') {
-          // For pseudo-sim, bit is the raw pin number (e.g. 23)
-          if (cPinId === `D${bit}` || cPinId === bit.toString() || cPinId === `A${bit}`) {
+          // Pseudo-sim passes raw pin numbers (e.g. bit=2 for GPIO2 / D2)
+          // Match against all pin naming conventions used in the registry:
+          //   ESP32  → GPIO2, GPIO13, etc.
+          //   Arduino → D2, D13, etc.
+          //   Raw num → "2", "13", etc.
+          if (
+            cPinId === `GPIO${bit}` ||
+            cPinId === `D${bit}`    ||
+            cPinId === bit.toString() ||
+            cPinId === `A${bit}`
+          ) {
             matches = true;
           }
         } else {
@@ -997,11 +1242,174 @@ function saveProject() {
     mode: PROJECT.mode,
     code: labEditor ? labEditor.getValue() : '',
     components: components.map(c => ({ id:c.id, defId:c.defId, x:c.x, y:c.y, rotation:c.rotation||0, props:{...c.props} })),
-    wires: wires.map(w => ({ id:w.id, from:w.from, to:w.to, color:w.color })),
+    wires: wires.map(w => ({ id:w.id, from:w.from, to:w.to, color:w.color, waypoints:w.waypoints?w.waypoints.map(p=>({...p})):[] })),
   };
   localStorage.setItem('edusim_vlab_' + PROJECT.id, JSON.stringify(data));
   clog('[Lab] Project saved to local storage ✓', 'ok');
 }
+
+// ── Report Modal ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const reportModal = document.getElementById('reportModal');
+  if (!reportModal) return;
+
+  document.getElementById('reportLabBtn').addEventListener('click', () => {
+    document.getElementById('reportProjectName').value = PROJECT.name || 'EduSim Project';
+    
+    const userInfoInput = document.getElementById('reportUserInfo');
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      const user = firebase.auth().currentUser;
+      userInfoInput.value = user.displayName || user.email || '';
+    } else {
+      userInfoInput.value = '';
+    }
+
+    const compList = components.map(c => c.props.label || c.def.label || c.def.name).filter(Boolean);
+    document.getElementById('reportComponents').textContent = compList.join(', ') || 'No components used';
+
+    document.getElementById('reportCode').textContent = labEditor ? labEditor.getValue() : 'No code uploaded.';
+
+    const svgNode = document.getElementById('labSvg').cloneNode(true);
+    svgNode.style.width = '100%';
+    svgNode.style.height = '100%';
+    svgNode.style.background = 'transparent';
+    
+    // Strip zoom/pan transforms so it renders cleanly in the PDF
+    const cLayer = svgNode.querySelector('#componentsLayer');
+    const wLayer = svgNode.querySelector('#wiresLayer');
+    if (cLayer) cLayer.removeAttribute('transform');
+    if (wLayer) wLayer.removeAttribute('transform');
+    
+    // Compute proper bounding box, falling back to 80px if w/h not defined
+    let vbW = 800, vbH = 400;
+    let vbx = 0, vby = 0;
+    if (components.length > 0) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      components.forEach(c => {
+        minX = Math.min(minX, c.x);
+        minY = Math.min(minY, c.y);
+        maxX = Math.max(maxX, c.x + (c.def.w || 80));
+        maxY = Math.max(maxY, c.y + (c.def.h || 80));
+      });
+      const pad = 60;
+      minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+      vbW = maxX - minX;
+      vbH = maxY - minY;
+      vbx = minX;
+      vby = minY;
+      svgNode.setAttribute('viewBox', `${minX} ${minY} ${vbW} ${vbH}`);
+    }
+
+    const cs = getComputedStyle(document.documentElement);
+    const varMap = {
+      '--accent':   cs.getPropertyValue('--accent').trim()  || '#00d4ff',
+      '--accent2':  cs.getPropertyValue('--accent2').trim() || '#7c3aed',
+      '--bg':       cs.getPropertyValue('--bg').trim()      || '#0d1117',
+      '--surface':  cs.getPropertyValue('--surface').trim() || '#161b22',
+      '--surface2': cs.getPropertyValue('--surface2').trim()|| '#1c2128',
+      '--text':     cs.getPropertyValue('--text').trim()    || '#e6edf3',
+      '--muted':    cs.getPropertyValue('--muted').trim()   || '#8b949e',
+      '--border':   cs.getPropertyValue('--border').trim()  || '#30363d',
+      '--border-h': cs.getPropertyValue('--border-h').trim()|| '#444c56',
+      '--success':  cs.getPropertyValue('--success').trim() || '#3fb950',
+      '--error':    cs.getPropertyValue('--error').trim()   || '#ff4466',
+    };
+
+    const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bgRect.setAttribute('x', String(vbx));
+    bgRect.setAttribute('y', String(vby));
+    bgRect.setAttribute('width', String(vbW));
+    bgRect.setAttribute('height', String(vbH));
+    bgRect.setAttribute('fill', varMap['--bg']);
+    svgNode.insertBefore(bgRect, svgNode.firstChild);
+    
+    let svgStr = new XMLSerializer().serializeToString(svgNode);
+    svgStr = svgStr.replace(/var\(\s*(--[\w-]+)\s*(?:,[^)]+)?\s*\)/g, (_, varName) => varMap[varName] || '#888888');
+    
+    const container = document.getElementById('reportImageContainer');
+    container.innerHTML = '<div style="color:var(--text-dim);font-style:italic">Rendering circuit...</div>';
+    reportModal.style.display = 'flex';
+
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = Math.round(1200 * (vbH / vbW));
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(svgUrl);
+      
+      const outImg = document.createElement('img');
+      outImg.src = canvas.toDataURL('image/png');
+      outImg.style.width = '100%';
+      outImg.style.maxHeight = '100%';
+      outImg.style.objectFit = 'contain';
+      outImg.style.borderRadius = '4px';
+      
+      container.innerHTML = '';
+      container.appendChild(outImg);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      container.innerHTML = '';
+      container.appendChild(svgNode); // fallback
+    };
+    img.src = svgUrl;
+  });
+
+  // Close handlers
+  const _closeReport = () => { reportModal.style.display = 'none'; };
+  document.getElementById('closeReportBtn').addEventListener('click', _closeReport);
+  document.getElementById('closeReportFooterBtn').addEventListener('click', _closeReport);
+  reportModal.addEventListener('click', e => { if (e.target === reportModal) _closeReport(); });
+
+  // Print / Save PDF
+  document.getElementById('printReportBtn').addEventListener('click', () => {
+    window.print();
+  });
+
+
+
+  document.getElementById('reportAiToggle').addEventListener('change', async (e) => {
+    const descEl = document.getElementById('reportDescription');
+    const generatingText = document.getElementById('aiGeneratingText');
+    
+    if (e.target.checked) {
+      descEl.disabled = true;
+      generatingText.style.display = 'inline';
+      
+      try {
+        const compList = components.map(c => c.props.label || c.def.label || c.def.name).join(', ');
+        const codeStr = labEditor ? labEditor.getValue() : '';
+        
+        const prompt = `Write a short, professional description (2-3 sentences max) for an electronics project. Components used: ${compList}. Code snippet: ${codeStr.substring(0, 400)}. Focus on what the circuit likely does. No conversational filler, just the description.`;
+
+        const aiUrl = (typeof ENV !== 'undefined' && ENV.BACKEND_URL) 
+          ? `${ENV.BACKEND_URL}/api/ai/generate` 
+          : 'http://localhost:3000/api/ai/generate';
+
+        const res = await fetch(aiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+        });
+        
+        if (!res.ok) throw new Error('AI API failed');
+        const data = await res.json();
+        descEl.value = data.message.content.trim();
+      } catch (err) {
+        console.error('AI error:', err);
+        descEl.value = 'Failed to generate description. Please ensure the backend is running.';
+        e.target.checked = false;
+      } finally {
+        descEl.disabled = false;
+        generatingText.style.display = 'none';
+      }
+    }
+  });
+});
 
 // ── Load ──────────────────────────────────────────────────
 function loadProject() {
@@ -1045,7 +1453,11 @@ function loadProject() {
       `translate(${comp.x},${comp.y}) rotate(${comp.rotation} ${comp.def.w/2} ${comp.def.h/2})`);
   });
 
-  data.wires.forEach(w => drawWire(w.from, w.to, w.color));
+  data.wires.forEach(w => {
+    const nw = drawWire(w.from, w.to, w.color);
+    if (w.waypoints) nw.waypoints = [...w.waypoints];
+    updateWirePath(nw);
+  });
 
   // Restore editor code (may run after Monaco is ready)
   if (data.code) {
@@ -1069,6 +1481,24 @@ function clog(msg, type='') {
   el.textContent = msg;
   document.getElementById('consoleBody').appendChild(el);
   document.getElementById('consoleBody').scrollTop = 9999;
+}
+
+let serialBuffer = '';
+function slog(text) {
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '\n') {
+      const el = document.createElement('div');
+      el.className = 'clog';
+      el.textContent = serialBuffer || ' ';
+      const sb = document.getElementById('serialBody');
+      sb.appendChild(el);
+      sb.scrollTop = 9999;
+      serialBuffer = '';
+    } else {
+      if (char !== '\r') serialBuffer += char;
+    }
+  }
 }
 
 // ── Undo / Redo buttons ───────────────────────────────────
@@ -1129,6 +1559,7 @@ document.getElementById('uploadCodeBtn').addEventListener('click', runUpload);
 document.getElementById('themeBtn').addEventListener('click', () => {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
+  localStorage.setItem('edusim_theme', isLight ? 'light' : 'dark');
   if (labEditor) {
     monaco.editor.setTheme(isLight ? 'vs-light' : 'vs-dark');
   }
