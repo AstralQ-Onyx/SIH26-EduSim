@@ -1620,3 +1620,120 @@ setTimeout(() => {
   }
 }, 0);
 
+// ==============================================================
+// Upload to Hub Feature
+// ==============================================================
+document.addEventListener('DOMContentLoaded', async function initHubUploadFeature() {
+  const uploadHubBtn = document.getElementById('uploadHubBtn');
+  const uploadHubModal = document.getElementById('uploadHubModal');
+  const closeUploadHubModal = document.getElementById('closeUploadHubModal');
+  const cancelUploadHubBtn = document.getElementById('cancelUploadHubBtn');
+  const startUploadHubBtn = document.getElementById('startUploadHubBtn');
+  const hubControllerName = document.getElementById('hubControllerName');
+  const hubProgressList = document.getElementById('hubProgressList');
+  
+  if (!uploadHubBtn || !uploadHubModal) return;
+
+  // We will dynamically import the HubService when needed
+  let HubServiceClass = null;
+
+  function openHubModal() {
+    // Auto-detect controller: prefer the code editor's selected device,
+    // fall back to finding a microcontroller on the canvas.
+    let defId = 'arduinoNano';
+    let controllerLabel = 'Arduino Nano';
+
+    const deviceSelect = document.getElementById('codeDeviceSelect');
+    if (deviceSelect && deviceSelect.value) {
+      const comp = components.find(c => c.id === deviceSelect.value);
+      if (comp) {
+        defId = comp.defId;
+        controllerLabel = comp.def?.label || comp.defId;
+      }
+    } else {
+      // Scan canvas for a known microcontroller
+      const mcuDefs = ['arduinoNano', 'arduino_nano', 'esp32', 'esp32DevModule', 'arduinoUno', 'arduino_uno_r3', 'arduinoMega'];
+      const found = components.find(c => mcuDefs.includes(c.defId));
+      if (found) {
+        defId = found.defId;
+        controllerLabel = found.def?.label || found.defId;
+      } else if (components.length === 0) {
+        clog('[Hub] Please add a microcontroller to the canvas first.', 'err');
+        return;
+      }
+    }
+
+    hubControllerName.textContent = controllerLabel;
+    hubControllerName.dataset.defId = defId;
+    hubProgressList.innerHTML = '';
+    uploadHubModal.classList.add('active');
+  }
+
+  function closeHubModal() {
+    uploadHubModal.classList.remove('active');
+  }
+
+  uploadHubBtn.addEventListener('click', openHubModal);
+  closeUploadHubModal.addEventListener('click', closeHubModal);
+  cancelUploadHubBtn.addEventListener('click', closeHubModal);
+  uploadHubModal.addEventListener('click', e => { if (e.target === uploadHubModal) closeHubModal(); });
+
+  startUploadHubBtn.addEventListener('click', async () => {
+    startUploadHubBtn.disabled = true;
+    cancelUploadHubBtn.disabled = true;
+    hubProgressList.innerHTML = '';
+
+    // Safely get code — editor may not be open yet but it still holds its value
+    const code = (typeof labEditor !== 'undefined' && labEditor)
+      ? labEditor.getValue()
+      : (window._pendingEditorCode || '');
+    const defId = hubControllerName.dataset.defId;
+
+    try {
+      if (!HubServiceClass) {
+        const module = await import('../hub-service/hubService.js');
+        HubServiceClass = module.HubService;
+      }
+      
+      const hubService = new HubServiceClass({
+        onProgress: (step, msg) => {
+          const item = document.createElement('div');
+          item.style.display = 'flex';
+          item.style.alignItems = 'center';
+          item.style.gap = '8px';
+          item.innerHTML = `<span style="color:#00e5ff;">✓</span> <span>${msg}</span>`;
+          hubProgressList.appendChild(item);
+          hubProgressList.scrollTop = hubProgressList.scrollHeight;
+        },
+        onComplete: (success, msg) => {
+          const item = document.createElement('div');
+          item.style.color = 'var(--success)';
+          item.style.fontWeight = 'bold';
+          item.style.marginTop = '8px';
+          item.textContent = msg;
+          hubProgressList.appendChild(item);
+          startUploadHubBtn.disabled = false;
+          cancelUploadHubBtn.disabled = false;
+        },
+        onError: (msg) => {
+          const item = document.createElement('div');
+          item.style.color = 'var(--error)';
+          item.style.fontWeight = 'bold';
+          item.style.marginTop = '8px';
+          item.style.whiteSpace = 'pre-wrap';
+          item.textContent = 'Error: ' + msg;
+          hubProgressList.appendChild(item);
+          startUploadHubBtn.disabled = false;
+          cancelUploadHubBtn.disabled = false;
+        }
+      });
+
+      await hubService.uploadToHub(defId, code);
+
+    } catch (err) {
+      console.error(err);
+      startUploadHubBtn.disabled = false;
+      cancelUploadHubBtn.disabled = false;
+    }
+  });
+});

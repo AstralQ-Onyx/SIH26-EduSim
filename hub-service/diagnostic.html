@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>EduSim Hub Diagnostic</title>
+<style>
+  body { background:#0d0d0d; color:#eee; font-family:monospace; padding:20px; }
+  button { margin:8px 4px; padding:8px 14px; background:#1a1a2e; border:1px solid #00e5ff; color:#00e5ff; cursor:pointer; border-radius:4px; }
+  button:hover { background:#00e5ff; color:#000; }
+  #log { background:#111; border:1px solid #333; padding:12px; margin-top:12px; border-radius:6px; min-height:200px; white-space:pre-wrap; font-size:13px; }
+  .ok { color:#00ff88; }
+  .err { color:#ff4757; }
+  .warn { color:#ffa502; }
+  .info { color:#00e5ff; }
+</style>
+</head>
+<body>
+<h2>🔧 EduSim Hub — Diagnostic Scratchpad</h2>
+<p>Connect ESP32 Master (COM18) via USB before running tests.</p>
+
+<button onclick="testWebSerial()">1. Test Web Serial API</button>
+<button onclick="testCompiler()">2. Test Cloud Compiler</button>
+<button onclick="testEsptoolLoad()">3. Test esptool-js Load</button>
+<button onclick="testFullFlash()">4. Full Flash Test (COM18)</button>
+
+<div id="log">[ Diagnostic Log ]\n</div>
+
+<script>
+const log = (msg, type='') => {
+  const el = document.getElementById('log');
+  const cls = type ? ` class="${type}"` : '';
+  el.innerHTML += `<span${cls}>${msg}</span>\n`;
+  el.scrollTop = el.scrollHeight;
+};
+
+// ── TEST 1: Web Serial ─────────────────────────────────────────
+async function testWebSerial() {
+  log('\n--- TEST 1: Web Serial API ---', 'info');
+  if (!('serial' in navigator)) {
+    log('FAIL: navigator.serial not available. Use Chrome/Edge!', 'err');
+    return;
+  }
+  log('PASS: navigator.serial exists', 'ok');
+  try {
+    const port = await navigator.serial.requestPort();
+    log('PASS: Port selected by user', 'ok');
+    const info = port.getInfo();
+    log(`  usbVendorId: ${info.usbVendorId}, usbProductId: ${info.usbProductId}`, 'info');
+    log('Opening port at 115200...', 'info');
+    await port.open({ baudRate: 115200 });
+    log('PASS: Port opened successfully', 'ok');
+    await port.close();
+    log('PASS: Port closed cleanly', 'ok');
+    window._testPort = port;
+  } catch(e) {
+    log('FAIL: ' + e.message, 'err');
+  }
+}
+
+// ── TEST 2: Cloud Compiler ─────────────────────────────────────
+async function testCompiler() {
+  log('\n--- TEST 2: Cloud Compiler ---', 'info');
+  // const COMPILER_URL = 'https://edusim-compiler.onrender.com';
+  const COMPILER_URL = 'http://localhost:3000';
+  const testCode = `
+void setup() {
+  int pin = 33;
+  pinMode(pin, OUTPUT);
+}
+void loop() {
+  int pin = 33;
+  digitalWrite(pin, HIGH);
+  delay(1000);
+  digitalWrite(pin, LOW);
+  delay(1000);
+}`;
+  log('Sending blink code to cloud compiler for esp32:esp32:esp32...', 'info');
+  try {
+    const resp = await fetch(`${COMPILER_URL}/compile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: testCode, fqbn: 'esp32:esp32:esp32' })
+    });
+    const data = await resp.json();
+    log(`HTTP status: ${resp.status}`, resp.ok ? 'ok' : 'err');
+    log(`Response keys: ${Object.keys(data).join(', ')}`, 'info');
+    if (data.success && data.data) {
+      log(`PASS: Got .bin payload! format=${data.format}, size=${data.data.length} base64 chars`, 'ok');
+      window._testBin = data.data;
+    } else {
+      log('FAIL: ' + JSON.stringify(data), 'err');
+    }
+  } catch(e) {
+    log('FAIL: ' + e.message, 'err');
+  }
+}
+
+// ── TEST 3: esptool-js Load ────────────────────────────────
+async function testEsptoolLoad() {
+  log('\n--- TEST 3: esptool-js Load (ESM dynamic import) ---', 'info');
+  const CDN = 'https://unpkg.com/esptool-js@0.4.3/bundle.js';
+  log(`Importing from: ${CDN}`, 'info');
+  try {
+    if (!window.Buffer) {
+      log('Polyfilling Buffer...', 'info');
+      const { Buffer } = await import('https://esm.sh/buffer');
+      window.Buffer = Buffer;
+    }
+    const mod = await import(CDN);
+    log('Module imported successfully!', 'ok');
+    log('Exported keys: ' + Object.keys(mod).join(', '), 'info');
+
+    window._ESPLoader = mod.ESPLoader || (mod.default && mod.default.ESPLoader);
+    window._Transport = mod.Transport || (mod.default && mod.default.Transport);
+
+    if (window._ESPLoader) log('PASS: ESPLoader found ✓', 'ok');
+    else log('FAIL: ESPLoader not found', 'err');
+
+    if (window._Transport) log('PASS: Transport found ✓', 'ok');
+    else log('FAIL: Transport not found', 'err');
+  } catch(e) {
+    log('FAIL: import() threw: ' + e.message, 'err');
+    console.error(e);
+  }
+}
+
+// ── TEST 4: Full Flash ──────────────────────────────────
+async function testFullFlash() {
+  log('\n--- TEST 4: Full Flash ---', 'info');
+  if (!window._testBin) { log('Run Test 2 first to get the .bin payload', 'warn'); return; }
+  if (!window._ESPLoader || !window._Transport) { log('Run Test 3 first to load esptool-js', 'warn'); return; }
+
+  // Decode base64 bin
+  const binaryString = atob(window._testBin);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+  log(`Decoded .bin: ${bytes.length} bytes`, 'ok');
+
+  if (!('serial' in navigator)) { log('FAIL: No Web Serial support', 'err'); return; }
+
+  let port;
+  try {
+    log('Requesting serial port...', 'info');
+    port = await navigator.serial.requestPort();
+    log('PASS: Port selected', 'ok');
+    // Do NOT open the port — Transport opens it internally
+  } catch(e) { log('FAIL selecting port: ' + e.message, 'err'); return; }
+
+  try {
+    log('Creating Transport...', 'info');
+    const transport = new window._Transport(port);
+
+    const term = {
+      writeLine: (msg) => log('  [esp] ' + msg, 'info'),
+      write:     (msg) => log('  [esp] ' + msg, 'info'),
+      clean:     ()    => {}
+    };
+
+    log('Creating ESPLoader...', 'info');
+    const esploader = new window._ESPLoader({ transport, baudrate: 921600, terminal: term });
+
+    log('Connecting to ROM bootloader... (hold BOOT button if needed)', 'warn');
+    const chip = await esploader.main();
+    log(`PASS: Connected! Chip: ${chip}`, 'ok');
+
+    log('Writing firmware to 0x10000...', 'info');
+    await esploader.writeFlash({
+      fileArray: [{ data: binaryString, address: 0x10000 }],
+      flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep',
+      compress: true,
+      reportProgress: (fi, written, total) => {
+        log(`  Flash progress: ${Math.floor((written/total)*100)}%`, 'info');
+      }
+    });
+
+    log('Hard resetting...', 'info');
+    await esploader.hardReset();
+    log('PASS: Upload complete! ESP32 is running the new firmware.', 'ok');
+  } catch(e) {
+    log('FAIL: ' + e.message, 'err');
+    console.error(e);
+  } finally {
+    try { await port.close(); } catch(e) {}
+  }
+}
+</script>
+</body>
+</html>

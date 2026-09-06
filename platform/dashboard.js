@@ -659,6 +659,7 @@ function showAgentBanner(online) {
 function connectAgent() {
   try {
     agent = new WebSocket('ws://127.0.0.1:3745');
+    // agent = new WebSocket('ws://edusim-compiler.onrender.com');
 
     agent.onopen = () => {
       agentOnline = true;
