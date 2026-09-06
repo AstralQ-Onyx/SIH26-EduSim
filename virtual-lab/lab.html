@@ -172,8 +172,14 @@
   <footer class="lab-console" id="labConsole">
     <div class="console-tabs">
       <button class="console-tab active" data-ctab="console">Console</button>
-      <button class="console-tab" data-ctab="serial">Serial</button>
+      <button class="console-tab" data-ctab="serial">Serial Monitor</button>
       <div style="flex:1"></div>
+      <!-- Serial monitor controls — shown only when Serial tab is active -->
+      <div id="serialControls" style="display:none; align-items:center; gap:8px;">
+        <span id="serialStatus" style="font-size:11px; color:var(--text-dim);">Disconnected</span>
+        <button class="lab-btn" id="serialConnectBtn" style="padding:3px 10px; font-size:11px; color:#00e5ff; border-color:rgba(0,229,255,0.4);">Connect</button>
+        <button class="lab-btn" id="serialClearBtn" style="padding:3px 10px; font-size:11px;">Clear</button>
+      </div>
       <button class="lab-btn" id="toggleConsoleBtn" title="Toggle Console Height">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       </button>
@@ -182,7 +188,9 @@
     <div class="console-body active" id="consoleBody">
       <div class="clog sys">[ EduSim Virtual Lab Ready ]</div>
     </div>
-    <div class="console-body" id="serialBody" style="display:none;"></div>
+    <div class="console-body" id="serialBody" style="display:none; font-family: monospace; font-size: 12px; white-space: pre-wrap; overflow-y: auto;">
+      <div style="color:var(--text-dim); font-style:italic; padding:4px 0;">Click "Connect" to open the Web Serial monitor and see output from your EduSim Hub in real time.</div>
+    </div>
     
     <div class="console-input-row">
       <input type="text" class="console-input" id="consoleInput" placeholder="Send to serial…" disabled/>

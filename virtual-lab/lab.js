@@ -1737,3 +1737,135 @@ document.addEventListener('DOMContentLoaded', async function initHubUploadFeatur
     }
   });
 });
+
+// ==============================================================
+// Console Tab Switching (Console / Serial Monitor)
+// ==============================================================
+document.addEventListener('DOMContentLoaded', function initConsoleTabs() {
+  const tabs       = document.querySelectorAll('.console-tab');
+  const consoleBody = document.getElementById('consoleBody');
+  const serialBody  = document.getElementById('serialBody');
+  const serialControls = document.getElementById('serialControls');
+
+  if (!tabs.length || !consoleBody || !serialBody) return;
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const which = tab.dataset.ctab;
+      if (which === 'serial') {
+        consoleBody.classList.remove('active');
+        consoleBody.style.display = 'none';
+        serialBody.style.display  = 'block';
+        if (serialControls) serialControls.style.display = 'flex';
+      } else {
+        serialBody.style.display  = 'none';
+        if (serialControls) serialControls.style.display = 'none';
+        consoleBody.style.display = 'block';
+        consoleBody.classList.add('active');
+      }
+    });
+  });
+});
+
+// ==============================================================
+// Serial Monitor Feature
+// ==============================================================
+document.addEventListener('DOMContentLoaded', async function initSerialMonitor() {
+  const connectBtn  = document.getElementById('serialConnectBtn');
+  const clearBtn    = document.getElementById('serialClearBtn');
+  const statusEl    = document.getElementById('serialStatus');
+  const serialBody  = document.getElementById('serialBody');
+  const sendInput   = document.getElementById('consoleInput');
+  const sendBtn     = document.getElementById('consoleSend');
+
+  if (!connectBtn || !serialBody) return;
+
+  let HubServiceClass = null;
+  let monitor = null;
+  let isConnected = false;
+
+  function appendLine(text, color) {
+    // Remove placeholder text on first real data
+    const placeholder = serialBody.querySelector('div[style*="italic"]');
+    if (placeholder) placeholder.remove();
+
+    const line = document.createElement('span');
+    if (color) line.style.color = color;
+    line.textContent = text;
+    serialBody.appendChild(line);
+    serialBody.scrollTop = serialBody.scrollHeight;
+  }
+
+  function setConnected(connected) {
+    isConnected = connected;
+    connectBtn.textContent     = connected ? 'Disconnect' : 'Connect';
+    connectBtn.style.color     = connected ? '#ff4d4d' : '#00e5ff';
+    connectBtn.style.borderColor = connected ? 'rgba(255,77,77,0.4)' : 'rgba(0,229,255,0.4)';
+    statusEl.textContent       = connected ? '● Connected' : 'Disconnected';
+    statusEl.style.color       = connected ? '#4dff91' : 'var(--text-dim)';
+    sendInput.disabled         = !connected;
+    sendBtn.disabled           = !connected;
+  }
+
+  clearBtn.addEventListener('click', () => {
+    serialBody.innerHTML = '';
+    appendLine('[ Cleared ]', 'var(--text-dim)');
+  });
+
+  connectBtn.addEventListener('click', async () => {
+    if (isConnected) {
+      // Disconnect
+      if (monitor) await monitor.stopSerialMonitor();
+      monitor = null;
+      setConnected(false);
+      appendLine('\n[ Disconnected ]\n', '#ff4d4d');
+      return;
+    }
+
+    // Connect
+    if (!HubServiceClass) {
+      try {
+        const mod = await import('../hub-service/hubService.js');
+        HubServiceClass = mod.HubService;
+      } catch (e) {
+        appendLine('Error: Could not load HubService — ' + e.message, '#ff4d4d');
+        return;
+      }
+    }
+
+    monitor = new HubServiceClass({});
+    appendLine('[ Requesting serial port… ]\n', 'var(--text-dim)');
+
+    const ok = await monitor.startSerialMonitor({
+      baudRate: 115200,
+      onData: (text) => appendLine(text),
+      onError: (msg) => {
+        appendLine('\n[ Error: ' + msg + ' ]\n', '#ff4d4d');
+        setConnected(false);
+      },
+      onDisconnect: () => {
+        appendLine('\n[ Port closed ]\n', '#ffa500');
+        setConnected(false);
+      }
+    });
+
+    if (ok) {
+      setConnected(true);
+      appendLine('[ Connected at 115200 baud — waiting for data… ]\n', '#4dff91');
+    }
+  });
+
+  // Send data to the ESP32
+  function doSend() {
+    const text = sendInput.value.trim();
+    if (!text || !monitor) return;
+    monitor.sendSerialData(text);
+    appendLine('> ' + text + '\n', '#00e5ff');
+    sendInput.value = '';
+  }
+
+  sendBtn.addEventListener('click', doSend);
+  sendInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSend(); });
+});

@@ -221,4 +221,76 @@ export class HubService {
     this.updateProgress(7, 'Uploading Firmware... (Resetting ESP32)');
     await this.esploader.hardReset();
   }
+
+  // ── Serial Monitor ────────────────────────────────────────────
+  // Opens a Web Serial port and streams incoming bytes to onData(text).
+  // Resolves when the port is opened; streaming runs in background.
+  async startSerialMonitor({ baudRate = 115200, onData, onError, onDisconnect }) {
+    if (!('serial' in navigator)) {
+      if (onError) onError('Web Serial API not supported in this browser.');
+      return false;
+    }
+    try {
+      this._monitorPort = await navigator.serial.requestPort();
+      await this._monitorPort.open({ baudRate });
+    } catch (err) {
+      if (err.name !== 'NotFoundError') {
+        if (onError) onError('Could not open port: ' + err.message);
+      }
+      return false;
+    }
+
+    this._monitorActive = true;
+
+    // Keep a reference to the writer for sending data
+    this._monitorWriter = this._monitorPort.writable.getWriter();
+
+    // Read loop — runs in background
+    (async () => {
+      const decoder = new TextDecoderStream();
+      const readableStreamClosed = this._monitorPort.readable.pipeTo(decoder.writable);
+      const reader = decoder.readable.getReader();
+
+      try {
+        while (this._monitorActive) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value && onData) onData(value);
+        }
+      } catch (err) {
+        if (this._monitorActive && onError) onError('Serial read error: ' + err.message);
+      } finally {
+        reader.releaseLock();
+        if (onDisconnect) onDisconnect();
+      }
+    })();
+
+    return true;
+  }
+
+  async sendSerialData(text) {
+    if (!this._monitorWriter) return;
+    const encoder = new TextEncoder();
+    try {
+      await this._monitorWriter.write(encoder.encode(text + '\n'));
+    } catch(e) {
+      console.error('Serial send error:', e);
+    }
+  }
+
+  async stopSerialMonitor() {
+    this._monitorActive = false;
+    try {
+      if (this._monitorWriter) {
+        await this._monitorWriter.releaseLock();
+        this._monitorWriter = null;
+      }
+    } catch(e) {}
+    try {
+      if (this._monitorPort) {
+        await this._monitorPort.close();
+        this._monitorPort = null;
+      }
+    } catch(e) {}
+  }
 }
