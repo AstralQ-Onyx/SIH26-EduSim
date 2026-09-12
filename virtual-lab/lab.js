@@ -1624,47 +1624,64 @@ setTimeout(() => {
 // Upload to Hub Feature
 // ==============================================================
 document.addEventListener('DOMContentLoaded', async function initHubUploadFeature() {
-  const uploadHubBtn = document.getElementById('uploadHubBtn');
-  const uploadHubModal = document.getElementById('uploadHubModal');
-  const closeUploadHubModal = document.getElementById('closeUploadHubModal');
+  const uploadHubBtn       = document.getElementById('uploadHubBtn');
+  const uploadHubModal     = document.getElementById('uploadHubModal');
+  const closeUploadHubModal= document.getElementById('closeUploadHubModal');
   const cancelUploadHubBtn = document.getElementById('cancelUploadHubBtn');
-  const startUploadHubBtn = document.getElementById('startUploadHubBtn');
-  const hubControllerName = document.getElementById('hubControllerName');
-  const hubProgressList = document.getElementById('hubProgressList');
-  
+  const startUploadHubBtn  = document.getElementById('startUploadHubBtn');
+  const hubProgressList    = document.getElementById('hubProgressList');
+  const hubBoardCards      = document.getElementById('hubBoardCards');
+
   if (!uploadHubBtn || !uploadHubModal) return;
 
-  // We will dynamically import the HubService when needed
   let HubServiceClass = null;
 
-  function openHubModal() {
-    // Auto-detect controller: prefer the code editor's selected device,
-    // fall back to finding a microcontroller on the canvas.
-    let defId = 'arduinoNano';
-    let controllerLabel = 'Arduino Nano';
+  // ── Board card selection logic ────────────────────────────────
+  function getSelectedBoardId() {
+    const sel = hubBoardCards && hubBoardCards.querySelector('.hub-board-card.selected');
+    return sel ? sel.dataset.boardId : 'arduinoNano';
+  }
 
+  function selectCard(boardId) {
+    if (!hubBoardCards) return;
+    hubBoardCards.querySelectorAll('.hub-board-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.boardId === boardId);
+    });
+    // Persist so the modal reopens on the same card
+    try { localStorage.setItem('edusim_hub_board', boardId); } catch(e) {}
+  }
+
+  // Wire card click events
+  if (hubBoardCards) {
+    hubBoardCards.addEventListener('click', e => {
+      const card = e.target.closest('.hub-board-card');
+      if (card) selectCard(card.dataset.boardId);
+    });
+  }
+
+  // ── Open modal ───────────────────────────────────────────────
+  function openHubModal() {
+    // Auto-detect from canvas; fall back to saved preference
+    let boardId = localStorage.getItem('edusim_hub_board') || 'arduinoNano';
+
+    const mcuMap = {
+      arduinoNano: 'arduinoNano', arduino_nano: 'arduinoNano',
+      esp32: 'esp32',             esp32DevModule: 'esp32',
+    };
     const deviceSelect = document.getElementById('codeDeviceSelect');
     if (deviceSelect && deviceSelect.value) {
       const comp = components.find(c => c.id === deviceSelect.value);
-      if (comp) {
-        defId = comp.defId;
-        controllerLabel = comp.def?.label || comp.defId;
-      }
+      if (comp && mcuMap[comp.defId]) boardId = mcuMap[comp.defId];
     } else {
-      // Scan canvas for a known microcontroller
-      const mcuDefs = ['arduinoNano', 'arduino_nano', 'esp32', 'esp32DevModule', 'arduinoUno', 'arduino_uno_r3', 'arduinoMega'];
-      const found = components.find(c => mcuDefs.includes(c.defId));
-      if (found) {
-        defId = found.defId;
-        controllerLabel = found.def?.label || found.defId;
-      } else if (components.length === 0) {
+      const found = components.find(c => mcuMap[c.defId]);
+      if (found) boardId = mcuMap[found.defId];
+      else if (components.length === 0) {
         clog('[Hub] Please add a microcontroller to the canvas first.', 'err');
         return;
       }
     }
 
-    hubControllerName.textContent = controllerLabel;
-    hubControllerName.dataset.defId = defId;
+    selectCard(boardId);
     hubProgressList.innerHTML = '';
     uploadHubModal.classList.add('active');
   }
@@ -1683,11 +1700,13 @@ document.addEventListener('DOMContentLoaded', async function initHubUploadFeatur
     cancelUploadHubBtn.disabled = true;
     hubProgressList.innerHTML = '';
 
-    // Safely get code — editor may not be open yet but it still holds its value
+    // Read code from Monaco editor
     const code = (typeof labEditor !== 'undefined' && labEditor)
       ? labEditor.getValue()
       : (window._pendingEditorCode || '');
-    const defId = hubControllerName.dataset.defId;
+
+    // Read selected board from card picker
+    const boardId = getSelectedBoardId();
 
     try {
       if (!HubServiceClass) {
@@ -1728,7 +1747,8 @@ document.addEventListener('DOMContentLoaded', async function initHubUploadFeatur
         }
       });
 
-      await hubService.uploadToHub(defId, code);
+      // Pass boardId (from card picker) to the upload pipeline
+      await hubService.uploadToHub(boardId, code);
 
     } catch (err) {
       console.error(err);

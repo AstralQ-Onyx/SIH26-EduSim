@@ -1,4 +1,4 @@
-import { ArduinoNanoProfile } from './profiles/arduinoNano.js';
+import { getProfile, ALL_BANK_PINS } from './profiles/index.js';
 
 export class CodeTranslator {
   constructor(profileId) {
@@ -6,10 +6,7 @@ export class CodeTranslator {
   }
 
   getProfile(profileId) {
-    if (profileId === 'arduinoNano' || profileId === 'arduino_nano') {
-      return ArduinoNanoProfile;
-    }
-    return null;
+    return getProfile(profileId);
   }
 
   validate(code) {
@@ -117,18 +114,42 @@ export class CodeTranslator {
   }
 
   wrapInFirmwareTemplate(translatedCode) {
-    // Rename setup and loop
+    // Rename setup and loop so they run under EduSim control
     let fwCode = translatedCode.replace(/void\s+setup\s*\(\s*\)/g, 'void studentSetup()');
     fwCode = fwCode.replace(/void\s+loop\s*\(\s*\)/g, 'void studentLoop()');
+
+    // Build the list of ALL known bank control pins (to disable all others first)
+    const allPins      = ALL_BANK_PINS;
+    const activePin    = this.profile.bankControlPin;
+    const allPinsList  = allPins.join(', ');
 
     return `
 #include <Arduino.h>
 
 HardwareSerial InterESP(2);
 
-// UART Pins
+// UART Pins (Master <-> Analog Slave)
 #define TX_PIN 4
 #define RX_PIN 5
+
+// ── EDUSIM BOARD SELECTION HAL ───────────────────────────────
+// All bank control pins known to this Hub build
+const int BANK_PINS[]    = { ${allPinsList} };
+const int BANK_PIN_COUNT = ${allPins.length};
+const int ACTIVE_PIN     = ${activePin}; // Selected board: ${this.profile.displayName}
+
+void edu_selectBoard() {
+  // Disable every header bank first
+  for (int i = 0; i < BANK_PIN_COUNT; i++) {
+    pinMode(BANK_PINS[i], OUTPUT);
+    digitalWrite(BANK_PINS[i], LOW);
+  }
+  // Enable only the selected board's header bank
+  digitalWrite(ACTIVE_PIN, HIGH);
+  Serial.print("[EduSim] Active board: ");
+  Serial.println("${this.profile.displayName}");
+}
+// ─────────────────────────────────────────────────────────────
 
 // [EDUSIM DIGITAL HAL]
 void eduPinMode(int pin, int mode) {
@@ -145,11 +166,11 @@ int eduDigitalRead(int pin) {
 
 // [EDUSIM ANALOG HAL]
 int eduAnalogRead(int analogPinIndex) {
-  // Request analog value from Left ESP32
+  // Request analog value from Left (Analog Slave) ESP32
   InterESP.print("READ:A");
   InterESP.println(analogPinIndex);
   
-  // Wait for response
+  // Wait for response (100ms timeout)
   long startTime = millis();
   while (!InterESP.available() && millis() - startTime < 100) {
     delay(1);
@@ -157,13 +178,12 @@ int eduAnalogRead(int analogPinIndex) {
   
   if (InterESP.available()) {
     String resp = InterESP.readStringUntil('\\n');
-    // Expected format: A0:2048
     int colonIdx = resp.indexOf(':');
     if (colonIdx > 0) {
       return resp.substring(colonIdx + 1).toInt();
     }
   }
-  return 0; // Default or error value
+  return 0;
 }
 
 // --- STUDENT CODE ---
@@ -173,6 +193,9 @@ ${fwCode}
 void setup() {
   Serial.begin(115200);
   InterESP.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
+  
+  // Activate selected board's header bank, disable all others
+  edu_selectBoard();
   
   studentSetup();
 }

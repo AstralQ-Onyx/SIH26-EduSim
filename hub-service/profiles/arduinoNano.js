@@ -1,6 +1,12 @@
 export const ArduinoNanoProfile = {
   id: 'arduinoNano',
-  name: 'Arduino Nano',
+  boardId: 'arduinoNano',
+  displayName: 'Arduino Nano V3',
+  shortName: 'Nano',
+  // FQBN used by the cloud compiler
+  fqbn: 'esp32:esp32:esp32',
+  // Master ESP32 GPIO that drives the transistor/relay powering this header bank
+  bankControlPin: 15,
   supportedFunctions: [
     'pinMode',
     'digitalWrite',
@@ -8,6 +14,7 @@ export const ArduinoNanoProfile = {
     'analogRead',
     'delay'
   ],
+  // Arduino pin number → Master ESP32 GPIO mapping
   digitalPins: {
     0: 16,
     1: 17,
@@ -25,7 +32,7 @@ export const ArduinoNanoProfile = {
     13: 33
   },
   analogPins: {
-    // Handled by analog ESP32 remotely, these are mapped to A0-A7 commands internally
+    // Handled by the Analog ESP32 slave; mapped to index 0-7
     'A0': 0, 'A1': 1, 'A2': 2, 'A3': 3, 'A4': 4, 'A5': 5, 'A6': 6, 'A7': 7
   }
 };
