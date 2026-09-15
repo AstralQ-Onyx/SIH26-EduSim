@@ -9,10 +9,12 @@ const AGENT_HTTP = 'http://127.0.0.1:3746';
 
 // Board FQBN map
 const FQBN_MAP = {
+  arduino_uno:      'arduino:avr:uno',
   arduino_uno_r3:   'arduino:avr:uno',
   arduino_nano:     'arduino:avr:nano',
   esp32_dev_module: 'esp32:esp32:esp32',
   esp32:            'esp32:esp32:esp32',
+  esp8266:          'esp8266:esp8266:nodemcuv2',
 };
 
 // ── avr8js loaded state ─────────────────────────────────────
@@ -23,6 +25,24 @@ let onPinChange = null; // callback(port, pin, value)
 
 let pseudoSimRunner = null; // Promise for ESP32
 let pseudoStopRequested = false;
+let pseudoEpoch = 0;
+
+/** Match a schematic pin id to a pseudo-sim digitalWrite(pin) number. */
+function pinsMatchPseudo(cPinId, bit, pinDef) {
+  const n = Number(bit);
+  if (cPinId == null || Number.isNaN(n)) return false;
+  const id = String(cPinId);
+  if (id === `D${n}` || id === `GPIO${n}` || id === String(n) || id === `A${n}`) return true;
+  if (pinDef && Number(pinDef.gpio) === n) return true;
+  return false;
+}
+
+function advanceCpu(cpu, avrInstruction, cycles) {
+  for (let i = 0; i < cycles; i++) {
+    avrInstruction(cpu);
+    cpu.tick();
+  }
+}
 
 // Load avr8js via ESM
 async function loadAvr8js() {
@@ -74,6 +94,7 @@ function transpileArduinoToJS(code) {
 }
 
 async function runPseudoSim(code, onLog, onReady) {
+  const epoch = ++pseudoEpoch;
   pseudoStopRequested = false;
   const jsCode = transpileArduinoToJS(code);
   
@@ -82,6 +103,9 @@ async function runPseudoSim(code, onLog, onReady) {
     LOW: 0,
     INPUT: 0,
     OUTPUT: 1,
+    LED_BUILTIN: 2,
+    // NodeMCU digital aliases so digitalWrite(D4, …) matches GPIO2
+    D0: 16, D1: 5, D2: 4, D3: 0, D4: 2, D5: 14, D6: 12, D7: 13, D8: 15,
     delay: (ms) => new Promise(res => setTimeout(res, ms)),
     digitalWrite: (pin, val) => {
       if (onPinChange) onPinChange('PSEUDO', pin, val);
@@ -96,7 +120,7 @@ async function runPseudoSim(code, onLog, onReady) {
 
   const wrappedCode = `
     return (async function(env) {
-      const { HIGH, LOW, INPUT, OUTPUT, delay, digitalWrite, pinMode, Serial } = env;
+      const { HIGH, LOW, INPUT, OUTPUT, LED_BUILTIN, D0, D1, D2, D3, D4, D5, D6, D7, D8, delay, digitalWrite, pinMode, Serial } = env;
       ${jsCode}
       if (typeof setup === 'function') await setup();
       while (true) {
@@ -109,7 +133,7 @@ async function runPseudoSim(code, onLog, onReady) {
   `;
 
   try {
-    env.checkStop = () => pseudoStopRequested;
+    env.checkStop = () => pseudoStopRequested || epoch !== pseudoEpoch;
     const runner = new Function(wrappedCode)();
     onLog('[PseudoSim] Lexical transpilation complete. Running...', 'sys');
     onReady();
@@ -193,9 +217,7 @@ async function compileAndSimulate(code, defId, callbacks) {
 
   const CYCLES_PER_TICK = 160000; 
   simRunner = setInterval(() => {
-    for (let i = 0; i < CYCLES_PER_TICK; i++) {
-      avrInstruction(cpu);
-    }
+    advanceCpu(cpu, avrInstruction, CYCLES_PER_TICK);
   }, 10);
 
   return true;
@@ -207,6 +229,7 @@ function stopSimulation() {
     simRunner = null;
   }
   cpu = null;
+  pseudoEpoch += 1;
   pseudoStopRequested = true;
   pseudoSimRunner = null;
 }
@@ -215,5 +238,6 @@ function isRunning() {
   return simRunner !== null || pseudoSimRunner !== null;
 }
 
-// Export to global scope (no module bundler)
-window.EduSimulator = { compileAndSimulate, stopSimulation, isRunning };
+const EduSimulator = { compileAndSimulate, stopSimulation, isRunning, pinsMatchPseudo, advanceCpu, parseHex };
+if (typeof window !== 'undefined') window.EduSimulator = EduSimulator;
+if (typeof module !== 'undefined' && module.exports) module.exports = EduSimulator;

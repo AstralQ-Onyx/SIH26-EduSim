@@ -948,8 +948,8 @@ async function runUpload() {
         if (!cPinId) return;
 
         if (portName === 'PSEUDO') {
-          // For pseudo-sim, bit is the raw pin number (e.g. 23)
-          if (cPinId === `D${bit}` || cPinId === bit.toString() || cPinId === `A${bit}`) {
+          const pinDef = ctrlComp.def.pins.find(p => p.id === cPinId);
+          if (EduSimulator.pinsMatchPseudo(cPinId, bit, pinDef)) {
             matches = true;
           }
         } else {

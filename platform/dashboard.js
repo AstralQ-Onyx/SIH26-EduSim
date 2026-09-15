@@ -89,6 +89,9 @@ auth.onAuthStateChanged(async user => {
   document.getElementById('profileAvatarBig').textContent = initial;
   document.getElementById('displayUser').textContent      = user.displayName || user.email;
 
+  // Project access is independent of the optional profile document.
+  loadProjects(user.uid);
+
   // Helper to render a value or dash
   const val = (v, fb) => (v && String(v).trim()) ? String(v).trim() : (fb || '—');
 
@@ -139,9 +142,6 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('editOrg').value     = data.org      || '';
     document.getElementById('editDept').value    = data.dept     || '';
     document.getElementById('editContact').value = data.contactMail || '';
-
-    // Load projects count
-    loadProjects(user.uid);
 
   } catch (err) {
     console.error('Profile load error:', err);
@@ -240,9 +240,13 @@ newProjectModal.addEventListener('click', e => { if (e.target === newProjectModa
 
 async function loadProjects(uid) {
   const grid = document.getElementById('projectsGrid');
+  const statProjects = document.getElementById('statProjects');
+  grid.setAttribute('aria-busy', 'true');
+  grid.innerHTML = '<div class="empty-state projects-loading"><p>Loading projects…</p></div>';
+
   try {
     const snap = await db.collection('users').doc(uid).collection('projects').orderBy('createdAt','desc').get();
-    document.getElementById('statProjects').textContent = snap.size;
+    statProjects.textContent = snap.size;
 
     if (snap.empty) { grid.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><p>No projects yet. Click <strong>New Project</strong> to get started.</p></div>'; return; }
 
@@ -292,16 +296,34 @@ async function loadProjects(uid) {
     grid.querySelectorAll('.delete-proj-btn').forEach(b => {
       b.addEventListener('click', async () => {
         if (!confirm('Delete this project?')) return;
-        await db.collection('users').doc(currentUser.uid).collection('projects').doc(b.dataset.id).delete();
-        showToast('Project deleted');
-        loadProjects(currentUser.uid);
+        b.disabled = true;
+        try {
+          await db.collection('users').doc(currentUser.uid).collection('projects').doc(b.dataset.id).delete();
+          showToast('Project deleted');
+          loadProjects(currentUser.uid);
+        } catch (err) {
+          b.disabled = false;
+          showToast(getFirestoreErrorMessage(err, 'delete this project'), 'error');
+        }
       });
     });
 
   } catch (err) {
-    console.error('Projects load error:', err);
-    grid.innerHTML = '<div class="empty-state"><p>Failed to load projects. Check Firestore rules.</p></div>';
+    grid.innerHTML = `<div class="empty-state project-error">
+      <p>${getFirestoreErrorMessage(err, 'load projects')}</p>
+      <button class="btn" type="button" id="retryProjectsBtn">Retry</button>
+    </div>`;
+    document.getElementById('retryProjectsBtn').addEventListener('click', () => loadProjects(uid));
+  } finally {
+    grid.removeAttribute('aria-busy');
   }
+}
+
+function getFirestoreErrorMessage(err, action) {
+  if (err?.code === 'permission-denied') {
+    return `Projects are unavailable because you do not have permission to ${action}.`;
+  }
+  return `Could not ${action}. Please try again.`;
 }
 
 // Edit Project Modal handlers
@@ -382,14 +404,9 @@ createProjectBtn.addEventListener('click', async () => {
 const MONACO_BASE = 'https://unpkg.com/monaco-editor@0.44.0/min/vs';
 
 window.MonacoEnvironment = {
-  getWorkerUrl: function(_moduleId, label) {
-    const url = label === 'json'       ? `${MONACO_BASE}/language/json/jsonWorker.js`
-               : label === 'css'       ? `${MONACO_BASE}/language/css/cssWorker.js`
-               : label === 'html'      ? `${MONACO_BASE}/language/html/htmlWorker.js`
-               : label === 'typescript'? `${MONACO_BASE}/language/typescript/tsWorker.js`
-               :                        `${MONACO_BASE}/editor/editorWorker.js`;
+  getWorkerUrl: function() {
     return `data:text/javascript;charset=utf-8,${encodeURIComponent(
-      `self.MonacoEnvironment={baseUrl:'${MONACO_BASE}/'};importScripts('${url}');`
+      `self.MonacoEnvironment={baseUrl:'${MONACO_BASE}/'};importScripts('${MONACO_BASE}/base/worker/workerMain.js');`
     )}`;
   }
 };

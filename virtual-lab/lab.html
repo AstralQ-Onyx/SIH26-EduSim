@@ -123,13 +123,21 @@
     <!-- Floating Code Panel -->
     <aside class="code-panel" id="codePanel" style="display:none;">
       <div class="code-panel-header">
-        <h3>Source Code</h3>
+        <div class="code-header-title">
+          <span class="code-kicker">SOURCE / SKETCH</span>
+          <span class="code-file-tab">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            sketch.ino
+          </span>
+        </div>
+        <span class="code-header-state">LOCAL EDITOR</span>
         <button class="close-code-btn" id="closeCodeBtn"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="code-editor-wrap">
         <div id="monacoLabEditor"></div>
       </div>
       <div class="code-panel-footer">
+        <div class="code-footer-status"><span class="code-status-dot"></span><span>READY</span><small>VERIFY / UPLOAD</small></div>
         <select class="code-device-select" id="codeDeviceSelect">
           <option value="">Select target device...</option>
         </select>
@@ -179,19 +187,14 @@
     </div>
   </footer>
 
-  <script src="../config.js"></script>
+  <script src="../config/config.js"></script>
   <script>
     // Monaco from CDN — configure worker before loading
     window.MonacoEnvironment = {
-      getWorkerUrl: function(_, label) {
+      getWorkerUrl: function() {
         const base = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs';
-        const url  = label === 'json'        ? `${base}/language/json/jsonWorker.js`
-                   : label === 'css'         ? `${base}/language/css/cssWorker.js`
-                   : label === 'html'        ? `${base}/language/html/htmlWorker.js`
-                   : label === 'typescript'  ? `${base}/language/typescript/tsWorker.js`
-                   :                          `${base}/editor/editorWorker.js`;
         return `data:text/javascript;charset=utf-8,${encodeURIComponent(
-          `self.MonacoEnvironment={baseUrl:'${base}/'};importScripts('${url}');`
+          `self.MonacoEnvironment={baseUrl:'${base}/'};importScripts('${base}/base/worker/workerMain.js');`
         )}`;
       }
     };
