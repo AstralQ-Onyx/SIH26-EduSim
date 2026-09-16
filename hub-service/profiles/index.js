@@ -14,12 +14,6 @@ export const PROFILES = {
   esp32:       ESP32Profile,
 };
 
-/**
- * All known bank control pins across every profile.
- * Used by edu_selectBoard() to disable all other banks first.
- */
-export const ALL_BANK_PINS = Object.values(PROFILES).map(p => p.bankControlPin);
-
 export function getProfile(boardId) {
   return PROFILES[boardId] || null;
 }

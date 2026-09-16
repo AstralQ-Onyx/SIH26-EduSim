@@ -1740,7 +1740,13 @@ document.addEventListener('DOMContentLoaded', async function initHubUploadFeatur
           item.style.fontWeight = 'bold';
           item.style.marginTop = '8px';
           item.style.whiteSpace = 'pre-wrap';
-          item.textContent = 'Error: ' + msg;
+          
+          let displayMsg = 'Error: ' + msg;
+          if (msg.includes('Failed to open serial port')) {
+            displayMsg += '\n\n💡 Hint: Is your Serial Monitor still connected? Please disconnect it and try again.';
+          }
+          item.textContent = displayMsg;
+          
           hubProgressList.appendChild(item);
           startUploadHubBtn.disabled = false;
           cancelUploadHubBtn.disabled = false;

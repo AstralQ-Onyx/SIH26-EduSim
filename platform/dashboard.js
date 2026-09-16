@@ -540,7 +540,35 @@ document.getElementById('langSelect').addEventListener('change', function() {
   // Update file tab name
   const extMap = { cpp:'sketch.ino', python:'main.py', javascript:'main.js' };
   document.getElementById('currentFileName').textContent = extMap[lang];
+  updateMpBtnVisibility();
 });
+
+document.getElementById('boardSelect').addEventListener('change', function() {
+  updateMpBtnVisibility();
+});
+
+function updateMpBtnVisibility() {
+  const lang = document.getElementById('langSelect').value;
+  const boardId = document.getElementById('boardSelect').value;
+  const mpBtn = document.getElementById('installMpBtn');
+  const jsBtn = document.getElementById('installJsBtn');
+  
+  if (mpBtn) {
+    if (lang === 'python' && (boardId === 'esp32' || boardId === 'esp8266')) {
+      mpBtn.style.display = 'inline-flex';
+    } else {
+      mpBtn.style.display = 'none';
+    }
+  }
+  
+  if (jsBtn) {
+    if (lang === 'javascript' && (boardId === 'esp32' || boardId === 'esp8266')) {
+      jsBtn.style.display = 'inline-flex';
+    } else {
+      jsBtn.style.display = 'none';
+    }
+  }
+}
 
 function getCode() {
   if (window._monacoEditor) return window._monacoEditor.getValue();
@@ -563,6 +591,7 @@ const connectBtnText = document.getElementById('connectBtnText');
 const statusDot      = document.getElementById('statusDot');
 const statusText     = document.getElementById('statusText');
 const uploadBtn      = document.getElementById('uploadBtn');
+const installMpBtn   = document.getElementById('installMpBtn');
 const serialInput    = document.getElementById('serialInput');
 const sendSerialBtn  = document.getElementById('sendSerialBtn');
 const eolSelect      = document.getElementById('eolSelect');
@@ -601,106 +630,7 @@ document.querySelectorAll('.panel-tab').forEach(tab => {
   });
 });
 
-// ── Agent Banner ─────────────────────────────────────────
-// GitHub Releases URL — update this after you publish the first release
-const AGENT_DOWNLOAD_URL = 'https://github.com/AstralQ-Onyx/SIH26-EduSim/releases/latest/download/EduSimAgent.exe';
-
-function showAgentBanner(online) {
-  let banner = document.getElementById('agentBanner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'agentBanner';
-    banner.style.cssText = `
-      position:fixed; top:0; left:0; right:0; z-index:999;
-      padding:8px 20px; font-family:var(--font-ui); font-size:12px;
-      display:flex; align-items:center; justify-content:center; gap:16px;
-      letter-spacing:0.3px;
-    `;
-    document.body.appendChild(banner);
-    // Push main content down
-    document.querySelector('.main-content').style.marginTop = '38px';
-    document.querySelector('.sidebar').style.marginTop = '38px';
-  }
-  if (online) {
-    banner.style.background = 'rgba(0,255,136,0.10)';
-    banner.style.borderBottom = '1px solid rgba(0,255,136,0.3)';
-    banner.style.color = 'var(--success)';
-    banner.innerHTML = '● EduSim Agent Connected &mdash; Real compile &amp; upload enabled';
-  } else {
-    banner.style.background = 'rgba(255,170,0,0.10)';
-    banner.style.borderBottom = '1px solid rgba(255,170,0,0.35)';
-    banner.style.color = '#ffaa00';
-    banner.innerHTML = `
-      <span>⚠ EduSim Agent not running &mdash; hardware features disabled (simulation mode)</span>
-      <span style="color:rgba(255,170,0,0.5)">|</span>
-      <span>To enable real upload &amp; serial monitor:</span>
-      <a href="${AGENT_DOWNLOAD_URL}"
-         download="EduSimAgent.exe"
-         style="
-           display:inline-flex; align-items:center; gap:6px;
-           background:rgba(255,170,0,0.15); border:1px solid rgba(255,170,0,0.5);
-           color:#ffaa00; padding:3px 12px; border-radius:20px;
-           font-size:11px; font-weight:700; letter-spacing:0.8px;
-           text-decoration:none; transition:background 0.2s;
-           white-space:nowrap;
-         "
-         onmouseover="this.style.background='rgba(255,170,0,0.30)'"
-         onmouseout="this.style.background='rgba(255,170,0,0.15)'"
-      >
-        ⬇ Download EduSim Agent (.exe)
-      </a>
-      <span style="font-size:11px; opacity:0.7">Run it, then refresh this page</span>
-    `;
-  }
-}
-
-
-// ── Connect to Agent ─────────────────────────────────────
-function connectAgent() {
-  try {
-    agent = new WebSocket('ws://127.0.0.1:3745');
-    // agent = new WebSocket('ws://edusim-compiler.onrender.com');
-
-    agent.onopen = () => {
-      agentOnline = true;
-      showAgentBanner(true);
-      termLog('[Agent] Connected to EduSim Local Agent ✓', 'sys');
-      console.log('[Dashboard] Agent connected');
-    };
-
-    agent.onclose = () => {
-      agentOnline = false;
-      agent = null;
-      selectedPort = null;
-      setConnectedUI(false);
-      showAgentBanner(false);
-      termLog('[Agent] Disconnected from agent — switching to simulation mode.', 'warn');
-      // Retry every 5 s
-      setTimeout(connectAgent, 5000);
-    };
-
-    agent.onerror = () => {
-      // Will trigger onclose automatically
-    };
-
-    agent.onmessage = (ev) => {
-      const msg = JSON.parse(ev.data);
-      handleAgentMessage(msg);
-    };
-  } catch (e) {
-    agentOnline = false;
-    showAgentBanner(false);
-    setTimeout(connectAgent, 5000);
-  }
-}
-
-function sendAgent(obj) {
-  if (agent && agent.readyState === WebSocket.OPEN) {
-    agent.send(JSON.stringify(obj));
-    return true;
-  }
-  return false;
-}
+// Agent functionality has been completely removed in favor of Web Serial and Cloud Compiler
 
 // ── Handle Agent Messages ─────────────────────────────────
 let _ports = []; // cached port list from agent
@@ -984,6 +914,7 @@ document.getElementById('compileBtn').addEventListener('click', async () => {
   }
 });
 
+
 // ── Upload ────────────────────────────────────────────────
 document.getElementById('uploadBtn').addEventListener('click', async () => {
   const build = document.getElementById('buildOutput');
@@ -992,59 +923,193 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
   uploadBtn.disabled = true;
 
   const p = getBoardProfile();
+  const vState = {
+    language: document.getElementById('langSelect').value,
+    code: getCode(),
+    compiledData: window._cloudCompiledData
+  };
 
-
-
-  // ── Cloud / Web Serial Upload ──
-  if (!window._cloudCompiledData) {
-    buildLog(`[EduSim] ✗ No compiled code found. Please click Verify first.`, 'err');
-    showToast('Click Verify first', 'error');
-    uploadBtn.disabled = false;
-    return;
-  }
-
-  buildLog(`[EduSim] [CLOUD UPLOAD] Preparing to flash ${boardLabel()} via Web Serial…`, 'sys');
-  
   if (!('serial' in navigator)) {
     buildLog(`[EduSim] ✗ Web Serial API is not supported in this browser. Please use Chrome or Edge.`, 'err');
     uploadBtn.disabled = false;
     return;
   }
 
+  let port = window._wsPort;
+  let openedLocally = false;
+  let wasConnected = !!window._wsPort;
+  const currentBaud = parseInt(document.getElementById('baudRate').value) || 115200;
+
   try {
-    buildLog(`[EduSim] Please select your board from the browser popup...`);
-    const port = await navigator.serial.requestPort();
-    
-    // Close the serial monitor port if it's currently open
-    if (window._wsPort) {
+    if (!port) {
+      buildLog(`[EduSim] Please select your board from the browser popup...`);
+      port = await navigator.serial.requestPort();
+    } else {
+      buildLog(`[EduSim] Using existing serial connection...`, 'sys');
+      if (typeof pauseSerialMonitor === 'function') await pauseSerialMonitor();
       window._wsKeepReading = false;
       try { await window._wsReader?.cancel(); } catch {}
-      try { await window._wsPort.close(); } catch {}
-      window._wsPort = null;
     }
 
-    buildLog(`[EduSim] Connected to port. Initializing flasher...`, 'sys');
-
-    const compiledData = window._cloudCompiledData;
-    
-    if (p.family === 'esp') {
-      buildLog(`[EduSim] ESP board detected. Integrating esptool.js...`, 'sys');
-      // TODO: Implement esptool-js flashing here using compiledData.data (base64)
-      buildLog(`⚠ esptool-js library not yet loaded. Flashing skipped.`, 'warn');
-    } else if (p.family === 'avr') {
-      buildLog(`[EduSim] AVR board detected. Integrating avrgirl-arduino...`, 'sys');
-      // TODO: Implement avrgirl-arduino flashing here using compiledData.data (hex string)
-      buildLog(`⚠ avrgirl-arduino library not yet loaded. Flashing skipped.`, 'warn');
+    if (vState.language === 'cpp') {
+      if (wasConnected) {
+        try { await port.close(); } catch(e) {}
+      }
     } else {
-      buildLog(`[EduSim] ✗ Web Serial flashing for ${p.family} is not yet supported.`, 'err');
+      if (!wasConnected) {
+        await port.open({ baudRate: 115200 });
+        openedLocally = true;
+      }
     }
 
-    buildLog(`[EduSim] Upload process finished.`, 'success');
+    if (vState.language === 'python') {
+      buildLog(`[EduSim] Sending MicroPython script via REPL...`, 'sys');
+      const writer = port.writable.getWriter();
+      const enc = new TextEncoder();
+      
+      await writer.write(enc.encode('\x03\x03\x05')); 
+      
+      const chunkSize = 128;
+      for (let i = 0; i < vState.code.length; i += chunkSize) {
+        await writer.write(enc.encode(vState.code.substring(i, i + chunkSize)));
+        await new Promise(r => setTimeout(r, 10));
+      }
+      
+      await writer.write(enc.encode('\x04'));
+      writer.releaseLock();
+      buildLog(`[EduSim] MicroPython upload complete. Executing...`, 'success');
+
+    } else if (vState.language === 'javascript') {
+      buildLog(`[EduSim] Sending JavaScript IoT code...`, 'sys');
+      const writer = port.writable.getWriter();
+      const enc = new TextEncoder();
+      
+      await writer.write(enc.encode('\x03\n')); // Ctrl+C to break current execution
+      await new Promise(r => setTimeout(r, 100));
+      
+      const chunkSize = 64; // Chunking to prevent Espruino REPL buffer overflows
+      for (let i = 0; i < vState.code.length; i += chunkSize) {
+        await writer.write(enc.encode(vState.code.substring(i, i + chunkSize)));
+        await new Promise(r => setTimeout(r, 20));
+      }
+      
+      await writer.write(enc.encode('\n'));
+      writer.releaseLock();
+      buildLog(`[EduSim] JavaScript upload complete.`, 'success');
+
+    } else if (vState.language === 'cpp') {
+      buildLog(`[EduSim] C++ flashing for ${p.family}...`, 'sys');
+      if (p.family === 'esp') {
+        buildLog(`[EduSim] Downloading esptool-js flasher...`, 'sys');
+        
+        let ESPLoader, Transport;
+        try {
+          const esptool = await import('https://unpkg.com/esptool-js/bundle.js');
+          ESPLoader = esptool.ESPLoader;
+          Transport = esptool.Transport;
+        } catch (e) {
+          throw new Error('esptool-js failed to load');
+        }
+
+        buildLog(`[EduSim] Connecting to ESP ROM bootloader...`, 'sys');
+        const transport = new Transport(port);
+        const loader = new ESPLoader({
+            transport: transport,
+            baudrate: 115200,
+            terminal: {
+                clean: () => {},
+                writeLine: (data) => buildLog(data, 'sys'),
+                write: (data) => {
+                  if (data.trim().length > 2) buildLog(data.trim(), 'sys');
+                }
+            }
+        });
+
+        await loader.main();
+        await loader.flashId();
+
+        const b64ToUint8 = (b64) => {
+          const binStr = atob(b64);
+          const len = binStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binStr.charCodeAt(i);
+          }
+          return bytes;
+        };
+
+        const fileArray = [];
+        if (vState.compiledData.files && vState.compiledData.files.length > 0) {
+          for (const f of vState.compiledData.files) {
+            fileArray.push({
+              address: f.address,
+              data: b64ToUint8(f.data)
+            });
+          }
+          buildLog(`[EduSim] Flashing all firmware components (bootloader, partitions, app)...`, 'sys');
+        } else {
+          fileArray.push({
+            address: 0x10000,
+            data: b64ToUint8(vState.compiledData.data)
+          });
+          buildLog(`[EduSim] Flashing application to 0x10000...`, 'sys');
+        }
+
+        window._lastPct = 0;
+        await loader.writeFlash({
+            fileArray: fileArray,
+            flashSize: 'keep',
+            eraseAll: false,
+            compress: false,
+            reportProgress: (fileIndex, written, total) => {
+                const pct = Math.round((written / total) * 100);
+                if (pct % 10 === 0 && pct > 0 && window._lastPct !== pct) {
+                  buildLog(`[EduSim] Progress: ${pct}%`, 'sys');
+                  window._lastPct = pct;
+                }
+            }
+        });
+
+        buildLog(`[EduSim] Hard resetting ESP to execute sketch...`, 'sys');
+        try { await loader.after("hard_reset"); } catch (e) {}
+        try { await transport.disconnect(); } catch (e) {}
+
+        buildLog(`[EduSim] C++ Upload complete!`, 'success');
+        showToast('Upload successful!', 'success');
+      } else {
+        buildLog(`⚠ Web Serial flashing for ${p.family} is not fully integrated yet.`, 'warn');
+      }
+    }
 
   } catch (err) {
     buildLog(`[EduSim] Web Serial Error: ${err.message}`, 'err');
     showToast('Upload aborted', 'error');
   } finally {
+    if (vState.language === 'cpp') {
+      if (wasConnected && port) {
+        try {
+          await port.open({ baudRate: currentBaud });
+          window._wsPort = port;
+          window._wsKeepReading = true;
+          window._wsPaused = false;
+          setConnectedUI(true, 'USB', currentBaud);
+          wsReadLoop(port);
+          buildLog(`[EduSim] Serial monitor reconnected @ ${currentBaud} baud.`, 'sys');
+        } catch (e) {
+          window._wsPort = null;
+        }
+      } else {
+        window._wsPort = null;
+      }
+    } else {
+      if (openedLocally && port) {
+        try { await port.close(); } catch (e) {}
+        window._wsPort = null;
+      } else if (wasConnected && port) {
+        window._wsKeepReading = true;
+        window._wsPaused = false;
+      }
+    }
     uploadBtn.disabled = false;
   }
 });
@@ -1300,7 +1365,215 @@ loadVirtualLabs();
 
 
 // ── Start Agent Connection ────────────────────────────────
-connectAgent();
+// connectAgent();
 // Also show offline banner immediately (before WS connects)
-showAgentBanner(false);
+// showAgentBanner(false);
 
+
+
+// ── MicroPython Firmware Flashing ─────────────────────────────
+if (installMpBtn) {
+  installMpBtn.addEventListener('click', async function() {
+    if (!('serial' in navigator)) {
+      showToast('Web Serial API is not supported in this browser.', 'error');
+      return;
+    }
+
+    installMpBtn.disabled = true;
+    installMpBtn.innerHTML = 'Installing...';
+    
+    let port = window._wsPort;
+    let wasConnected = !!window._wsPort;
+    const currentBaud = 115200;
+
+    try {
+      if (!port) {
+        buildLog(`[EduSim] Please select your board to install MicroPython...`);
+        port = await navigator.serial.requestPort();
+      } else {
+        if (typeof pauseSerialMonitor === 'function') await pauseSerialMonitor();
+        window._wsKeepReading = false;
+        try { await window._wsReader?.cancel(); } catch {}
+      }
+
+      if (wasConnected) {
+        try { await port.close(); } catch(e) {}
+      }
+
+      buildLog(`[EduSim] Downloading MicroPython firmware...`, 'sys');
+      const fwResponse = await fetch('firmware/micropython_esp32.bin');
+      if (!fwResponse.ok) throw new Error('Could not download MicroPython firmware.');
+      
+      const fwArrayBuffer = await fwResponse.arrayBuffer();
+      const fwBytes = new Uint8Array(fwArrayBuffer);
+
+      buildLog(`[EduSim] Connecting to ESP ROM bootloader...`, 'sys');
+      let ESPLoader, Transport;
+      try {
+        const esptool = await import('https://unpkg.com/esptool-js/bundle.js');
+        ESPLoader = esptool.ESPLoader;
+        Transport = esptool.Transport;
+      } catch (e) {
+        throw new Error('esptool-js failed to load');
+      }
+
+      const transport = new Transport(port);
+      const loader = new ESPLoader({
+          transport: transport,
+          baudrate: 115200,
+          terminal: {
+              clean: () => {},
+              writeLine: (data) => buildLog(data, 'sys'),
+              write: (data) => { if (data.trim().length > 2) buildLog(data.trim(), 'sys'); }
+          }
+      });
+
+      await loader.main();
+      await loader.flashId();
+
+      buildLog(`[EduSim] Flashing MicroPython firmware to 0x1000...`, 'sys');
+      await loader.writeFlash({
+          fileArray: [{ address: 0x1000, data: fwBytes }],
+          flashSize: 'keep',
+          eraseAll: false,
+          compress: false,
+          reportProgress: (fileIndex, written, total) => {
+             if (written % 65536 === 0 || written === total) {
+                 buildLog(`[EduSim] Progress: ${Math.round((written/total)*100)}%`);
+             }
+          }
+      });
+
+      buildLog(`[EduSim] Hard resetting ESP to execute MicroPython...`, 'sys');
+      try { await loader.after("hard_reset"); } catch (e) {}
+      try { await transport.disconnect(); } catch (e) {}
+
+      buildLog(`[EduSim] MicroPython installed successfully!`, 'success');
+      showToast('MicroPython Installed!', 'success');
+
+    } catch (err) {
+      buildLog(`[EduSim] MicroPython Install Error: ${err.message}`, 'err');
+      showToast('Install aborted', 'error');
+    } finally {
+      if (port) {
+        try {
+          await port.open({ baudRate: currentBaud });
+          window._wsPort = port;
+          window._wsKeepReading = true;
+          window._wsPaused = false;
+          setConnectedUI(true, 'USB', currentBaud);
+          wsReadLoop(port);
+          buildLog(`[EduSim] Serial monitor reconnected @ ${currentBaud} baud. Ready for Python!`, 'sys');
+        } catch (e) {
+          window._wsPort = null;
+        }
+      }
+      installMpBtn.disabled = false;
+      installMpBtn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Install MicroPython';
+    }
+  });
+}
+
+// ── Espruino Firmware Flashing ─────────────────────────────
+const installJsBtn = document.getElementById('installJsBtn');
+if (installJsBtn) {
+  installJsBtn.addEventListener('click', async function() {
+    if (!('serial' in navigator)) {
+      showToast('Web Serial API is not supported in this browser.', 'error');
+      return;
+    }
+
+    installJsBtn.disabled = true;
+    installJsBtn.innerHTML = 'Installing...';
+    
+    let port = window._wsPort;
+    let wasConnected = !!window._wsPort;
+    const currentBaud = 115200;
+
+    try {
+      if (!port) {
+        buildLog(`[EduSim] Please select your board to install Espruino (JS)...`);
+        port = await navigator.serial.requestPort();
+      } else {
+        if (typeof pauseSerialMonitor === 'function') await pauseSerialMonitor();
+        window._wsKeepReading = false;
+        try { await window._wsReader?.cancel(); } catch {}
+      }
+
+      if (wasConnected) {
+        try { await port.close(); } catch(e) {}
+      }
+
+      buildLog(`[EduSim] Downloading Espruino firmware...`, 'sys');
+      const fwResponse = await fetch('firmware/espruino_esp32.bin');
+      if (!fwResponse.ok) throw new Error('Could not download Espruino firmware.');
+      
+      const fwArrayBuffer = await fwResponse.arrayBuffer();
+      const fwBytes = new Uint8Array(fwArrayBuffer);
+
+      buildLog(`[EduSim] Connecting to ESP ROM bootloader...`, 'sys');
+      let ESPLoader, Transport;
+      try {
+        const esptool = await import('https://unpkg.com/esptool-js/bundle.js');
+        ESPLoader = esptool.ESPLoader;
+        Transport = esptool.Transport;
+      } catch (e) {
+        throw new Error('esptool-js failed to load');
+      }
+
+      const transport = new Transport(port);
+      const loader = new ESPLoader({
+          transport: transport,
+          baudrate: 115200,
+          terminal: {
+              clean: () => {},
+              writeLine: (data) => buildLog(data, 'sys'),
+              write: (data) => { if (data.trim().length > 2) buildLog(data.trim(), 'sys'); }
+          }
+      });
+
+      await loader.main();
+      await loader.flashId();
+
+      buildLog(`[EduSim] Flashing Espruino firmware to 0x1000...`, 'sys');
+      await loader.writeFlash({
+          fileArray: [{ address: 0x1000, data: fwBytes }],
+          flashSize: 'keep',
+          eraseAll: false,
+          compress: false,
+          reportProgress: (fileIndex, written, total) => {
+             if (written % 65536 === 0 || written === total) {
+                 buildLog(`[EduSim] Progress: ${Math.round((written/total)*100)}%`);
+             }
+          }
+      });
+
+      buildLog(`[EduSim] Hard resetting ESP to execute Espruino...`, 'sys');
+      try { await loader.after("hard_reset"); } catch (e) {}
+      try { await transport.disconnect(); } catch (e) {}
+
+      buildLog(`[EduSim] Espruino installed successfully!`, 'success');
+      showToast('Espruino Installed!', 'success');
+
+    } catch (err) {
+      buildLog(`[EduSim] Espruino Install Error: ${err.message}`, 'err');
+      showToast('Install aborted', 'error');
+    } finally {
+      if (port) {
+        try {
+          await port.open({ baudRate: currentBaud });
+          window._wsPort = port;
+          window._wsKeepReading = true;
+          window._wsPaused = false;
+          setConnectedUI(true, 'USB', currentBaud);
+          wsReadLoop(port);
+          buildLog(`[EduSim] Serial monitor reconnected @ ${currentBaud} baud. Ready for JavaScript!`, 'sys');
+        } catch (e) {
+          window._wsPort = null;
+        }
+      }
+      installJsBtn.disabled = false;
+      installJsBtn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Install Espruino (JS)';
+    }
+  });
+}

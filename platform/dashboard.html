@@ -112,6 +112,14 @@
 
       <div class="spacer"></div>
 
+      <button class="btn" id="installMpBtn" style="display: none; border-color: var(--accent); color: var(--accent);" title="Flash MicroPython firmware to the ESP32">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Install MicroPython
+      </button>
+      <button class="btn" id="installJsBtn" style="display: none; border-color: var(--accent); color: var(--accent);" title="Flash Espruino JavaScript firmware to the ESP32">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Install Espruino (JS)
+      </button>
       <button class="btn" id="compileBtn">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         Verify
@@ -734,7 +742,6 @@
 <!-- Config -->
 <script src="../config/config.js"></script>
 <!-- ESP32/ESP8266 Flasher -->
-<script src="https://unpkg.com/esptool-js/bundle.js"></script>
 
 <!-- Arduino AVR Flasher -->
 <script src="https://unpkg.com/avrgirl-arduino@latest/avrgirl-arduino.js"></script>

@@ -7,9 +7,9 @@ export const ESP32Profile = {
 
   // FQBN used by the cloud compiler
   fqbn: 'esp32:esp32:esp32',
-
-  // Master ESP32 GPIO that controls power for the ESP32 header bank
-  bankControlPin: 15,
+  
+  // Translator architecture mode for analog pins
+  analogMode: 'slave_gpio',
 
   supportedFunctions: [
     'pinMode',

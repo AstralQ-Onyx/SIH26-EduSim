@@ -11,9 +11,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 let ARDUINO_CLI = process.env.ARDUINO_CLI_PATH || 'arduino-cli';
 if (os.platform() === 'win32' && !process.env.ARDUINO_CLI_PATH) {
-  const localAgentPath = path.join(__dirname, '..', 'agent', 'bin', 'arduino-cli.exe');
-  if (fs.existsSync(localAgentPath)) {
-    ARDUINO_CLI = localAgentPath;
+  const customPath = "D:\\Applications Softwares\\ArduinoCLI\\arduino-cli.exe";
+  if (fs.existsSync(customPath)) {
+    ARDUINO_CLI = customPath;
   }
 }
 
@@ -103,10 +103,11 @@ function compileSketch(code, fqbn) {
       // Find compiled output
       const files = fs.readdirSync(tmpBase);
       const hexFile = files.find(f => f.endsWith('.hex'));
-      const binFile = files.find(f => f.endsWith('.bin'));
+      const binFile = files.find(f => f.endsWith('.ino.bin')) || files.find(f => f.endsWith('.bin'));
 
       let binaryData = null;
       let format = null;
+      const flashFiles = [];
 
       if (hexFile) {
         binaryData = fs.readFileSync(path.join(tmpBase, hexFile), 'utf8');
@@ -114,6 +115,48 @@ function compileSketch(code, fqbn) {
       } else if (binFile) {
         binaryData = fs.readFileSync(path.join(tmpBase, binFile)).toString('base64');
         format = 'bin';
+
+        // For ESP targets: include bootloader, partition table, boot_app0, and app binary
+        const bootloaderFile = files.find(f => f.endsWith('.bootloader.bin'));
+        const partitionsFile = files.find(f => f.endsWith('.partitions.bin'));
+        const mergedFile = files.find(f => f.endsWith('.merged.bin'));
+
+        if (bootloaderFile) {
+          flashFiles.push({
+            name: 'bootloader',
+            address: 0x1000,
+            data: fs.readFileSync(path.join(tmpBase, bootloaderFile)).toString('base64')
+          });
+        }
+        if (partitionsFile) {
+          flashFiles.push({
+            name: 'partitions',
+            address: 0x8000,
+            data: fs.readFileSync(path.join(tmpBase, partitionsFile)).toString('base64')
+          });
+        }
+        // Extract standard boot_app0 (8KB at offset 0xe000) from merged.bin if generated
+        if (mergedFile) {
+          try {
+            const mergedBuf = fs.readFileSync(path.join(tmpBase, mergedFile));
+            if (mergedBuf.length >= 0x10000) {
+              const bootApp0 = mergedBuf.subarray(0xe000, 0x10000);
+              flashFiles.push({
+                name: 'boot_app0',
+                address: 0xe000,
+                data: bootApp0.toString('base64')
+              });
+            }
+          } catch (e) {
+            console.warn('Could not extract boot_app0 from merged.bin:', e.message);
+          }
+        }
+        // Application binary at offset 0x10000
+        flashFiles.push({
+          name: 'app',
+          address: 0x10000,
+          data: binaryData
+        });
       }
 
       cleanup(tmpBase);
@@ -122,7 +165,7 @@ function compileSketch(code, fqbn) {
         return reject(new Error('No output binary found after compilation'));
       }
 
-      resolve({ data: binaryData, format, fqbn });
+      resolve({ data: binaryData, format, fqbn, files: flashFiles });
     });
   });
 }
@@ -132,7 +175,7 @@ function cleanup(dir) {
 }
 
 // ══════════════════════════════════════════════════════════
-//  POST /compile  — Dashboard IDE (returns { success, fqbn, format, data })
+//  POST /compile  — Dashboard IDE (returns { success, fqbn, format, data, files })
 // ══════════════════════════════════════════════════════════
 app.post('/compile', async (req, res) => {
   const { code, fqbn = 'arduino:avr:uno' } = req.body;
@@ -151,6 +194,7 @@ app.post('/compile', async (req, res) => {
       fqbn: result.fqbn,
       format: result.format,
       data: result.data,
+      files: result.files,
       message: 'Compiled successfully'
     });
   } catch (err) {

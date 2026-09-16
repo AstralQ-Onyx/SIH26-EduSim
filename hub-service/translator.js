@@ -1,127 +1,168 @@
-import { getProfile, ALL_BANK_PINS } from './profiles/index.js';
+import { getProfile } from './profiles/index.js';
 
 export class CodeTranslator {
   constructor(profileId) {
-    this.profile = this.getProfile(profileId);
+    this.profile = getProfile(profileId);
   }
 
-  getProfile(profileId) {
-    return getProfile(profileId);
-  }
+  // ── Validation ────────────────────────────────────────────────
 
   validate(code) {
     if (!this.profile) {
       return { valid: false, error: 'Controller profile not supported yet.' };
     }
 
+    // 1. Function whitelist check
     const unsupported = [];
     const usedFunctions = this.extractFunctions(code);
-
     usedFunctions.forEach(fn => {
-      // Basic Arduino core functions like setup, loop, Serial, are usually implicitly allowed
-      // The profile defines hardware interactions
       if (!this.profile.supportedFunctions.includes(fn) && !this.isCoreFunction(fn)) {
         unsupported.push(fn);
       }
     });
-
     if (unsupported.length > 0) {
-      return { 
-        valid: false, 
-        error: 'Some functions in your code are not yet supported by EduSim Hub.', 
-        unsupported 
+      return {
+        valid: false,
+        error: 'Some functions in your code are not yet supported by EduSim Hub.',
+        unsupported
       };
+    }
+
+    // 2. Reserved-pin check (if profile defines any)
+    if (this.profile.reservedPins && this.profile.reservedPins.length > 0) {
+      const usedPins = this.extractLiteralPins(code);
+      const violations = usedPins.filter(p => this.profile.reservedPins.includes(p));
+      if (violations.length > 0) {
+        return {
+          valid: false,
+          error: `Pin(s) ${violations.join(', ')} are reserved and cannot be used with the ${this.profile.displayName} profile.\n` +
+                 `Reserved pins: ${this.profile.reservedPins.join(', ')}`
+        };
+      }
     }
 
     return { valid: true };
   }
 
   extractFunctions(code) {
-    // Very basic regex to find function calls.
-    // E.g., pinMode(13, OUTPUT) -> 'pinMode'
     const fnRegex = /\b([a-zA-Z_]\w*)\s*\(/g;
     const matches = [...code.matchAll(fnRegex)];
-    const functions = matches.map(m => m[1]);
-    return [...new Set(functions)];
+    return [...new Set(matches.map(m => m[1]))];
+  }
+
+  /**
+   * Extract all integer pin literals used in standard Arduino calls.
+   * E.g. pinMode(15, OUTPUT) → [15]
+   */
+  extractLiteralPins(code) {
+    const pinRegex = /(?:pinMode|digitalWrite|digitalRead|analogRead|analogWrite)\s*\(\s*(\d+)/g;
+    const matches = [...code.matchAll(pinRegex)];
+    return [...new Set(matches.map(m => parseInt(m[1], 10)))];
   }
 
   isCoreFunction(fn) {
-    const coreFns = ['setup', 'loop', 'print', 'println', 'begin', 'if', 'else', 'for', 'while', 'switch', 'case'];
+    const coreFns = [
+      'setup', 'loop', 'print', 'println', 'begin',
+      'if', 'else', 'for', 'while', 'switch', 'case',
+      'int', 'void', 'bool', 'float', 'String', 'return'
+    ];
     return coreFns.includes(fn);
   }
+
+  // ── Translation ───────────────────────────────────────────────
 
   translate(code) {
     if (!this.profile) {
       throw new Error('Controller profile not found');
     }
 
-    // A simple lexical translation strategy mapping standard Arduino calls
-    // to EduSim HAL calls for ESP32.
-    
     let translated = code;
 
-    // 1. Map pinMode(pin, mode) -> eduPinMode(mappedPin, mode)
-    // 2. Map digitalWrite(pin, val) -> eduDigitalWrite(mappedPin, val)
-    // 3. Map digitalRead(pin) -> eduDigitalRead(mappedPin)
-    // 4. Map analogRead(pin) -> eduAnalogRead(mappedPin)
+    // pinMode(pin, mode) → eduPinMode(mappedPin, mode)
+    translated = translated.replace(
+      /pinMode\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
+      (_, pin, mode) => `eduPinMode(${this.mapDigitalPin(pin)}, ${mode})`
+    );
 
-    // Using regex replacement as a basic translation engine. 
-    // This is safe assuming simple usage, but could be enhanced with AST parsing later.
-    
-    // pinMode
-    translated = translated.replace(/pinMode\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, pin, mode) => {
-      return `eduPinMode(${this.mapPin(pin)}, ${mode})`;
-    });
+    // digitalWrite(pin, val) → eduDigitalWrite(mappedPin, val)
+    translated = translated.replace(
+      /digitalWrite\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
+      (_, pin, val) => `eduDigitalWrite(${this.mapDigitalPin(pin)}, ${val})`
+    );
 
-    // digitalWrite
-    translated = translated.replace(/digitalWrite\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, (match, pin, val) => {
-      return `eduDigitalWrite(${this.mapPin(pin)}, ${val})`;
-    });
+    // digitalRead(pin) → eduDigitalRead(mappedPin)
+    translated = translated.replace(
+      /digitalRead\s*\(\s*([^)]+)\s*\)/g,
+      (_, pin) => `eduDigitalRead(${this.mapDigitalPin(pin)})`
+    );
 
-    // digitalRead
-    translated = translated.replace(/digitalRead\s*\(\s*([^)]+)\s*\)/g, (match, pin) => {
-      return `eduDigitalRead(${this.mapPin(pin)})`;
-    });
+    // analogRead(pin) → eduAnalogRead(mappedAnalogPin)
+    translated = translated.replace(
+      /analogRead\s*\(\s*([^)]+)\s*\)/g,
+      (_, pin) => `eduAnalogRead(${this.mapAnalogPin(pin)})`
+    );
 
-    // analogRead
-    translated = translated.replace(/analogRead\s*\(\s*([^)]+)\s*\)/g, (match, pin) => {
-      return `eduAnalogRead(${this.mapAnalogPin(pin)})`;
-    });
+    // analogWrite(pin, val) → eduAnalogWrite(mappedPin, val)
+    // Only active if profile supports analogWrite
+    if (this.profile.supportedFunctions.includes('analogWrite')) {
+      translated = translated.replace(
+        /analogWrite\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
+        (_, pin, val) => `eduAnalogWrite(${this.mapDigitalPin(pin)}, ${val})`
+      );
+    }
 
     return this.wrapInFirmwareTemplate(translated);
   }
 
-  mapPin(pin) {
-    // If it's a string like '13', we parse it. If it's a variable, we pass it through (risky but okay for basic).
-    // The profile has string/number keys.
-    const cleanPin = pin.toString().trim();
-    if (this.profile.digitalPins.hasOwnProperty(cleanPin)) {
-      return this.profile.digitalPins[cleanPin];
+  // ── Pin Mapping ───────────────────────────────────────────────
+
+  /**
+   * Maps a student digital pin to the physical Master ESP32 GPIO.
+   * Looks up profile.digitalPins first, then analogPins, then passes through.
+   */
+  mapDigitalPin(pin) {
+    const clean = pin.toString().trim();
+    if (Object.prototype.hasOwnProperty.call(this.profile.digitalPins, clean)) {
+      return this.profile.digitalPins[clean];
     }
-    // If it's A0-A7, it should be mapped to the analog index
-    if (this.profile.analogPins.hasOwnProperty(cleanPin)) {
-      return this.profile.analogPins[cleanPin];
+    if (Object.prototype.hasOwnProperty.call(this.profile.analogPins, clean)) {
+      return this.profile.analogPins[clean];
     }
-    return pin; // Pass through (might be a variable name)
+    return pin; // variable name or unmapped literal — pass through
   }
 
+  /**
+   * Maps a student analog pin to the value sent to the Analog Slave.
+   * - slave_index mode (Nano): returns the index (0-7)
+   * - slave_gpio mode (ESP32): returns the physical ADC GPIO number on the slave
+   */
   mapAnalogPin(pin) {
-    const cleanPin = pin.toString().trim();
-    if (this.profile.analogPins.hasOwnProperty(cleanPin)) {
-      return this.profile.analogPins[cleanPin];
+    const clean = pin.toString().trim();
+    if (Object.prototype.hasOwnProperty.call(this.profile.analogPins, clean)) {
+      return this.profile.analogPins[clean];
     }
     return pin;
   }
 
-  wrapInFirmwareTemplate(translatedCode) {
-    // Rename setup and loop so they run under EduSim control
-    let fwCode = translatedCode.replace(/void\s+setup\s*\(\s*\)/g, 'void studentSetup()');
-    fwCode = fwCode.replace(/void\s+loop\s*\(\s*\)/g, 'void studentLoop()');
+  // ── Firmware Template ─────────────────────────────────────────
 
-    // Build the list of ALL known bank control pins (to disable all others first)
-    const allPins      = ALL_BANK_PINS;
-    const activePin    = this.profile.bankControlPin;
-    const allPinsList  = allPins.join(', ');
+  wrapInFirmwareTemplate(translatedCode) {
+    // Rename student setup/loop so HAL setup runs first
+    let fwCode = translatedCode
+      .replace(/void\s+setup\s*\(\s*\)/g, 'void studentSetup()')
+      .replace(/void\s+loop\s*\(\s*\)/g,  'void studentLoop()');
+
+    const analogMode = this.profile.analogMode || 'slave_index';
+    const supportsAnalogWrite = this.profile.supportedFunctions.includes('analogWrite');
+
+    // Build the profile-specific analog read HAL
+    const analogReadHAL = analogMode === 'slave_gpio'
+      ? this._analogReadHAL_gpio()
+      : this._analogReadHAL_index();
+
+    const analogWriteHAL = supportsAnalogWrite
+      ? this._analogWriteHAL()
+      : '';
 
     return `
 #include <Arduino.h>
@@ -132,24 +173,9 @@ HardwareSerial InterESP(2);
 #define TX_PIN 4
 #define RX_PIN 5
 
-// ── EDUSIM BOARD SELECTION HAL ───────────────────────────────
-// All bank control pins known to this Hub build
-const int BANK_PINS[]    = { ${allPinsList} };
-const int BANK_PIN_COUNT = ${allPins.length};
-const int ACTIVE_PIN     = ${activePin}; // Selected board: ${this.profile.displayName}
-
-void edu_selectBoard() {
-  // Disable every header bank first
-  for (int i = 0; i < BANK_PIN_COUNT; i++) {
-    pinMode(BANK_PINS[i], OUTPUT);
-    digitalWrite(BANK_PINS[i], LOW);
-  }
-  // Enable only the selected board's header bank
-  digitalWrite(ACTIVE_PIN, HIGH);
-  Serial.print("[EduSim] Active board: ");
-  Serial.println("${this.profile.displayName}");
-}
-// ─────────────────────────────────────────────────────────────
+// ── EDUSIM BOARD SELECTION HAL ──────────────────────────────────
+// Removed: Both header banks are powered directly; no power transistors.
+// ───────────────────────────────────────────────────────────────
 
 // [EDUSIM DIGITAL HAL]
 void eduPinMode(int pin, int mode) {
@@ -164,28 +190,9 @@ int eduDigitalRead(int pin) {
   return digitalRead(pin);
 }
 
-// [EDUSIM ANALOG HAL]
-int eduAnalogRead(int analogPinIndex) {
-  // Request analog value from Left (Analog Slave) ESP32
-  InterESP.print("READ:A");
-  InterESP.println(analogPinIndex);
-  
-  // Wait for response (100ms timeout)
-  long startTime = millis();
-  while (!InterESP.available() && millis() - startTime < 100) {
-    delay(1);
-  }
-  
-  if (InterESP.available()) {
-    String resp = InterESP.readStringUntil('\\n');
-    int colonIdx = resp.indexOf(':');
-    if (colonIdx > 0) {
-      return resp.substring(colonIdx + 1).toInt();
-    }
-  }
-  return 0;
-}
-
+// [EDUSIM ANALOG HAL — mode: ${analogMode}]
+${analogReadHAL}
+${analogWriteHAL}
 // --- STUDENT CODE ---
 ${fwCode}
 // --------------------
@@ -193,15 +200,70 @@ ${fwCode}
 void setup() {
   Serial.begin(115200);
   InterESP.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
-  
-  // Activate selected board's header bank, disable all others
-  edu_selectBoard();
-  
   studentSetup();
 }
 
 void loop() {
   studentLoop();
+}
+`;
+  }
+
+  // ── Private HAL Builders ──────────────────────────────────────
+
+  /**
+   * slave_index mode (Arduino Nano):
+   * Sends READ:A<index> and expects A<index>:<value>
+   */
+  _analogReadHAL_index() {
+    return `
+int eduAnalogRead(int idx) {
+  InterESP.print("READ:A");
+  InterESP.println(idx);
+  long t = millis();
+  while (!InterESP.available() && millis() - t < 100) delay(1);
+  if (InterESP.available()) {
+    String resp = InterESP.readStringUntil('\\n');
+    int col = resp.indexOf(':');
+    if (col > 0) return resp.substring(col + 1).toInt();
+  }
+  return 0;
+}
+`;
+  }
+
+  /**
+   * slave_gpio mode (ESP32):
+   * Sends READ:G<gpio> and expects G<gpio>:<value>
+   * The slave directly calls analogRead(gpio) on its hardware.
+   */
+  _analogReadHAL_gpio() {
+    return `
+int eduAnalogRead(int gpio) {
+  InterESP.print("READ:G");
+  InterESP.println(gpio);
+  long t = millis();
+  while (!InterESP.available() && millis() - t < 100) delay(1);
+  if (InterESP.available()) {
+    String resp = InterESP.readStringUntil('\\n');
+    int col = resp.indexOf(':');
+    if (col > 0) return resp.substring(col + 1).toInt();
+  }
+  return 0;
+}
+`;
+  }
+
+  /**
+   * PWM output via ESP32 LEDC peripheral.
+   * Uses channel 0 with 8-bit resolution at 5 kHz.
+   */
+  _analogWriteHAL() {
+    return `
+void eduAnalogWrite(int pin, int value) {
+  // ESP32 Arduino Core 3.x unified LEDC API
+  ledcAttach(pin, 5000, 8); // pin, freq=5kHz, resolution=8-bit
+  ledcWrite(pin, value);    // 0-255
 }
 `;
   }
