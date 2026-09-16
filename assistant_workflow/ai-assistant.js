@@ -5,9 +5,8 @@
 'use strict';
 
 // ── Configuration ────────────────────────────────────────────
-const MENTOR_PROXY = (typeof ENV !== 'undefined' && ENV.BACKEND_URL) 
-  ? `${ENV.BACKEND_URL}/api/ai/chat` 
-  : 'http://127.0.0.1:3746/api/ai/chat';
+const MENTOR_PROXY = 'https://salute-polygon-feline.ngrok-free.dev/v1/chat';
+const MENTOR_KEY = 'sk-sara-abc123';
 const MENTOR_MODEL = 'llama3.2';
 
 // ── Context: reads the IDE (sketch, board, language, errors) ─
@@ -133,7 +132,7 @@ Reference their current sketch and board, when needed.
 If they need code, generate it with inline comments explaining every non-obvious line.`;
 }
 
-// ── Ollama call ───────────────────────────────────────────────
+// ── LLM call ───────────────────────────────────────────────
 async function mentorQuery(history, mode) {
   const payload = {
     model: MENTOR_MODEL,
@@ -141,16 +140,25 @@ async function mentorQuery(history, mode) {
       { role: 'system', content: buildMentorPrompt(mode) },
       ...history
     ],
+    temperature: 0.7,
     stream: false
   };
   const res = await fetch(MENTOR_PROXY, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${MENTOR_KEY}`
+    },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+  
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(`API Error ${res.status}: ${errData.error?.message || 'Unknown'}`);
+  }
+  
   const data = await res.json();
-  return data.message?.content || data.response || '(empty response)';
+  return data.message?.content || '(empty response)';
 }
 
 // ── Per-mode isolated histories ───────────────────────────────
@@ -332,7 +340,7 @@ async function sendMessage(overrideText) {
   } catch (err) {
     hideTyping();
     addBotToMode(mentorMode,
-      `**Connection error:** ${err.message}\n\nEnsure Ollama is running (\`ollama serve\`) and the agent is up (\`node server.js\`).`);
+      `**Connection error:** ${err.message}\n\nEnsure your local LLM is running and your ngrok tunnel is active.`);
   } finally {
     mentorBusy = false;
     if (btnAiSend) btnAiSend.disabled = false;

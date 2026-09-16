@@ -243,47 +243,41 @@ app.post('/compile-hex', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════
-//  POST /api/ai/generate & /api/ai/chat — Gemini AI Proxy
-//  Proxies requests to Google Gemini 1.5 Flash for the
-//  CircuitMind and N.O.V.A. AI assistants
+//  POST /api/ai/generate & /api/ai/chat — LLM Proxy (ngrok)
+//  Proxies requests to local LLM via ngrok OpenAI API
 // ══════════════════════════════════════════════════════════
 app.post(['/api/ai/generate', '/api/ai/chat'], async (req, res) => {
-  const geminiKey = process.env.GEMINI_API_KEY;
-
-  if (!geminiKey) {
-    return res.status(503).json({
-      error: 'AI service unavailable',
-      details: 'GEMINI_API_KEY is not configured on the server.'
-    });
-  }
+  const ngrokUrl = 'https://salute-polygon-feline.ngrok-free.dev/v1/chat/completions';
+  const apiKey = 'sk-sara-abc123';
 
   try {
     const messages = req.body.messages || [];
-
-    // Map chat messages to Gemini format
-    const contents = messages.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
-
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
-
-    const response = await fetch(geminiUrl, {
+    
+    // The ngrok endpoint is assumed to be OpenAI compatible, so we can pass messages directly
+    const response = await fetch(ngrokUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: req.body.model || 'llama3.2', // Fallback or pass-through model name
+        messages: messages,
+        temperature: req.body.temperature || 0.7,
+        stream: false
+      })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: 'Gemini API error',
+        error: 'LLM API error',
         details: data.error?.message || JSON.stringify(data)
       });
     }
 
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || '(empty response)';
+    const replyText = data.choices?.[0]?.message?.content || '(empty response)';
 
     res.json({
       message: { role: 'assistant', content: replyText }
