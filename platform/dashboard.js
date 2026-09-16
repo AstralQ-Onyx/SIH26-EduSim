@@ -1114,26 +1114,62 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
   }
 });
 
-// ── Save Sketch ───────────────────────────────────────────
+// ── Save Sketch (Cloud) ───────────────────────────────────
 document.getElementById('saveSketchBtn').addEventListener('click', async () => {
-  if (!currentUser) return;
+  if (!currentUser) {
+    showToast('You must be logged in to save to the cloud.', 'error');
+    return;
+  }
+  
+  const projectName = prompt("Enter a name for your sketch:", "My Sketch");
+  if (!projectName) return; // User cancelled
+
   const code  = getCode();
   const board = document.getElementById('boardSelect').value;
   const lang  = document.getElementById('langSelect').value;
+  
   try {
     const col  = db.collection('users').doc(currentUser.uid).collection('projects');
-    const snap = await col.where('name','==','Quick Save').limit(1).get();
+    const snap = await col.where('name','==', projectName).limit(1).get();
+    
     if (snap.empty) {
-      await col.add({ name:'Quick Save', board, lang, code, desc:'Auto-saved sketch', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await col.add({ name: projectName, board, lang, code, desc:'Saved from IDE', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     } else {
       await snap.docs[0].ref.update({ code, board, lang, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
+    
     document.getElementById('unsavedDot').classList.remove('show');
-    showToast('Sketch saved!', 'success');
+    showToast('Sketch saved to cloud!', 'success');
     loadProjects(currentUser.uid);
   } catch (err) {
     showToast('Save failed: ' + err.message, 'error');
   }
+});
+
+// ── Download Sketch (Local) ────────────────────────────────
+document.getElementById('downloadSketchBtn')?.addEventListener('click', () => {
+  const code = getCode();
+  const lang = document.getElementById('langSelect').value;
+  
+  let ext = '.txt';
+  if (lang === 'cpp') ext = '.ino';
+  else if (lang === 'python') ext = '.py';
+  else if (lang === 'javascript') ext = '.js';
+
+  const filename = `sketch_${Date.now()}${ext}`;
+  const blob = new Blob([code], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  document.getElementById('unsavedDot').classList.remove('show');
+  showToast('Sketch downloaded!', 'success');
 });
 
 // ── Utility ───────────────────────────────────────────────
